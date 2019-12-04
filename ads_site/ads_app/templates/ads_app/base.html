@@ -1,0 +1,53 @@
+{% load static %}
+<html lang="en" class="gr__172_21_30_98">
+
+<head>
+    <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
+
+    <link href="/static/prettyjson/prettyjson.css" type="text/css" media="all" rel="stylesheet">
+    <link rel="stylesheet" href="/ads_site/ads_app/styles/style.css">
+    <script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/stactic/admin/js/jquery.init.js"></script>
+    <script type="text/javascript" src="/static/prettyjson/prettyjson.js"></script>
+
+
+    <title>dashboard application</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body data-gr-c-s-loaded="true">
+
+<div class="header">
+    <img src="https://seeklogo.com/images/I/Itron-logo-40F825A331-seeklogo.com.png" width="80" height="35" alt="itron">
+    <h3>ADS Dashboard Generator Tool</h3>
+    <p>Productivity and Standardization in ADS v2.0</p>
+
+</div>
+
+<div class="navbar">
+    <a id="test" href="test_plan">Create Test Plan</a>
+    <a id="home" href="home" >Create Full Dashboard</a>
+    <a id="update" href="update">Update Dashboard</a>
+    <a href="/admin/login/?next=/admin/" class="right">Admin Tools</a>
+</div>
+<div class="row">
+    <div class="side">
+        <!-- Trigger/Open The Modal -->
+        <button id="myBtn" class="help">?</button>
+
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+</div>
+
+<div class="footer">
+    <h2></h2>
+</div>
+</body>
+</html>

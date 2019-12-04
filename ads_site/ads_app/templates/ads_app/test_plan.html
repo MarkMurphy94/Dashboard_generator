@@ -1,0 +1,15 @@
+{% extends "ads_app/base.html" %}
+{% block content%}
+    <script>
+        $(document).ready(function () {
+            $(".navbar a").removeClass("active");
+            //this will remove the active class from
+            //previously active menu item
+
+            $("a#test").addClass('active');
+        });
+    </script>
+    <div class="main">
+        <h1>Create Test Plan</h1>
+    </div>
+{% endblock content %}

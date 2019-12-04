@@ -1,0 +1,32 @@
+{% extends "ads_app/base.html" %}
+{% block content%}
+    <script>
+        $(document).ready(function () {
+            $(".navbar a").removeClass("active");
+            //this will remove the active class from
+            //previously active menu item
+
+            $("a#home").addClass('active');
+        });
+    </script>
+
+    <div class="main">
+
+        <h1>Create Full Dashboard</h1>
+        <form action="post" method="POST">
+            <input type="hidden" name="csrfmiddlewaretoken" value="rYgmcd1qDMDo6P2RKMfvGZpEXdGDHhr5OPsLGeV0xzhYu4yFw1Jb1yiSCe1tMwAn">
+            <p>
+                <label for="id_output_Team">Enter the name for the new Project: *</label>
+                <input type="text" name="output_Team" required="" id="id_output_Team" maxlength="250">
+            </p>
+            <p><label for="id_Dash_Name">Enter the URL to the MRS requirements tree:</label> <input type="text" name="Dash_Name" required="" id="id_Dash_Name" maxlength="250"></p>
+            <p><label for="id_prog_short_name">Enter the Global Reqs Iteration Path: *</label> <input type="text" name="prog_short_name" required="" id="id_prog_short_name" maxlength="250"></p>
+            <p><label for="id_query_Folder">Enter the Tag or the Targeted Project: *</label> <input type="text" name="query_Folder" required="" id="id_query_Folder" maxlength="250"></p>
+            <p><label for="id_Overview_Id">Please enter the Test Suite ID or Name: *</label> <input type="text" name="Overview_Id" required="" id="id_Overview_Id" maxlength="250"></p>
+            <p><label>* Indicates field is required"</label> </p>
+            <button type="submit" class="button">SUBMIT</button>
+        </form>
+
+    </div>
+
+{% endblock content %}
