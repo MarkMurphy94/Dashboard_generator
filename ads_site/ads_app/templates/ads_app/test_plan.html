@@ -11,5 +11,14 @@
     </script>
     <div class="main">
         <h1>Create Test Plan</h1>
+        <form action="create_dash" method="POST">
+            <input list="project_list" name="project_list">
+                <datalist id="project_list">
+                    {% for item in pmo_list %}
+                        <option value={{ item }}>
+                    {% endfor %}
+                </datalist>
+            <button type="submit" class="button">SUBMIT</button>
+        </form>
     </div>
 {% endblock content %}

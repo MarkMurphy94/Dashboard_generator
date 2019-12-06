@@ -1,0 +1,121 @@
+500M Release 1 - Genx
+500M Release 1 - Riva
+AMI Operations Management (PM)
+Cyble India
+Demand Response
+DevOps Platform
+Distributed Intelligence
+FCS continuous
+FDM Continous
+Forecasting and Load Research
+GDS- Gas Distribution and Safety
+GEN4_INT_Rota_Osram_NLC
+GEN5_EMX_1P_Indonesia
+GEN5_EMX_3P_Sweden
+GEN5_INT_Nansen
+GEN5_INT_Secure
+GENX FW 4_12
+GENX_INT_Aclara_kV2c_Prion2
+GENX_INT_Eletra_Zeus
+GENX_INT_Kamstrup_NIC513
+GENX_INT_Wasion_Prion2
+GenX_Laplace
+GenX_Maxwell
+GenX_Network_Center_Continuous
+GenX-Int EDMI NIC513
+GSR 4-5 HF2_GSR4-7 HF1
+HCM Dorian
+IMU_500T
+INS_LG_S4x_NIC510
+Intelis 425 Gas
+Intelis DN25_50 Quality Robust
+Intelis DN50 L270mm
+Intelis-V2 DN 15_50 ISO Water
+Iskraemeco 3PH Direct Connect (DEWA)
+ISM Continuous
+Itron Mobile Continous
+MV 90 Continuous
+ODS_Badlands
+Operations Optimizer
+Operations Workflow (AM)
+OWC Bell CAN LTE Certification
+OWR-GRD-Large Dia-Valve-1-25
+OWR-GSR 5_x MR2
+Prepay
+Saturne Continuous
+SIQ_Hawaii
+SLV
+Temetra Continuous
+WOM – Water Operations Management
+SMETS2 E-Meter
+Equascan Smoke Detector
+Intelis DN25-50 WMbus 434-868
+OWR Gas Intelis
+SEC PP AMI_C_I
+Hertz 1 3 HZ CT
+TU6 DN15-20 R160
+Cyble LdE 169
+Linky New Tender
+1to1 Capsule cost reduction
+OWR Gas Disconnect
+Delta Series 1 Ductile Iron CR
+SMETS2 E-Meter Go To Volume
+Intelis NAM 5 8-2
+OWR_CAM3M
+Hertz 2 3 HZ DC
+Gas PrePay NFC Keypad System Release
+Flodis DN15-20 R250
+Riva DaVinci
+GENX_INT_LG Aus Gen5 MicroAP WP
+OWR_PMR_ASIC_MVP
+CC6 REGISTER AQUADIS QN 1_5
+Cyble 5
+Multimag 1-Dir Q3 1,6 R100
+EMX Single Phase AMI Prepay
+GENX_INT_LG NIC522 WP
+UltraMaXX Piezo Quality Fix
+OWR_PEA_Thailand
+INS_CentronIIGen5 Singlephase
+GEN5_INT_uAP_EDMI-Mk10E-SGP
+Ultrasonic DN50 200
+OWC 4G Cellular Elec
+Flodis DN15-20 R250 2_3
+OWR_PEA_Thailand_1_5
+Intelis Encoder
+AXONIC DN125
+HW 4_1 PP ANSI RIVA Cost Reduction
+GENX_550G
+OWR HW4_1 IEC SP meter
+SMETS2_Intelis_Gas
+Corus OEM
+GENX_500S_Release_1_5
+GENX_500S_Release_2
+INS_Harsh_Environment_Bridge
+Field Tools Continuous
+OWR _Large Star _R1
+500M Partner Release
+Equascan Coax Heat Meter
+IEE_NPI Data Management
+EMX C and I CL05 Polyphase
+INS_Gen5 Centron Polyphase III
+GEN4_INT_Rota_CIMCON-Robust
+GEN4_INT_Rota_Xylem-FailOff
+GEN4_INT_Rota_Acuity_CostDown
+GEN4_INT_Rota_Rongwen_CostDown
+OWR Intelis V1_5 Water
+Cyble LDE 169 Mode Switch
+GEN4_INT_Rota_Xylem_7P_Variant
+OWR GSR 5_3 MR1
+RN-EGM
+Linky T2P2 on G1 Firmware
+SBR_HW4dot1
+SBR_PMR MR2
+Gen5 Riva Meter
+HW 4-2
+OWR 500S Cellular
+Hertz e_HZ
+SMETS2 E Meter Release 3 and 4
+Genx_NIC570_TPC
+GEN5_uAP_SmartCity-NEMA-AP
+Aquadis Harsh Conditions
+GEN5_IoTRouterv5
