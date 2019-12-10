@@ -10,7 +10,9 @@ def get_pmo_list():
     """
         returns the pmo list from the file in the pmo_path
     """
-    with open(pmo_path) as _list:
-        pmo_list = [line for line in _list]
+
+    with open(pmo_path, 'r') as lines:
+        pmo_list = lines.readlines()
 
     return pmo_list
+

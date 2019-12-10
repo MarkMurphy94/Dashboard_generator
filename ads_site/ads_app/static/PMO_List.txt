@@ -46,7 +46,7 @@ Saturne Continuous
 SIQ_Hawaii
 SLV
 Temetra Continuous
-WOM – Water Operations Management
+WOM â€“ Water Operations Management
 SMETS2 E-Meter
 Equascan Smoke Detector
 Intelis DN25-50 WMbus 434-868

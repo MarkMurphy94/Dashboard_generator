@@ -15,7 +15,7 @@
             <input list="project_list" name="project_list">
                 <datalist id="project_list">
                     {% for item in pmo_list %}
-                        <option value={{ item }}>
+                        <option>{{ item }}</option>
                     {% endfor %}
                 </datalist>
             <button type="submit" class="button">SUBMIT</button>
