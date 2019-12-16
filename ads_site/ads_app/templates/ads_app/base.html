@@ -3,7 +3,6 @@
 
 <head>
     <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
-
     <link href="/static/prettyjson/prettyjson.css" type="text/css" media="all" rel="stylesheet">
     <script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
     <script type="text/javascript" src="/stactic/admin/js/jquery.init.js"></script>
@@ -28,7 +27,7 @@
     <a id="test" href="{% url 'ADS Dash Test Plan' %}">Create Test Plan</a>
     <a id="home" href="{% url 'ADS Create Full Dash' %}" >Create Full Dashboard</a>
     <a id="update" href="{% url 'Update Dashboard' %}">Update Dashboard</a>
-    <a href="/admin/login/?next=/admin/" class="right">Admin Tools</a>
+    <a id="admin" href="/admin/login/?next=/admin/" class="right">Admin Tools</a>
 </div>
 <div class="row">
     <div class="side">
@@ -42,7 +41,17 @@
             </div>
         </div>
     </div>
-    {% block content %}{% endblock %}
+    <div class="main">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <h1>{{ message }}</h1>
+
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
 </div>
 
 <div class="footer">

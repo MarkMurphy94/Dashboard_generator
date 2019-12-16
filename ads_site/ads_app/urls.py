@@ -7,5 +7,7 @@ urlpatterns = [
     url(r'^$', views.home, name='ADS Dash Home'),
     url(r'^home', views.home, name='ADS Create Full Dash'),
     url(r'^test_plan', views.test_plan, name='ADS Dash Test Plan'),
+    url(r'^create_test', views.create_test, name='ADS Loading'),
     url(r'^update', views.update, name='Update Dashboard'),
+    url(r'^done', views.done, name='Complete'),
 ]

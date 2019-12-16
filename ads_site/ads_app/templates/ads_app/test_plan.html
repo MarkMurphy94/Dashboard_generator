@@ -8,17 +8,51 @@
 
             $("a#test").addClass('active');
         });
+
+        $(function() {
+            $("#create_test").submit(function(event) {
+                // Stop form from submitting normally
+                event.preventDefault();
+                var create_test = $(this);
+                // Un-hide the Loading div
+                document.getElementById("loading").hidden = false;
+                // Disable Links and Submit button
+                $("a#test").addClass('isDisabled');
+                $("a#home").addClass('isDisabled');
+                $("a#update").addClass('isDisabled');
+                $("a#admin").addClass('isDisabled');
+                document.getElementsByClassName("button")[0].disabled = true;
+                // Submit Form
+                document.forms['create_test'].submit()
+            });
+
+            function disableUI() {
+              $("#uiOverlay").dialog({
+                modal: true,
+                closeOnEscape: false,
+                dialogClass: "dialog-no-close",
+              });
+            }
+        });
+
     </script>
-    <div class="main">
-        <h1>Create Test Plan</h1>
-        <form action="create_dash" method="POST">
-            <input list="project_list" name="project_list">
-                <datalist id="project_list">
-                    {% for item in pmo_list %}
-                        <option>{{ item }}</option>
-                    {% endfor %}
-                </datalist>
-            <button type="submit" class="button">SUBMIT</button>
-        </form>
+
+
+    <h1>Create Test Plan</h1>
+    <form action="create_test" method="POST" id="create_test">
+        {% csrf_token %}
+        <input list="project_list" name="project_list" required>
+            <datalist id="project_list">
+                {% for item in pmo_list %}
+                    <option>{{ item }}</option>
+                {% endfor %}
+            </datalist>
+        <button type="submit" class="button">SUBMIT</button>
+    </form>
+    <br>
+    <div id="loading" hidden>
+        <h1>Please wait...</h1>
+        <div class="loader"></div>
     </div>
+
 {% endblock content %}

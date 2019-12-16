@@ -1,0 +1,19 @@
+{% extends "ads_app/base.html" %}
+{% block content%}
+<script>
+        $(document).ready(function () {
+            $(".navbar a").removeClass("active");
+            //this will remove the active class from
+            //previously active menu item
+        });
+    </script>
+<div class="main">
+    {% if project %}
+        <h1>{{ project }}</h1>
+    {% endif %}
+    {% if test_plan %}
+        <a href="https://dev.azure.com/itron/RnD/_testPlans?planId={{ test_plan }}" class="button">Go to Test Plan</a>
+    {% endif %}
+
+</div>
+{% endblock content %}
