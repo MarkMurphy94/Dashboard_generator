@@ -14,6 +14,9 @@
     {% if test_plan %}
         <a href="https://dev.azure.com/itron/RnD/_testPlans?planId={{ test_plan }}" class="button">Go to Test Plan</a>
     {% endif %}
+    {% if dash_id %}
+        <a href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ dash_id }}" class="button">Go to Dashboard</a>
+    {% endif %}
 
 </div>
 {% endblock content %}

@@ -94,6 +94,7 @@ body {
 
 /* Column container */
 .row {
+  height: 100%;
   display: -ms-flexbox; /* IE10 */
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
@@ -109,10 +110,18 @@ body {
   padding: 20px;
 }
 
+.right-side {
+  float: right;
+  -ms-flex: 20%; /* IE10 */
+  flex: 20%;
+  background-color: #f1f1f1;
+  padding: 20px;
+}
+
 /* Main column */
 .main {
   -ms-flex: 80%; /* IE10 */
-  flex: 80%;
+  flex: 60%;
   background-color: white;
   padding: 20px;
 }
@@ -126,6 +135,11 @@ body {
 
 /* Footer */
 .footer {
+  position: fixed;
+
+  width: 100%;
+  left: 0;
+  bottom: 0;
   padding: 20px;
   text-align: center;
   background: #333;
@@ -176,19 +190,35 @@ body {
   cursor: pointer;
 }
 
+.form-table{
+  text-align: left;
+  width: 80%;
+}
+
+.form-table td{
+  text-align: left;
+  padding: 10px 3px;
+}
+
 .alert {
-    width: 80%;
-    position: relative;
-    padding: .75rem 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: .25rem;
+  width: 80%;
+  position: relative;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: .25rem;
 }
 
 .alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+.alert-error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
 }
 
 .isDisabled {
@@ -197,12 +227,11 @@ body {
   cursor: not-allowed;
   opacity: 0.5;
   text-decoration: none;
-
 }
 
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid #FFC72C; /* Blue */
+  border-top: 16px solid #FFC72C; /* ITRON yellow */
   border-radius: 50%;
   width: 120px;
   height: 120px;
