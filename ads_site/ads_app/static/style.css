@@ -191,6 +191,12 @@ body {
     border-color: #c3e6cb;
 }
 
+.validation-summary-errors {
+    color: #e80c4d;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
 .isDisabled {
   pointer-events: none;
   color: currentColor;
@@ -198,6 +204,23 @@ body {
   opacity: 0.5;
   text-decoration: none;
 
+}
+
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+}
+
+.thead,
+.tfoot {
+    background-color: #333;
+    color: #fff;
+}
+
+.selected {
+    background-color: grey !important;
+    color: #FFF !important;
 }
 
 .loader {
@@ -221,3 +244,84 @@ body {
     width: 100%;
   }
 }
+
+table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    display: table;
+    border-collapse: collapse;
+    white-space: normal;
+    line-height: normal;
+    font-weight: normal;
+    font-size: medium;
+    font-style: normal;
+    color: -internal-quirk-inherit;
+    text-align: start;
+    border-spacing: 2px;
+    border-color: grey;
+    font-variant: normal;
+}
+
+.table-bordered td, .table-bordered th {
+    border: 1px solid #dee2e6;
+}
+
+.table td, .table th {
+    padding: .75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.05);
+}
+
+th {
+    text-align: inherit;
+    pointer-events: none;
+    color: currentColor;
+    position: sticky;
+    top: 0;
+    cursor: not-allowed;
+    display: table-cell;
+    vertical-align: inherit;
+    font-weight: bold;
+    background-color: #c9c9c9;
+}
+
+.table tr:hover {
+      background-color: #d1d1d1 !important;
+      color: white;
+}
+
+.table-striped {
+  tbody tr:nth-of-type(#{$table-striped-order}) {
+    background-color: $table-accent-bg;
+  }
+}
+
+#table-wrapper {
+  position:relative;
+}
+
+#table-scroll {
+  width: 645px;
+  height:420px;
+  overflow:auto;
+  margin-top:20px;
+  padding: -5px;
+}
+#table-wrapper table {
+  width:100%;
+}
+
+#table-wrapper table thead th .text {
+  position:absolute;
+  top:-20px;
+  z-index:2;
+  height:20px;
+  width:35%;
+  border:1px solid red;
+}
+

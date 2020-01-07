@@ -1,15 +1,112 @@
 {% extends "ads_app/base.html" %}
 {% block content%}
     <script>
+        $(document).on('click', '#table td', function(){
+            $(this).parent().addClass('selected').siblings().removeClass('selected');
+            var selected = $("#table tr.selected td:first").html();
+            document.getElementById("selected").value = selected;
+        });
+
+        $(function() {
+            $("#actionURL").submit(function(event) {
+                // Stop form from submitting normally
+                event.preventDefault();
+                var actionURL = $(this);
+                if (document.getElementById("selected").value == ""){
+                    document.getElementById("Error").hidden = false;
+                }
+                else{
+                    // Un-hide the Loading div
+                    document.getElementById("loading").hidden = false;
+
+                    // Disable Links and Submit button
+                    $("a#test").addClass('isDisabled');
+                    $("a#home").addClass('isDisabled');
+                    $("a#update").addClass('isDisabled');
+                    $("a#admin").addClass('isDisabled');
+                    document.getElementsByClassName("button")[0].disabled = true;
+                    // Submit Form
+                    document.forms['actionURL'].submit();
+                }
+            });
+        });
+
         $(document).ready(function () {
-            $(".navbar a").removeClass("active");
             //this will remove the active class from
             //previously active menu item
-
+            $(".navbar a").removeClass("active");
             $("a#update").addClass('active');
         });
+
+        function filter_text() {
+            var input, filter, table, tr, td, i;
+            input = document.getElementById("id_Dash_Name");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("table");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                // Hide the row initially.
+                tr[i].style.display = "none";
+                td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    cell = tr[i].getElementsByTagName("td")[0];
+                    if (cell) {
+                        if (cell.innerHTML.toUpperCase().includes(filter)){
+                            tr[i].style.display = "";
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     </script>
+
     <div class="main">
         <h1>Update Dashboard</h1>
+        <p>
+            <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
+            <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
+        </p>
+        <div id="table-wrapper">
+            <div id="table-scroll">
+                <table id="table" class="table table-bordered table-striped table-hover" style="undefined;table-layout: fixed; width: 449px">
+                    <colgroup>
+                        <col style="width: 220px">
+                        <col style="width: 94px">
+                        <col style="width: 150px">
+                        <col style="width: 162px">
+                    </colgroup>
+                    <tr>
+                        <th class="tg-0lax">Project</th>
+                        <th class="tg-0lax">URL</th>
+                        <th class="tg-0lax">Last Updated</th>
+                        <th class="tg-0lax">Version</th>
+                    </tr>
+                    {% for items in json %}
+                        <tr>
+                            <td class="tg-0lax">{{ items.folderName }}</td>
+                            <td class="tg-0lax"><a href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">Click here</a></td>
+                            <td class="tg-0lax">{{ items.lastUpdate }}</td>
+                            <td class="tg-0lax">{{ items.version }}</td>
+                        </tr>
+                    {%endfor%}
+                </table>
+            </div>
+        </div>
+        <form action="actionURL" method="POST" id="actionURL">
+            {% csrf_token %}
+            <input type="hidden" name="selected" id="selected" value="">
+            <button type="submit" class="button">SUBMIT</button>
+        </form>
+        <div id="Error" hidden class="validation-summary-errors">
+            <p>Please select a Dashboard</p>
+        </div>
+        <div id="loading" hidden>
+            <h1>Please wait...</h1>
+            <div class="loader"></div>
+        </div>
+
     </div>
+
 {% endblock content %}

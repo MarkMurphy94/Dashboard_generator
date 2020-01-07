@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^create_test', views.create_test, name='ADS Loading'),
     url(r'^update', views.update, name='Update Dashboard'),
     url(r'^done', views.done, name='Complete'),
+    url(r'^actionURL', views.submit_update, name='Submit Update'),
 ]
