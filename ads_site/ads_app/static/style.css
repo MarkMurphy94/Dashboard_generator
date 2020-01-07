@@ -247,11 +247,13 @@ body {
 
 }
 
+/* Formatting for content of table header + rows */
 .tg  {border-collapse:collapse;border-spacing:0;}
 .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
 .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
 .tg .tg-0lax{text-align:left;vertical-align:top}
 }
+
 
 .thead,
 .tfoot {
@@ -259,6 +261,7 @@ body {
     color: #fff;
 }
 
+/* Used to highlight selected row on table */
 .selected {
     background-color: grey !important;
     color: #FFF !important;
@@ -288,6 +291,7 @@ body {
   }
 }
 
+/* Format for table widget */
 table {
     width: 100%;
     margin-bottom: 1rem;
@@ -306,20 +310,24 @@ table {
     font-variant: normal;
 }
 
+/* Table border thickness */
 .table-bordered td, .table-bordered th {
     border: 1px solid #dee2e6;
 }
 
+/* Table header + data formatting */
 .table td, .table th {
     padding: .75rem;
     vertical-align: top;
     border-top: 1px solid #dee2e6;
 }
 
+/* Colors every second row to light grey */
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(0,0,0,.05);
 }
 
+/* Formatting for table header */
 th {
     text-align: inherit;
     pointer-events: none;
@@ -333,11 +341,13 @@ th {
     background-color: #c9c9c9;
 }
 
+/* Highlights the table row the mouse is on */
 .table tr:hover {
       background-color: #d1d1d1 !important;
       color: white;
 }
 
+/*  */
 .table-striped {
   tbody tr:nth-of-type(#{$table-striped-order}) {
     background-color: $table-accent-bg;
@@ -348,6 +358,7 @@ th {
   position:relative;
 }
 
+/* Formatting for table scroll bar */
 #table-scroll {
   width: 645px;
   height:420px;
@@ -355,10 +366,12 @@ th {
   margin-top:20px;
   padding: -5px;
 }
+
 #table-wrapper table {
   width:100%;
 }
 
+/* Formatting for table wrapper */
 #table-wrapper table thead th .text {
   position:absolute;
   top:-20px;

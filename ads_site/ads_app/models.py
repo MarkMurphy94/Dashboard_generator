@@ -476,10 +476,10 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All Bugs Query
     json_obj["name"] = short_name + " All"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags], " \
-           "[System.CreatedBy], [System.CreatedDate], " \
-           "[Microsoft.VSTS.Common.Severity] " \
+    wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
+           " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
+           " [System.AssignedTo], [System.State], [System.CreatedDate]," \
+           " [Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
            "from WorkItems where [System.WorkItemType] = 'Bug' " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"

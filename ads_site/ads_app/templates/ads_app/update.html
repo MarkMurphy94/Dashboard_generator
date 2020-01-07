@@ -2,6 +2,7 @@
 {% block content%}
     <script>
         $(document).on('click', '#table td', function(){
+            // Adds the "selected" class to the row that the user selects
             $(this).parent().addClass('selected').siblings().removeClass('selected');
             var selected = $("#table tr.selected td:first").html();
             document.getElementById("selected").value = selected;
@@ -39,6 +40,7 @@
         });
 
         function filter_text() {
+            // Filters the table rows as the user types
             var input, filter, table, tr, td, i;
             input = document.getElementById("id_Dash_Name");
             filter = input.value.toUpperCase();
@@ -46,7 +48,7 @@
             tr = table.getElementsByTagName("tr");
 
             for (i = 1; i < tr.length; i++) {
-                // Hide the row initially.
+                // Hides the row initially.
                 tr[i].style.display = "none";
                 td = tr[i].getElementsByTagName("td");
                 for (var j = 0; j < td.length; j++) {

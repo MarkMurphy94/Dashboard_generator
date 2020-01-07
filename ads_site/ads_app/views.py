@@ -61,7 +61,6 @@ def create_dash(request):
         context['test_plan_name'] = test_plan_name
 
         try:
-            dash_id = "b38ebb7a-9338-4ac7-a630-904df5290716"
             dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
                                               iteration_shortname, test_choice, test_plan_name)
             context['dash_id'] = dash_id
@@ -90,6 +89,7 @@ def submit_update(request):
         selected = request_data['selected'].strip()
         print("folder name = " + selected)
 
+    # updates the selected dashboard, throws a general error message if error is encountered
     try:
         models.update_dash(selected)
         raise models.DashboardComplete()
