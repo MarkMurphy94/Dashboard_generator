@@ -1,3 +1,4 @@
+/* Formatting for All Elements (box sizing) */
 * {
   box-sizing: border-box;
 }
@@ -8,7 +9,7 @@ body {
   margin: 0;
 }
 
-
+/* Base button formatting */
 .button {
   background-color: #f1f1f1;
   border-radius: 4px;
@@ -20,10 +21,12 @@ body {
   cursor: pointer;
 }
 
+/* Button hover formatting */
 .button:hover {
   background-color: #666;
 }
 
+/* Base Help button formatting */
 .help {
   background-color: #f1f1f1;
   border: circle;
@@ -38,6 +41,7 @@ body {
   border-radius: 50%;
 }
 
+/* Help button hover formatting */
 .help:hover {
   background-color: #666;
 }
@@ -94,15 +98,24 @@ body {
 
 /* Column container */
 .row {
+  height: 100%;
   display: -ms-flexbox; /* IE10 */
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
   flex-wrap: wrap;
 }
 
-/* Create two unequal columns that sits next to each other */
 /* Sidebar/left column */
 .side {
+  -ms-flex: 20%; /* IE10 */
+  flex: 20%;
+  background-color: #f1f1f1;
+  padding: 20px;
+}
+
+/* Sidebar/right column */
+.right-side {
+  float: right;
   -ms-flex: 20%; /* IE10 */
   flex: 20%;
   background-color: #f1f1f1;
@@ -112,7 +125,7 @@ body {
 /* Main column */
 .main {
   -ms-flex: 80%; /* IE10 */
-  flex: 80%;
+  flex: 60%;
   background-color: white;
   padding: 20px;
 }
@@ -126,6 +139,11 @@ body {
 
 /* Footer */
 .footer {
+  position: fixed;
+
+  width: 100%;
+  left: 0;
+  bottom: 0;
   padding: 20px;
   text-align: center;
   background: #333;
@@ -169,6 +187,7 @@ body {
   font-weight: bold;
 }
 
+/* Close button formatting for hover and focus */
 .close:hover,
 .close:focus {
   color: #000;
@@ -176,19 +195,40 @@ body {
   cursor: pointer;
 }
 
-.alert {
-    width: 80%;
-    position: relative;
-    padding: .75rem 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: .25rem;
+/* Formatting for Form Table */
+.form-table{
+  text-align: left;
+  width: 80%;
 }
 
+/* Formatting for Form Table Data */
+.form-table td{
+  text-align: left;
+  padding: 10px 3px;
+}
+
+/* Base formatting for an Alert*/
+.alert {
+  width: 80%;
+  position: relative;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: .25rem;
+}
+
+/* Formatting for a Success Alert*/
 .alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+/* Formatting for an Error Alert*/
+.alert-error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
 }
 
 .validation-summary-errors {
@@ -197,6 +237,7 @@ body {
     font-size: 1.1em;
 }
 
+/* Used for disabling a button/nav-bar */
 .isDisabled {
   pointer-events: none;
   color: currentColor;
@@ -223,15 +264,17 @@ body {
     color: #FFF !important;
 }
 
+/*Defines the loading pinwheel*/
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid #FFC72C; /* Blue */
+  border-top: 16px solid #FFC72C; /* ITRON yellow */
   border-radius: 50%;
   width: 120px;
   height: 120px;
   animation: spin 2s linear infinite;
 }
 
+/* Allows spinning of div (used for loading wheel)*/
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

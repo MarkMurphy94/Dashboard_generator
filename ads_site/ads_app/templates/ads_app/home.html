@@ -8,24 +8,70 @@
 
             $("a#home").addClass('active');
         });
+
+        $(function() {
+            $("#create_dash").submit(function(event) {
+                // Stop form from submitting normally
+                event.preventDefault();
+                var create_dash = $(this);
+                // Un-hide the Loading div
+                document.getElementById("loading").hidden = false;
+                // Disable Links and Submit button
+                $("a#test").addClass('isDisabled');
+                $("a#home").addClass('isDisabled');
+                $("a#update").addClass('isDisabled');
+                $("a#admin").addClass('isDisabled');
+                document.getElementsByClassName("button")[0].disabled = true;
+                // Submit Form
+                document.forms['create_dash'].submit()
+            });
+        });
+
     </script>
 
-    <div class="main">
 
-        <h1>Create Full Dashboard</h1>
-        <form action="create_dash" method="POST">
-            <p>
-                <label for="id_output_Team">Enter the name for the new Project: *</label>
-                <input type="text" name="output_Team" required="" id="id_output_Team" maxlength="250">
-            </p>
-            <p><label for="id_Dash_Name">Enter the URL to the MRS requirements tree:</label> <input type="text" name="Dash_Name" required="" id="id_Dash_Name" maxlength="250"></p>
-            <p><label for="id_prog_short_name">Enter the Global Reqs Iteration Path: *</label> <input type="text" name="prog_short_name" required="" id="id_prog_short_name" maxlength="250"></p>
-            <p><label for="id_query_Folder">Enter the Tag or the Targeted Project: *</label> <input type="text" name="query_Folder" required="" id="id_query_Folder" maxlength="250"></p>
-            <p><label for="id_Overview_Id">Please enter the Test Suite ID or Name: *</label> <input type="text" name="Overview_Id" required="" id="id_Overview_Id" maxlength="250"></p>
-            <p><label>* Indicates field is required"</label> </p>
-            <button type="submit" class="button">SUBMIT</button>
-        </form>
-
+    <h1>Create Full Dashboard</h1>
+    <form action="create_dash" method="POST" id="create_dash">
+        {% csrf_token %}
+        <table class="form-table">
+            <tr>
+                <td><label for="folder_name">Enter the name for the new Project: *</label></td>
+                <td></td>
+                <td></td>
+                <td><input type="text" name="folder_name" required="" id="folder_name" maxlength="32"></td>
+            </tr>
+            <tr>
+                <td><label for="url">Enter the URL to the MRS requirements tree:</label></td>
+                <td></td>
+                <td></td>
+                <td><input type="text" name="url" id="url" maxlength="250"></td>
+            </tr>
+            <tr>
+                <td><label for="global_path">Enter the Global Reqs Iteration Path: *</label></td>
+                <td></td>
+                <td></td>
+                <td><input type="text" name="global_path" required="" id="global_path" maxlength="250"></td>
+            </tr>
+            <tr>
+                <td><label for="iteration_shortname">Enter the Tag or the Targeted Project: *</label></td>
+                <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
+                <td><input type="radio" name="target_choice" value="1"> Tag</td>
+                <td><input type="text" name="iteration_shortname" required="" id="iteration_shortname" maxlength="250"></td>
+            </tr>
+            <tr>
+                <td><label for="test_plan_name">Please enter the Test Suite ID or Name: *</label></td>
+                <td><input type="radio" name="test_choice" value="0" checked> ID</td>
+                <td><input type="radio" name="test_choice" value="1"> Name</td>
+                <td><input type="text" name="test_plan_name" required="" id="test_plan_name" maxlength="250"></td>
+            </tr>
+        </table>
+        <p><label>* Indicates field is required</label> </p>
+        <button type="submit" class="button">SUBMIT</button>
+    </form>
+    <br>
+    <div id="loading" hidden>
+        <h1>Please wait...</h1>
+        <div class="loader"></div>
     </div>
 
 {% endblock content %}
