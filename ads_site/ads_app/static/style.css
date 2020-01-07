@@ -1,3 +1,4 @@
+/* Formatting for All Elements (box sizing) */
 * {
   box-sizing: border-box;
 }
@@ -8,7 +9,7 @@ body {
   margin: 0;
 }
 
-
+/* Base button formatting */
 .button {
   background-color: #f1f1f1;
   border-radius: 4px;
@@ -20,10 +21,12 @@ body {
   cursor: pointer;
 }
 
+/* Button hover formatting */
 .button:hover {
   background-color: #666;
 }
 
+/* Base Help button formatting */
 .help {
   background-color: #f1f1f1;
   border: circle;
@@ -38,6 +41,7 @@ body {
   border-radius: 50%;
 }
 
+/* Help button hover formatting */
 .help:hover {
   background-color: #666;
 }
@@ -101,7 +105,6 @@ body {
   flex-wrap: wrap;
 }
 
-/* Create two unequal columns that sits next to each other */
 /* Sidebar/left column */
 .side {
   -ms-flex: 20%; /* IE10 */
@@ -110,6 +113,7 @@ body {
   padding: 20px;
 }
 
+/* Sidebar/right column */
 .right-side {
   float: right;
   -ms-flex: 20%; /* IE10 */
@@ -183,6 +187,7 @@ body {
   font-weight: bold;
 }
 
+/* Close button formatting for hover and focus */
 .close:hover,
 .close:focus {
   color: #000;
@@ -190,16 +195,19 @@ body {
   cursor: pointer;
 }
 
+/* Formatting for Form Table */
 .form-table{
   text-align: left;
   width: 80%;
 }
 
+/* Formatting for Form Table Data */
 .form-table td{
   text-align: left;
   padding: 10px 3px;
 }
 
+/* Base formatting for an Alert*/
 .alert {
   width: 80%;
   position: relative;
@@ -209,18 +217,21 @@ body {
   border-radius: .25rem;
 }
 
+/* Formatting for a Success Alert*/
 .alert-success {
   color: #155724;
   background-color: #d4edda;
   border-color: #c3e6cb;
 }
 
+/* Formatting for an Error Alert*/
 .alert-error {
   color: #721c24;
   background-color: #f8d7da;
   border-color: #f5c6cb;
 }
 
+/* Used for disabling a button/nav-bar */
 .isDisabled {
   pointer-events: none;
   color: currentColor;
@@ -229,6 +240,7 @@ body {
   text-decoration: none;
 }
 
+/*Defines the loading pinwheel*/
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
   border-top: 16px solid #FFC72C; /* ITRON yellow */
@@ -238,6 +250,7 @@ body {
   animation: spin 2s linear infinite;
 }
 
+/* Allows spinning of div (used for loading wheel)*/
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
