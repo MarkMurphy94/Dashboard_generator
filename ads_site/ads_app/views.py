@@ -62,21 +62,11 @@ def create_dash(request):
                                               iteration_shortname, test_choice, test_plan_name)
             context['dash_id'] = dash_id
             raise models.DashboardComplete(dash_id)
-        except models.TestPlanError as error:  # error for test plan name not found
-            messages.error(request, "Entry Error: " + str(error))
-        except ValueError:  # error for Test Suite ID not being a number
-            messages.error(request, "Entry Error: Test Suite ID must be a number")
-        except models.ApiTestIDNotFound as error:  # error for Test Suite ID not being found
-            messages.error(request, "Entry Error: " + str(error))
-        except models.FolderAlreadyExists as error:  # error is the query folder already exists
-            messages.error(request, "Entry Error: " + str(error))
-        except models.DashAlreadyExists as error:  # error is the dashboard with same name already exists
-            messages.error(request, "Entry Error: " + str(error))
         except models.DashboardComplete:
             messages.success(request, 'The Dashboard was successfully created')
             return render(request, 'ads_app/done.html', context)
-        except Exception as e:
-            messages.error(request, "Entry Error: " + str(e))
+        except Exception as error:
+            messages.error(request, "Entry Error: " + str(error))
 
     return render(request, 'ads_app/home.html', context)
 
