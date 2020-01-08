@@ -749,7 +749,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     else:
         # return the child suite within resources
         name = "All New Feature Test Cases (Resources)"
-        suite = return_suite_child_id("All Manual New", test_plan,
+        suite = return_suite_child_id("All New", test_plan,
                                       resources_suite)
         new_features = return_test_chart(2, 3, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
@@ -757,7 +757,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
 
         # region All Manual Regression (Resources)
         name = "All Regression Test Cases"
-        suite = return_suite_child_id("All Manual Reg", test_plan,
+        suite = return_suite_child_id("All Reg", test_plan,
                                       resources_suite)
         new_features = return_test_chart(4, 3, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
