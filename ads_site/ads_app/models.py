@@ -1,9 +1,7 @@
-import os
-
 from django.conf import settings
 from _datetime import datetime
 from requests.auth import HTTPBasicAuth
-
+import os
 import json
 import requests
 
