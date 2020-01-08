@@ -50,14 +50,10 @@
             for (i = 1; i < tr.length; i++) {
                 // Hides the row initially.
                 tr[i].style.display = "none";
-                td = tr[i].getElementsByTagName("td");
-                for (var j = 0; j < td.length; j++) {
-                    cell = tr[i].getElementsByTagName("td")[0];
-                    if (cell) {
-                        if (cell.innerHTML.toUpperCase().includes(filter)){
-                            tr[i].style.display = "";
-                            break;
-                        }
+                cell = tr[i].getElementsByTagName("td")[0];
+                if (cell) {
+                    if (cell.innerHTML.toUpperCase().includes(filter)){
+                        tr[i].style.display = "";
                     }
                 }
             }
@@ -79,20 +75,24 @@
                         <col style="width: 150px">
                         <col style="width: 162px">
                     </colgroup>
-                    <tr>
-                        <th class="tg-0lax">Project</th>
-                        <th class="tg-0lax">URL</th>
-                        <th class="tg-0lax">Last Updated</th>
-                        <th class="tg-0lax">Version</th>
-                    </tr>
-                    {% for items in json %}
+                    <thead>
+                        <tr>
+                            <th class="tg-0lax">Project</th>
+                            <th class="tg-0lax">URL</th>
+                            <th class="tg-0lax">Last Updated</th>
+                            <th class="tg-0lax">Version</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for items in json %}
                         <tr>
                             <td class="tg-0lax">{{ items.folderName }}</td>
                             <td class="tg-0lax"><a href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">Click here</a></td>
                             <td class="tg-0lax">{{ items.lastUpdate }}</td>
                             <td class="tg-0lax">{{ items.version }}</td>
                         </tr>
-                    {%endfor%}
+                        {%endfor%}
+                    </tbody>
                 </table>
             </div>
         </div>
