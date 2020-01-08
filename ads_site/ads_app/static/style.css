@@ -98,7 +98,6 @@ body {
 
 /* Column container */
 .row {
-  height: 100%;
   display: -ms-flexbox; /* IE10 */
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
@@ -231,6 +230,7 @@ body {
   border-color: #f5c6cb;
 }
 
+/* Formatting for error message */
 .validation-summary-errors {
     color: #e80c4d;
     font-weight: bold;
@@ -254,12 +254,13 @@ body {
 .tg .tg-0lax{text-align:left;vertical-align:top}
 }
 
-
+/* Changes the color of the selected row to dark grey */
 .thead,
 .tfoot {
     background-color: #333;
     color: #fff;
 }
+
 
 /* Used to highlight selected row on table */
 .selected {
@@ -347,16 +348,10 @@ th {
       color: white;
 }
 
-/*  */
-.table-striped {
-  tbody tr:nth-of-type(#{$table-striped-order}) {
-    background-color: $table-accent-bg;
-  }
-}
-
-#table-wrapper {
-  position:relative;
-}
+/* Formatting for table wrapper */
+ #table-wrapper {
+   position:relative;
+ }
 
 /* Formatting for table scroll bar */
 #table-scroll {
@@ -367,17 +362,4 @@ th {
   padding: -5px;
 }
 
-#table-wrapper table {
-  width:100%;
-}
-
-/* Formatting for table wrapper */
-#table-wrapper table thead th .text {
-  position:absolute;
-  top:-20px;
-  z-index:2;
-  height:20px;
-  width:35%;
-  border:1px solid red;
-}
 
