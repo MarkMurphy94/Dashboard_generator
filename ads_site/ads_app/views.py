@@ -1,6 +1,10 @@
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import render
 from . import models
+import json
+import os
+import app
 
 
 def home(request):
@@ -19,16 +23,16 @@ def create_test(request):
         project = form['project_list'].strip()
         context['project'] = project
 
-    try:
-        test_plan_id = models.create_full_test_plan(project)
-        context['test_plan'] = test_plan_id
-        raise models.DashboardComplete(test_plan_id)
-    except models.DashboardComplete:
-        print("Test Plan Created")
-        messages.success(request, 'The Test Plan was successfully created')
-    except Exception as e:
-        print("error")
-        messages.error(request, e)
+        try:
+            test_plan_id = models.create_full_test_plan(project)
+            context['test_plan'] = test_plan_id
+            raise models.DashboardComplete(test_plan_id)
+        except models.DashboardComplete:
+            print("Test Plan Created")
+            messages.success(request, 'The Test Plan was successfully created')
+        except Exception as e:
+            print("error")
+            messages.error(request, e)
 
     return render(request, 'ads_app/done.html', context)
 
@@ -57,7 +61,6 @@ def create_dash(request):
         context['test_plan_name'] = test_plan_name
 
         try:
-            dash_id = "b38ebb7a-9338-4ac7-a630-904df5290716"
             dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
                                               iteration_shortname, test_choice, test_plan_name)
             context['dash_id'] = dash_id
@@ -72,9 +75,29 @@ def create_dash(request):
 
 
 def update(request):
-    return render(request, 'ads_app/update.html')
+    config_data = models.get_config()
+    return render(request, 'ads_app/update.html', {'json': config_data})
 
 
 def done(request):
     return render(request, 'ads_app/done.html')
 
+
+def submit_update(request):
+    if request.method == 'POST':  # if the request from the HTML is a post
+        request_data = request.POST
+        selected = request_data['selected'].strip()
+        print("folder name = " + selected)
+
+    # updates the selected dashboard, throws a general error message if error is encountered
+    try:
+        models.update_dash(selected)
+        raise models.DashboardComplete()
+    except models.DashboardComplete:
+        print("Dashboard updated")
+        messages.success(request, 'The Dashboard was updated successfully')
+    except Exception as e:
+        print("error")
+        messages.error(request, e)
+    config_data = models.get_config()
+    return render(request, 'ads_app/update.html', {'json': config_data})

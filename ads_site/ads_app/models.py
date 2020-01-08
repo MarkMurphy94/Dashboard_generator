@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from _datetime import datetime
 from requests.auth import HTTPBasicAuth
@@ -135,7 +137,6 @@ class FolderAlreadyExists(Exception):
 
 class DashAlreadyExists(Exception):
     """Query Folder already Exists"""
-
 
 # endregion
 
@@ -475,10 +476,10 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All Bugs Query
     json_obj["name"] = short_name + " All"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags], " \
-           "[System.CreatedBy], [System.CreatedDate], " \
-           "[Microsoft.VSTS.Common.Severity] " \
+    wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
+           " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
+           " [System.AssignedTo], [System.State], [System.CreatedDate]," \
+           " [Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
            "from WorkItems where [System.WorkItemType] = 'Bug' " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"
@@ -1790,4 +1791,76 @@ def sort_child_list(child_list):
                 child_list.append(item)
 
     return child_list
+# endregion
+
+# region Update Dashboard
+
+
+def get_config():
+    directory = CONFIGS_PATH + '\\'
+    file_path = os.listdir(directory)
+    config_data = []
+    for file in file_path:
+        file1 = directory + file
+        with open(file1, 'r') as json_file:
+            config_data.append(json.load(json_file))
+    return config_data
+
+
+def delete_widget(team_name, widget_id, dashboard_id):
+    """
+        Removes a widget from the dashboard
+    """
+    version = {'api-version': '5.1-preview.2'}
+    response = requests.delete(URL_HEADER + PROJECT + '/' + team_name
+                               + '/_apis/dashboard/dashboards/' + dashboard_id
+                               + '/widgets/' + widget_id + '?',
+                               auth=HTTPBasicAuth(USER, TOKEN), params=version)
+    js = response.json()
+    print("Object Deleted: ")
+    print(json.dumps(js))
+
+
+def clear_dash(team_name, dashboard_id):
+    """
+        Clears all widgets from a dashboard
+    """
+    version = {'api-version': '4.1-preview.2'}
+    response = requests.get(URL_HEADER + PROJECT + '/' + team_name
+                            + '/_apis/dashboard/dashboards/' + dashboard_id
+                            + '?', auth=HTTPBasicAuth(USER, TOKEN),
+                            params=version)
+    dash_response = response.json()
+    for widgets in dash_response["widgets"]:
+        print(widgets["id"])
+        delete_widget(team_name, widgets["id"], dashboard_id)
+    print("Dashboard cleared")
+
+
+def update_dash(file):
+    """
+        Updates a dashboard based on the given dashboard config file
+    """
+    print(os.curdir)
+    print(file)
+    # file_directory = r"..\ADS Dash\Dashboard configs" + "\\" + file + ".txt"
+    with open(CONFIGS_PATH + '\\' + file + '.txt', 'r') as json_file:
+        config_data = json.load(json_file)
+        team_name = config_data['teamName']
+        url = config_data['url']
+        dash_id = config_data['dashId']
+        test_plan = config_data['testPlan']
+        folder = config_data['folderName']
+        query_folder = config_data['folderId']
+
+    clear_dash(team_name, dash_id)
+    make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    print("Dashboard Updated")
+
+    now = datetime.now()
+    date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    with open(CONFIGS_PATH + '\\' + file + '.txt', 'w') as outfile:
+        config_data['lastUpdate'] = date_string
+        json.dump(config_data, outfile)
+
 # endregion

@@ -98,7 +98,6 @@ body {
 
 /* Column container */
 .row {
-  height: 100%;
   display: -ms-flexbox; /* IE10 */
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
@@ -231,6 +230,13 @@ body {
   border-color: #f5c6cb;
 }
 
+/* Formatting for error message */
+.validation-summary-errors {
+    color: #e80c4d;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
 /* Used for disabling a button/nav-bar */
 .isDisabled {
   pointer-events: none;
@@ -238,6 +244,28 @@ body {
   cursor: not-allowed;
   opacity: 0.5;
   text-decoration: none;
+
+}
+
+/* Formatting for content of table header + rows */
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+}
+
+/* Changes the color of the selected row to dark grey */
+.thead,
+.tfoot {
+    background-color: #333;
+    color: #fff;
+}
+
+
+/* Used to highlight selected row on table */
+.selected {
+    background-color: grey !important;
+    color: #FFF !important;
 }
 
 /*Defines the loading pinwheel*/
@@ -263,3 +291,75 @@ body {
     width: 100%;
   }
 }
+
+/* Format for table widget */
+table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    display: table;
+    border-collapse: collapse;
+    white-space: normal;
+    line-height: normal;
+    font-weight: normal;
+    font-size: medium;
+    font-style: normal;
+    color: -internal-quirk-inherit;
+    text-align: start;
+    border-spacing: 2px;
+    border-color: grey;
+    font-variant: normal;
+}
+
+/* Table border thickness */
+.table-bordered td, .table-bordered th {
+    border: 1px solid #dee2e6;
+}
+
+/* Table header + data formatting */
+.table td, .table th {
+    padding: .75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Colors every second row to light grey */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.05);
+}
+
+/* Formatting for table header */
+th {
+    text-align: inherit;
+    pointer-events: none;
+    color: currentColor;
+    position: sticky;
+    top: 0;
+    cursor: not-allowed;
+    display: table-cell;
+    vertical-align: inherit;
+    font-weight: bold;
+    background-color: #c9c9c9;
+}
+
+/* Highlights the table row the mouse is on */
+.table tr:hover {
+      background-color: #d1d1d1 !important;
+      color: white;
+}
+
+/* Formatting for table wrapper */
+ #table-wrapper {
+   position:relative;
+ }
+
+/* Formatting for table scroll bar */
+#table-scroll {
+  width: 645px;
+  height:420px;
+  overflow:auto;
+  margin-top:20px;
+  padding: -5px;
+}
+
+
