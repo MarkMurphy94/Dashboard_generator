@@ -9,10 +9,10 @@
         });
 
         $(function() {
-            $("#actionURL").submit(function(event) {
+            $("#submit_update").submit(function(event) {
                 // Stop form from submitting normally
                 event.preventDefault();
-                var actionURL = $(this);
+                var submit_update = $(this);
                 if (document.getElementById("selected").value == ""){
                     document.getElementById("Error").hidden = false;
                 }
@@ -27,7 +27,7 @@
                     $("a#admin").addClass('isDisabled');
                     document.getElementsByClassName("button")[0].disabled = true;
                     // Submit Form
-                    document.forms['actionURL'].submit();
+                    document.forms['submit_update'].submit();
                 }
             });
         });
@@ -96,7 +96,7 @@
                 </table>
             </div>
         </div>
-        <form action="actionURL" method="POST" id="actionURL">
+        <form action="submit_update" method="POST" id="submit_update">
             {% csrf_token %}
             <input type="hidden" name="selected" id="selected" value="">
             <button type="submit" class="button">SUBMIT</button>
