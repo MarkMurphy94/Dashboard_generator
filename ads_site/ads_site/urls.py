@@ -15,9 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from ads_site.authentication import views as authentication_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('ads_app.urls')),
     path('ads_app/', include('ads_app.urls')),
+    path('login/', include('authentication.urls')),
+    path('authentication/', include('authentication.urls')),
+    path('register/', authentication_views.register, name='register'),
 ]

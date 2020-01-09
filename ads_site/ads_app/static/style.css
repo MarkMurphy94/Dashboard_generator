@@ -98,6 +98,7 @@ body {
 
 /* Column container */
 .row {
+  height: 75%;
   display: -ms-flexbox; /* IE10 */
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
@@ -139,7 +140,7 @@ body {
 /* Footer */
 .footer {
   position: fixed;
-
+  height: 5%;
   width: 100%;
   left: 0;
   bottom: 0;

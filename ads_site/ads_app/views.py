@@ -4,8 +4,6 @@ from django.shortcuts import render
 from . import models
 import json
 import os
-import app
-
 
 def home(request):
     return render(request, 'ads_app/home.html')
