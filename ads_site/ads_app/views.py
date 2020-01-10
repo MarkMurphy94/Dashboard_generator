@@ -7,10 +7,6 @@ def home(request):
     return render(request, 'ads_app/home.html')
 
 
-def help_page(request):
-    return render(request, 'ads_app/help.html')
-
-
 def test_plan(request):
     pmo_list = models.get_pmo_list()
     return render(request, 'ads_app/test_plan.html', {'pmo_list': pmo_list})

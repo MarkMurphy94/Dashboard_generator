@@ -87,7 +87,7 @@
                         {% for items in json %}
                         <tr>
                             <td class="tg-0lax">{{ items.folderName }}</td>
-                            <td class="tg-0lax"><a href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">Click here</a></td>
+                            <td class="tg-0lax"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">Click here</a></td>
                             <td class="tg-0lax">{{ items.lastUpdate }}</td>
                             <td class="tg-0lax">{{ items.version }}</td>
                         </tr>
@@ -109,6 +109,16 @@
             <div class="loader"></div>
         </div>
 
+        <div id="myModal" class="modal" style="display: none;">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close">x</span>
+                <h1>Update Dashboard Help</h1>
+                <p>
+                    The purpose of this tool is to automate the creation of dashboards within Azure DevOps.
+                </p>
+            </div>
+        </div>
     </div>
 
 {% endblock content %}

@@ -29,7 +29,6 @@
 
     </script>
 
-
     <h1>Create Test Plan</h1>
     <form action="create_test" method="POST" id="create_test">
         {% csrf_token %}
@@ -45,6 +44,17 @@
     <div id="loading" hidden>
         <h1>Please wait...</h1>
         <div class="loader"></div>
+    </div>
+
+    <div id="myModal" class="modal" style="display: none;">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">x</span>
+            <h1>Create Test Plan Help</h1>
+            <p>
+                The purpose of this tool is to automate the creation of dashboards within Azure DevOps.
+            </p>
+        </div>
     </div>
 
 {% endblock content %}

@@ -10,5 +10,4 @@ urlpatterns = [
     url(r'^done', views.done, name='Complete'),
     url(r'^create_dash', views.create_dash, name='Create Dashboard'),
     url(r'^submit_update', views.submit_update, name='Submit Update'),
-    url(r'^help', views.help_page, name='help'),
 ]
