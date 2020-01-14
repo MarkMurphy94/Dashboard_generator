@@ -536,7 +536,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "[System.AssignedTo], [System.State], [System.CreatedDate], " \
            "[Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
            "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and not [System.State] contains 'Closed' " \
+           "and not [System.State] in ('Closed', 'Resolved') " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
