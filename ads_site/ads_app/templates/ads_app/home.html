@@ -1,5 +1,6 @@
 {% extends "ads_app/base.html" %}
 {% block content%}
+{% load static %}
     <script>
         $(document).ready(function () {
             $(".navbar a").removeClass("active");
@@ -31,7 +32,7 @@
 
     <div id="myModal" class="modal" style="display: none;">
         <!-- Modal content -->
-        <div class="modal-content">
+        <div class="help-modal-content">
             <span class="close">x</span>
             <h1>Create Full Dashboard Help</h1>
             <p class="help-text">
@@ -44,22 +45,26 @@
             </p>
             <h2>MRS Requirements Tree</h2>
             <p>
-
             </p>
-            <h2>Iteration Path</h2>
+            <h2>Targeted Project</h2>
             <p>
-
+                This field can be in found in a Bug work item under the Planning section.
             </p>
-            <h2>Tag/Targeted Project</h2>
-            <p>
-                This field can be in found in a Bug work item under the Planning section. (SCREENSHOT)
+            <img src="{% static 'ADS_Dash screenshots/Targeted Project.PNG' %}" alt="itron">
+            <h2>Project Tag and Iteration Path</h2>
+            <p>The project tag can be found in a bug work item for the desired project. Following the <br>
+                example below, the PEA project tag is the tag that references PEA. The project iteration<br>
+                path can be found below the area path within a test case or bug work item.
             </p>
+            <img src="{% static 'ADS_Dash screenshots/Project tag + iteration path.PNG' %}" alt="itron">
             <h2>Test Suite ID/Test Suite Name</h2>
             <p class="help-text">
                 The Test Suite ID can be located from within the Test Plan. Navigate to the desired<br>
-                test plan then select the suite with the same name as the test plan. On the right <br>
-                will be the Suite ID. (SCREENSHOT)
+                test plan then select the suite with the same name as the test plan. Next to the title<br>
+                will be the Suite ID.
             </p>
+            <img src="{% static 'ADS_Dash screenshots/Test Suite ID underlined.PNG' %}" alt="itron">
+
         </div>
     </div>
 
