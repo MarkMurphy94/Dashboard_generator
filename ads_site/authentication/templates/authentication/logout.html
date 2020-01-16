@@ -1,0 +1,12 @@
+{% extends "ads_app/base.html" %}
+{% block content%}
+
+<div>
+    <h2>You have been logged out</h2>
+    <div>
+        <small>
+            <a href="{% url 'login' %}"> Log In Again</a>
+        </small>
+    </div>
+</div>
+{% endblock content %}

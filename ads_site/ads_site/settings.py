@@ -125,3 +125,10 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_URL = '/static/'
+
+LOGIN_REDIRECT_URL = 'ADS Create Full Dash'
+LOGIN_URL = 'login'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'ral-smtp.itron.com'
+EMAIL_PORT = 25

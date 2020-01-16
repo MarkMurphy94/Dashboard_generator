@@ -1,7 +1,7 @@
 import os
 
 from django.conf import settings
-from _datetime import datetime
+import datetime
 from requests.auth import HTTPBasicAuth
 
 import json
@@ -9,8 +9,8 @@ import requests
 
 
 # reading in token credentials for user
-CONFIGS_PATH = settings.BASE_DIR + r'\ads_app\static\Dashboard configs'
-TOKEN_PATH = settings.BASE_DIR + r'\ads_app\static\token.txt'
+CONFIGS_PATH = settings.BASE_DIR + r'/ads_app/static/Dashboard configs/'
+TOKEN_PATH = settings.BASE_DIR + r'/ads_app/static/token.txt'
 with open(TOKEN_PATH, 'r') as TOKEN_FILE:
     USER = TOKEN_FILE.readline().strip()
     TOKEN = TOKEN_FILE.readline().strip()
@@ -22,7 +22,7 @@ JSON_ERROR = "json error"
 MAX_ROW = 7  # maximum number of widgets per row
 VERSION = 'v0.1'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
-PMO_PATH = settings.BASE_DIR + r'\ads_app\static\PMO_List.txt'
+PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
 
 
 # settings dictionary for json charts
@@ -1146,7 +1146,7 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         Creates a JSON config file with the parameters provided, this is used
         when performing the update function
     """
-    now = datetime.now()
+    now = datetime.datetime.now()
     date_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
     config_file = {
@@ -1160,7 +1160,7 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         'lastUpdate': date_string
     }
 
-    with open(CONFIGS_PATH + '\\' + folder_name + '.txt', 'w') \
+    with open(CONFIGS_PATH + folder_name + '.txt', 'w') \
             as outfile:
         json.dump(config_file, outfile)
 
@@ -1797,8 +1797,9 @@ def sort_child_list(child_list):
 
 
 def get_config():
-    directory = CONFIGS_PATH + '\\'
+    directory = CONFIGS_PATH
     file_path = os.listdir(directory)
+    file_path.sort()
     config_data = []
     for file in file_path:
         file1 = directory + file
@@ -1844,7 +1845,7 @@ def update_dash(file):
     print(os.curdir)
     print(file)
     # file_directory = r"..\ADS Dash\Dashboard configs" + "\\" + file + ".txt"
-    with open(CONFIGS_PATH + '\\' + file + '.txt', 'r') as json_file:
+    with open(CONFIGS_PATH + file + '.txt', 'r') as json_file:
         config_data = json.load(json_file)
         team_name = config_data['teamName']
         url = config_data['url']
@@ -1857,9 +1858,9 @@ def update_dash(file):
     make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
     print("Dashboard Updated")
 
-    now = datetime.now()
+    now = datetime.datetime.now()
     date_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    with open(CONFIGS_PATH + '\\' + file + '.txt', 'w') as outfile:
+    with open(CONFIGS_PATH + file + '.txt', 'w') as outfile:
         config_data['lastUpdate'] = date_string
         json.dump(config_data, outfile)
 

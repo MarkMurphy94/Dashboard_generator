@@ -1,14 +1,16 @@
 from django.contrib import messages
-from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from .forms import CreateDash
 from . import models
-import json
-import os
 
+
+@login_required
 def home(request):
     return render(request, 'ads_app/home.html')
 
 
+@login_required
 def test_plan(request):
     pmo_list = models.get_pmo_list()
     return render(request, 'ads_app/test_plan.html', {'pmo_list': pmo_list})
@@ -18,7 +20,7 @@ def create_test(request):
     context = {}
     if request.method == 'POST':  # if the request from the HTML is a post
         form = request.POST
-        project = form['project_list'].strip()
+        project = str(form['project_list'].strip())
         context['project'] = project
 
         try:
@@ -38,40 +40,44 @@ def create_test(request):
 def create_dash(request):
     context = {}
     if request.method == 'POST':  # if the request from the HTML is a post
-        form = request.POST
+        form = CreateDash(request.POST)
+        if form.is_valid():
 
-        # stripping form values
-        folder_name = form['folder_name'].strip()
-        url = form['url'].strip()
-        global_path = form['global_path'].strip()
-        target_choice = form['target_choice'].strip()
-        iteration_shortname = form['iteration_shortname'].strip()
-        test_choice = form['test_choice'].strip()
-        test_plan_name = form['test_plan_name'].strip()
+            # stripping form values
+            folder_name = str(form.cleaned_data['folder_name'])
+            url = str(form.cleaned_data['url'])
+            global_path = str(form.cleaned_data['global_path'])
+            target_choice = str(form.cleaned_data['target_choice'])
+            short_name = str(form.cleaned_data['short_name'])
+            test_choice = str(form.cleaned_data['test_choice'])
+            test_plan_name = str(form.cleaned_data['test_plan_name'])
 
-        # Adding form values to context
-        context['folder_name'] = folder_name
-        context['url'] = url
-        context['global_path'] = global_path
-        context['target_choice'] = target_choice
-        context['iteration_shortname'] = iteration_shortname
-        context['test_choice'] = test_choice
-        context['test_plan_name'] = test_plan_name
+            # Adding form values to context
+            context['folder_name'] = folder_name
+            context['url'] = url
+            context['global_path'] = global_path
+            context['target_choice'] = target_choice
+            context['short_name'] = short_name
+            context['test_choice'] = test_choice
+            context['test_plan_name'] = test_plan_name
 
-        try:
-            dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
-                                              iteration_shortname, test_choice, test_plan_name)
-            context['dash_id'] = dash_id
-            raise models.DashboardComplete(dash_id)
-        except models.DashboardComplete:
-            messages.success(request, 'The Dashboard was successfully created')
-            return render(request, 'ads_app/done.html', context)
-        except Exception as error:
-            messages.error(request, "Entry Error: " + str(error))
+            try:
+                dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
+                                                  short_name, test_choice, test_plan_name)
+                context['dash_id'] = dash_id
+                raise models.DashboardComplete(dash_id)
+            except models.DashboardComplete:
+                messages.success(request, 'The Dashboard was successfully created')
+                return render(request, 'ads_app/done.html', context)
+            except Exception as error:
+                messages.error(request, "Entry Error: " + str(error))
+        else:
+            messages.error(request, "Form is invalid")
 
     return render(request, 'ads_app/home.html', context)
 
 
+@login_required
 def update(request):
     config_data = models.get_config()
     return render(request, 'ads_app/update.html', {'json': config_data})

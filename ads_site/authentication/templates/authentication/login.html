@@ -1,0 +1,20 @@
+{% extends "ads_app/base.html" %}
+{% block content%}
+
+<h1>Log In</h1>
+<div>
+    <form method="POST">
+        {% csrf_token %}
+        <fieldset>
+            <legend> Log In </legend>
+            {{ form.as_p }}
+        </fieldset>
+        <button type="submit" class="button">SUBMIT</button>
+    </form>
+    <div>
+        <small>
+            Need to rest your password? <a href="{% url 'password_reset' %}"> Forgot Password</a>
+        </small>
+    </div>
+</div>
+{% endblock content %}
