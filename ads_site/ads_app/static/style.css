@@ -131,6 +131,11 @@ body {
   padding: 20px;
 }
 
+/* Line spacing for help text in modals */
+.help-text {
+  line-height: 1.6;
+}
+
 /* Fake image, just for this example */
 .fakeimg {
   background-color: #aaa;
@@ -141,7 +146,7 @@ body {
 /* Footer */
 .footer {
   position: fixed;
-
+  height: 5%;
   width: 100%;
   left: 0;
   bottom: 0;
