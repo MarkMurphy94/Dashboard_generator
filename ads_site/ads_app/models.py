@@ -1,9 +1,7 @@
-import os
-
 from django.conf import settings
 from _datetime import datetime
 from requests.auth import HTTPBasicAuth
-
+import os
 import json
 import requests
 
@@ -538,7 +536,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "[System.AssignedTo], [System.State], [System.CreatedDate], " \
            "[Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
            "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and not [System.State] contains 'Closed' " \
+           "and not [System.State] in ('Closed', 'Resolved') " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
@@ -749,7 +747,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     else:
         # return the child suite within resources
         name = "All New Feature Test Cases (Resources)"
-        suite = return_suite_child_id("All Manual New", test_plan,
+        suite = return_suite_child_id("New", test_plan,
                                       resources_suite)
         new_features = return_test_chart(2, 3, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
@@ -757,7 +755,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
 
         # region All Manual Regression (Resources)
         name = "All Regression Test Cases"
-        suite = return_suite_child_id("All Manual Reg", test_plan,
+        suite = return_suite_child_id("Reg", test_plan,
                                       resources_suite)
         new_features = return_test_chart(4, 3, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)

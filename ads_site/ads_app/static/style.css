@@ -129,6 +129,11 @@ body {
   padding: 20px;
 }
 
+/* Line spacing for help text in modals */
+.help-text {
+  line-height: 1.6;
+}
+
 /* Fake image, just for this example */
 .fakeimg {
   background-color: #aaa;
@@ -139,7 +144,7 @@ body {
 /* Footer */
 .footer {
   position: fixed;
-
+  height: 5%;
   width: 100%;
   left: 0;
   bottom: 0;
@@ -176,6 +181,16 @@ body {
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
+}
+
+/* Help pop-up modal Content */
+.help-modal-content {
+  background-color: #fefefe;
+  position: center;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 15%;
 }
 
 /* The Close Button */
@@ -232,7 +247,7 @@ body {
 
 /* Formatting for error message */
 .validation-summary-errors {
-    color: #e80c4d;
+    color: #eb4034;
     font-weight: bold;
     font-size: 1.1em;
 }
