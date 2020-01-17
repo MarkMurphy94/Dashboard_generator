@@ -12,6 +12,7 @@
             $("#submit_update").submit(function(event) {
                 // Stop form from submitting normally
                 event.preventDefault();
+                var modal1 = document.getElementById("LoadingModal");
                 var submit_update = $(this);
                 if (document.getElementById("selected").value == ""){
                     document.getElementById("Error").hidden = false;
@@ -27,6 +28,7 @@
                     $("a#admin").addClass('isDisabled');
                     document.getElementsByClassName("button")[0].disabled = true;
                     // Submit Form
+                    modal1.style.display = "block";
                     document.forms['submit_update'].submit();
                 }
             });
@@ -87,14 +89,14 @@
                         {% for items in json %}
                         <tr>
                             <td class="tg-0lax">{{ items.folderName }}</td>
-                            <td class="tg-0lax"><a href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">Click here</a></td>
+                            <td class="tg-0lax"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">Click here</a></td>
                             <td class="tg-0lax">{{ items.lastUpdate }}</td>
                             <td class="tg-0lax">{{ items.version }}</td>
                         </tr>
                         {%endfor%}
                     </tbody>
                 </table>
-            </div>
+        </div>
         </div>
         <form action="submit_update" method="POST" id="submit_update">
             {% csrf_token %}
@@ -104,11 +106,26 @@
         <div id="Error" hidden class="validation-summary-errors">
             <p>Please select a Dashboard</p>
         </div>
-        <div id="loading" hidden>
-            <h1>Please wait...</h1>
-            <div class="loader"></div>
+        <div id="LoadingModal" class="modal" style="">
+            <div class="help-modal-content">
+                <div id="loading" hidden>
+                    <h1>Please wait...</h1>
+                    <div class="loader"></div>
+                </div>
+            </div>
         </div>
-
+        <div id="myModal" class="modal" style="display: none;">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close">x</span>
+                <h1>Update Dashboard Help</h1>
+                <p class="help-text">
+                    This page displays all dashboards that have been previously generated using this tool.<br>
+                    Updating a dashboard will refresh all the widgets within that dashboard if new test suites
+                    have been<br> added to the associated test plan.
+                </p>
+            </div>
+        </div>
     </div>
 
 {% endblock content %}
