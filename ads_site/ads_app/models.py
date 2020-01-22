@@ -1,5 +1,5 @@
 from django.conf import settings
-from _datetime import datetime
+import datetime
 from requests.auth import HTTPBasicAuth
 import os
 import json
@@ -7,8 +7,8 @@ import requests
 
 
 # reading in token credentials for user
-CONFIGS_PATH = settings.BASE_DIR + r'\ads_app\static\Dashboard configs'
-TOKEN_PATH = settings.BASE_DIR + r'\ads_app\static\token.txt'
+CONFIGS_PATH = settings.BASE_DIR + r'/ads_app/static/Dashboard configs/'
+TOKEN_PATH = settings.BASE_DIR + r'/ads_app/static/token.txt'
 with open(TOKEN_PATH, 'r') as TOKEN_FILE:
     USER = TOKEN_FILE.readline().strip()
     TOKEN = TOKEN_FILE.readline().strip()
@@ -20,7 +20,7 @@ JSON_ERROR = "json error"
 MAX_ROW = 7  # maximum number of widgets per row
 VERSION = 'v0.1'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
-PMO_PATH = settings.BASE_DIR + r'\ads_app\static\PMO_List.txt'
+PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
 
 
 # settings dictionary for json charts
@@ -226,8 +226,7 @@ def create_test_plan(test_plan):
 
     # indicates that a test plan with test_plan name already exists
     if response.status_code != 200:
-        raise DashAlreadyExists("API Response: " + str(response.status_code)
-                                + "\nTest Plan with name " + test_plan
+        raise DashAlreadyExists("Test Plan with name " + test_plan
                                 + " already exists")
 
     print(json.dumps(test_plan_response))
@@ -254,8 +253,7 @@ def create_suite(suite_name, test_plan_id, suite_id):
 
     # indicates that a test plan with suite name already exists
     if response.status_code != 200:
-        raise DashAlreadyExists("API Response: " + str(response.status_code)
-                                + "\nTest Plan with name " + suite_name
+        raise DashAlreadyExists("Test Plan with name " + suite_name
                                 + " already exists")
 
     print(json.dumps(suite_response))
@@ -379,9 +377,7 @@ def check_folder_exists(folder):
 
     # indicates that query folder with folderName already exists
     if response.status_code == 200:
-        raise FolderAlreadyExists("API Response: " + str(response.status_code)
-                                  + "\nQuery Folder with name " + folder
-                                  + " already exists")
+        raise FolderAlreadyExists("Query Folder with name " + folder + " already exists")
 
 
 def return_suite_test_plan_id(test_suite, test_choice):
@@ -415,8 +411,7 @@ def create_dash(team_name, dash_name):
 
     # indicates that a dashboard with dashName already exists
     if response.status_code != 200:
-        raise DashAlreadyExists("API Response: " + str(response.status_code)
-                                + "\nDashboard with name " + dash_name
+        raise DashAlreadyExists("Dashboard with name " + dash_name
                                 + " already exists")
 
     print(json.dumps(dash_response))
@@ -440,9 +435,7 @@ def create_query_folder(folder):
 
     # indicates that query folder with folderName already exists
     if response.status_code != 201:
-        raise FolderAlreadyExists("API Response: " + str(response.status_code)
-                                  + "\nQuery Folder with name " + folder
-                                  + " already exists")
+        raise FolderAlreadyExists('Query Folder with name "' + folder + '" already exists')
 
     query_response = response.json()
     return query_response['id']
@@ -1144,8 +1137,9 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         Creates a JSON config file with the parameters provided, this is used
         when performing the update function
     """
-    now = datetime.now()
+    now = datetime.datetime.now()
     date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    file_directory = CONFIGS_PATH + folder_name + '.txt'
 
     config_file = {
         'teamName': team_name,
@@ -1158,7 +1152,7 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         'lastUpdate': date_string
     }
 
-    with open(CONFIGS_PATH + '\\' + folder_name + '.txt', 'w') \
+    with open(file_directory, 'w') \
             as outfile:
         json.dump(config_file, outfile)
 
@@ -1202,8 +1196,7 @@ def check_test_plan_id(test_plan):
                             + str(test_plan) + '?',
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     if response.status_code != 200:
-        raise ApiTestIDNotFound("API Response: " + str(
-            response.status_code) + "\nTest Plan ID not Found")
+        raise ApiTestIDNotFound("Test Plan ID was not Found in Azure DevOps")
 
 
 def create_query(json_obj, query_folder):
@@ -1795,8 +1788,9 @@ def sort_child_list(child_list):
 
 
 def get_config():
-    directory = CONFIGS_PATH + '\\'
+    directory = CONFIGS_PATH
     file_path = os.listdir(directory)
+    file_path.sort()
     config_data = []
     for file in file_path:
         file1 = directory + file
@@ -1841,8 +1835,8 @@ def update_dash(file):
     """
     print(os.curdir)
     print(file)
-    # file_directory = r"..\ADS Dash\Dashboard configs" + "\\" + file + ".txt"
-    with open(CONFIGS_PATH + '\\' + file + '.txt', 'r') as json_file:
+    file_directory = CONFIGS_PATH + file + '.txt'
+    with open(file_directory, 'r') as json_file:
         config_data = json.load(json_file)
         team_name = config_data['teamName']
         url = config_data['url']
@@ -1855,9 +1849,9 @@ def update_dash(file):
     make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
     print("Dashboard Updated")
 
-    now = datetime.now()
+    now = datetime.datetime.now()
     date_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    with open(CONFIGS_PATH + '\\' + file + '.txt', 'w') as outfile:
+    with open(file_directory, 'w') as outfile:
         config_data['lastUpdate'] = date_string
         json.dump(config_data, outfile)
 
