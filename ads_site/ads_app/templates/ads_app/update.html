@@ -96,7 +96,7 @@
                         {%endfor%}
                     </tbody>
                 </table>
-        </div>
+            </div>
         </div>
         <form action="submit_update" method="POST" id="submit_update">
             {% csrf_token %}
@@ -107,22 +107,25 @@
             <p>Please select a Dashboard</p>
         </div>
         <div id="LoadingModal" class="modal" style="">
-            <div class="help-modal-content">
+            <div class="loading-modal-content">
                 <div id="loading" hidden>
                     <h1>Please wait...</h1>
+                    <br>
                     <div class="loader"></div>
+                    <br>
+                    <p>Do not refresh the page. This process may take a few minutes.</p>
                 </div>
             </div>
         </div>
         <div id="myModal" class="modal" style="display: none;">
             <!-- Modal content -->
-            <div class="modal-content">
+            <div class="help-modal-content">
                 <span class="close">x</span>
                 <h1>Update Dashboard Help</h1>
-                <p class="help-text">
-                    This page displays all dashboards that have been previously generated using this tool.<br>
-                    Updating a dashboard will refresh all the widgets within that dashboard if new test suites
-                    have been<br> added to the associated test plan.
+                <p>
+                    Dashboards that have already been created using this tool will appear here. <br>
+                    Updating a dashboard will refresh all the widgets on that dashboard. Use this <br>
+                    feature if there have been new test suites added to a test plan.
                 </p>
             </div>
         </div>
