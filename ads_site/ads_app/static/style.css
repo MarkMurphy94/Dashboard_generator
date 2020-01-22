@@ -58,6 +58,19 @@ body {
   border-radius: 50%;
 }
 
+.box {
+  border: 2px solid #d0d0d0;
+  float: right;
+  padding: 10px;
+  width: 50%;
+  margin-right: 10px;
+}
+
+.main-left {
+  float: left;
+  width: 30%;
+}
+
 /* Help button hover formatting */
 .help:hover {
   background-color: #666;
@@ -68,6 +81,7 @@ body {
   padding: 20px;
   text-align: center;
   background: #666;
+  width: 100%;
   color: white;
 }
 
@@ -81,6 +95,7 @@ body {
   overflow: hidden;
   background-color: #333;
   position: sticky;
+  width: 100%;
   position: -webkit-sticky;
   top: 0;
 }
@@ -192,23 +207,27 @@ body {
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-/* Modal Content */
-.modal-content {
+/* Help modal Content */
+.help-modal-content {
+  position: center;
   background-color: #fefefe;
   margin: auto;
+  height: 80%;
+  overflow: auto;
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
 }
 
-/* Help pop-up modal Content */
-.help-modal-content {
+/* Formatting for loading modal */
+.loading-modal-content {
   background-color: #fefefe;
-  position: center;
-  margin: auto;
-  padding: 20px;
+  margin: 10% auto;
   border: 1px solid #888;
-  width: 15%;
+  height: 40%;
+  overflow: auto;
+  width: 40%;
+  text-align: center;
 }
 
 /* The Close Button */
@@ -333,8 +352,9 @@ body {
   border: 16px solid #f3f3f3; /* Light grey */
   border-top: 16px solid #FFC72C; /* ITRON yellow */
   border-radius: 50%;
-  width: 120px;
-  height: 120px;
+  margin: 0 auto;
+  width: 4em;
+  height: 4em;
   animation: spin 2s linear infinite;
 }
 
