@@ -11,7 +11,7 @@
     opacity: 1;
 }
 
-/* Formating for Help test */
+/* Formating for Help text */
 .helptext {
     display: table-row;
     font-size: .9em;
@@ -281,11 +281,38 @@ body {
 }
 
 /* Formatting for content of table header + rows */
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg .tg-0lax{text-align:left;vertical-align:top}
+.tg  {
+  border-collapse: collapse;
+  border-spacing: 0;
 }
+
+.tg td {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  padding: 10px 5px;
+  border-style: solid;
+  border-width: 1px;
+  overflow: hidden;
+  word-break: normal;
+  border-color: black;
+}
+.tg th {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  padding: 10px 5px;
+  border-style: solid;
+  border-width: 1px;
+  overflow: hidden;
+  word-break: normal;
+  border-color: black;
+}
+
+.tg .tg-0lax {
+  text-align: left;
+  vertical-align: top
+}
+
 
 /* Changes the color of the selected row to dark grey */
 .thead,

@@ -21,7 +21,7 @@ from django.conf.urls import url
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', include('ads_app.urls')),
+    url(r'^', include('ads_app.urls')),
     url(r'^ads_app/', include('ads_app.urls')),
     url(r'^authentication/', include('authentication.urls')),
     url(r'^login/', auth_views.LoginView.as_view(template_name='authentication/login.html'), name='login'),
