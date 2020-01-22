@@ -41,6 +41,19 @@ body {
   border-radius: 50%;
 }
 
+.box {
+  border: 2px solid #d0d0d0;
+  float: right;
+  padding: 10px;
+  width: 50%;
+  margin-right: 10px;
+}
+
+.main-left {
+  float: left;
+  width: 30%;
+}
+
 /* Help button hover formatting */
 .help:hover {
   background-color: #666;
@@ -194,6 +207,7 @@ body {
   margin: 10% auto;
   border: 1px solid #888;
   height: 40%;
+  overflow: auto;
   width: 40%;
   text-align: center;
 }
@@ -252,7 +266,7 @@ body {
 
 /* Formatting for error message */
 .validation-summary-errors {
-    color: #e80c4d;
+    color: #eb4034;
     font-weight: bold;
     font-size: 1.1em;
 }
@@ -294,8 +308,8 @@ body {
   border-top: 16px solid #FFC72C; /* ITRON yellow */
   border-radius: 50%;
   margin: 0 auto;
-  width: 100px;
-  height: 100px;
+  width: 4em;
+  height: 4em;
   animation: spin 2s linear infinite;
 }
 
