@@ -14,6 +14,7 @@
             $("#create_dash").submit(function(event) {
                 // Stop form from submitting normally
                 event.preventDefault();
+                var modal1 = document.getElementById("LoadingModal");
                 var create_dash = $(this);
                 // Un-hide the Loading div
                 document.getElementById("loading").hidden = false;
@@ -24,6 +25,7 @@
                 $("a#admin").addClass('isDisabled');
                 document.getElementsByClassName("button")[0].disabled = true;
                 // Submit Form
+                modal1.style.display = "block";
                 document.forms['create_dash'].submit()
             });
         });
@@ -76,40 +78,88 @@
                 <td><label for="folder_name">Enter the name for the new Project: *</label></td>
                 <td></td>
                 <td></td>
-                <td><input type="text" name="folder_name" required="" id="folder_name" maxlength="32"></td>
+                {% if folder_name %}
+                    <td><input type="text" name="folder_name" value="{{ folder_name }}" required="" id="folder_name" maxlength="32"></td>
+                {% else %}
+                    <td><input type="text" name="folder_name" required="" id="folder_name" maxlength="32"></td>
+                {% endif %}
             </tr>
             <tr>
                 <td><label for="url">Enter the URL to the MRS requirements tree:</label></td>
                 <td></td>
                 <td></td>
-                <td><input type="url" name="url" id="url" maxlength="250"></td>
+                {% if url %}
+                    <td><input type="url" name="url" id="url" value="{{ url }}" maxlength="250"></td>
+                {% else %}
+                    <td><input type="url" name="url" id="url" maxlength="250"></td>
+                {% endif %}
             </tr>
             <tr>
                 <td><label for="global_path">Enter the Global Reqs Iteration Path: *</label></td>
                 <td></td>
                 <td></td>
-                <td><input type="text" name="global_path" required="" id="global_path" maxlength="250"></td>
+                {% if global_path %}
+                    <td><input type="text" name="global_path" value="{{ global_path }}" required="" id="global_path" maxlength="250"></td>
+                {% else %}
+                    <td><input type="text" name="global_path" required="" id="global_path" maxlength="250"></td>
+                {% endif %}
             </tr>
             <tr>
                 <td><label for="short_name">Enter the Tag or the Targeted Project: *</label></td>
-                <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
-                <td><input type="radio" name="target_choice" value="1"> Tag</td>
-                <td><input type="text" name="short_name" required="" id="short_name" maxlength="250"></td>
+                {% if target_choice %}
+                    {% if target_choice == '0' %}
+                        <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
+                        <td><input type="radio" name="target_choice" value="1"> Tag</td>
+                    {% else %}
+                        <td><input type="radio" name="target_choice" value="0" > Targeted Project</td>
+                        <td><input type="radio" name="target_choice" value="1" checked> Tag</td>
+                    {% endif %}
+                {% else %}
+                    <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
+                    <td><input type="radio" name="target_choice" value="1"> Tag</td>
+                {% endif %}
+                {% if short_name %}
+                    <td><input type="text" name="short_name" value="{{ short_name }}" required="" id="short_name" maxlength="250"></td>
+                {% else %}
+                    <td><input type="text" name="short_name" required="" id="short_name" maxlength="250"></td>
+                {% endif %}
             </tr>
             <tr>
                 <td><label for="test_plan_name">Please enter the Test Suite ID or Name: *</label></td>
-                <td><input type="radio" name="test_choice" value="0" checked> ID</td>
-                <td><input type="radio" name="test_choice" value="1"> Name</td>
-                <td><input type="text" name="test_plan_name" required="" id="test_plan_name" maxlength="250"></td>
+                {% if test_choice %}
+                    {% if test_choice == '0' %}
+                        <td><input type="radio" name="test_choice" value="0" checked> ID</td>
+                        <td><input type="radio" name="test_choice" value="1"> Name</td>
+                    {% else %}
+                        <td><input type="radio" name="test_choice" value="0"> ID</td>
+                        <td><input type="radio" name="test_choice" value="1" checked> Name</td>
+                    {% endif %}
+                {% else %}
+                    <td><input type="radio" name="test_choice" value="0" checked> ID</td>
+                    <td><input type="radio" name="test_choice" value="1"> Name</td>
+                {% endif %}
+
+                {% if short_name %}
+                    <td><input type="text" name="test_plan_name" value="{{ test_plan_name }}" required="" id="test_plan_name" maxlength="250"></td>
+                {% else %}
+                    <td><input type="text" name="test_plan_name" required="" id="test_plan_name" maxlength="250"></td>
+                {% endif %}
             </tr>
         </table>
         <p><label>* Indicates field is required</label> </p>
         <button type="submit" class="button">SUBMIT</button>
     </form>
     <br>
-    <div id="loading" hidden>
-        <h1>Please wait...</h1>
-        <div class="loader"></div>
+    <div id="LoadingModal" class="modal" style="">
+        <div class="loading-modal-content">
+            <div id="loading" hidden>
+                <h1>Please wait...</h1>
+                <br>
+                <div class="loader"></div>
+                <br>
+                <p>Do not refresh the page. This process may take a few minutes.</p>
+            </div>
+        </div>
     </div>
 
 {% endblock content %}

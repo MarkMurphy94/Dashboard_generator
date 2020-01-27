@@ -187,6 +187,10 @@ body {
   text-align: center;
   background: #333;
 }
+/* Style for contact information*/
+.contact {
+  font-size: smaller;
+}
 
 /* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 700px) {
@@ -422,6 +426,7 @@ th {
     vertical-align: inherit;
     font-weight: bold;
     background-color: #c9c9c9;
+    border: 0px solid !important;
 }
 
 /* Highlights the table row the mouse is on */
