@@ -13,6 +13,7 @@
             $("#create_test").submit(function(event) {
                 // Stop form from submitting normally
                 event.preventDefault();
+                var modal1 = document.getElementById("LoadingModal");
                 var create_test = $(this);
                 // Un-hide the Loading div
                 document.getElementById("loading").hidden = false;
@@ -23,6 +24,7 @@
                 $("a#admin").addClass('isDisabled');
                 document.getElementsByClassName("button")[0].disabled = true;
                 // Submit Form
+                modal1.style.display = "block";
                 document.forms['create_test'].submit()
             });
         });
@@ -45,9 +47,16 @@
     </div>
 
     <br>
-    <div id="loading" hidden>
-        <h1>Please wait...</h1>
-        <div class="loader"></div>
+    <div id="LoadingModal" class="modal" style="">
+        <div class="loading-modal-content">
+            <div id="loading" hidden>
+                <h1>Please wait...</h1>
+                <br>
+                <div class="loader"></div>
+                <br>
+                <p>Do not refresh the page. This process may take a few minutes.</p>
+            </div>
+        </div>
     </div>
     <div class="box">
         <h2>Example Test Plan Structure</h2>
