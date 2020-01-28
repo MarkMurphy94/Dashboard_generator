@@ -1,6 +1,6 @@
 from django.conf import settings
-import datetime
 from requests.auth import HTTPBasicAuth
+import datetime
 import os
 import json
 import requests
@@ -367,14 +367,12 @@ def check_folder_exists(folder):
 
         :raises a FolderAlreadyExists Exception if the folder is found
     """
-
     query_path = 'Shared Queries/GTO/' + folder
     payload = {'api-version': '5.1'}
 
     response = requests.get(URL_HEADER + PROJECT + '/_apis/wit/queries/'
                             + query_path + '?',
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
-
     # indicates that query folder with folderName already exists
     if response.status_code == 200:
         raise FolderAlreadyExists("Query Folder with name " + folder + " already exists")
@@ -449,9 +447,9 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains " + repr(short_name)
+        target_clause = "[Custom.TargetedProject] contains '{}'".format(short_name)
     else:
-        target_clause = "[System.Tags] contains " + repr(short_name)
+        target_clause = "[System.Tags] contains '{}'".format(short_name)
 
     # New Bugs Query
     wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
@@ -1152,8 +1150,7 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         'lastUpdate': date_string
     }
 
-    with open(file_directory, 'w') \
-            as outfile:
+    with open(file_directory, 'w') as outfile:
         json.dump(config_file, outfile)
 
 
@@ -1774,7 +1771,7 @@ def sort_child_list(child_list):
             else:
                 sorted_dictionary[6].append(child)
 
-    child_list.clear()
+    del child_list[:]
     for key in sorted_dictionary:
         if sorted_dictionary[key]:
             items = sorted_dictionary[key]

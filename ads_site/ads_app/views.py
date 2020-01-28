@@ -53,13 +53,13 @@ def create_dash(request):
         if form.is_valid():
 
             # stripping form values
-            folder_name = str(form.cleaned_data[folder_key])
-            url = str(form.cleaned_data[url_key])
-            global_path = str(form.cleaned_data[global_key])
-            target_choice = str(form.cleaned_data[target_key])
-            short_name = str(form.cleaned_data[name_key])
-            test_choice = str(form.cleaned_data[choice_key])
-            test_plan_name = str(form.cleaned_data[test_plan_key])
+            folder_name = form.cleaned_data[folder_key]
+            url = form.cleaned_data[url_key]
+            global_path = form.cleaned_data[global_key]
+            target_choice = form.cleaned_data[target_key]
+            short_name = form.cleaned_data[name_key]
+            test_choice = form.cleaned_data[choice_key]
+            test_plan_name = form.cleaned_data[test_plan_key]
 
             # Adding form values to context
             context[folder_key] = folder_name
@@ -80,6 +80,7 @@ def create_dash(request):
                 return render(request, 'ads_app/done.html', context)
             except Exception as error:
                 messages.error(request, "Entry Error: " + str(error))
+                return render(request, 'ads_app/home.html', context)
         else:
             error_type = "A form field "
             for item in form:

@@ -12,7 +12,7 @@
             $("#submit_update").submit(function(event) {
                 // Stop form from submitting normally
                 event.preventDefault();
-                var modal1 = document.getElementById("LoadingModal");
+                var help_modal = document.getElementById("LoadingModal");
                 var submit_update = $(this);
                 if (document.getElementById("selected").value == ""){
                     document.getElementById("Error").hidden = false;
@@ -28,7 +28,7 @@
                     $("a#admin").addClass('isDisabled');
                     document.getElementsByClassName("button")[0].disabled = true;
                     // Submit Form
-                    modal1.style.display = "block";
+                    help_modal.style.display = "block";
                     document.forms['submit_update'].submit();
                 }
             });
