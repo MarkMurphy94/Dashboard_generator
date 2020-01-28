@@ -13,7 +13,7 @@
             $("#create_test").submit(function(event) {
                 // Stop form from submitting normally
                 event.preventDefault();
-                var modal1 = document.getElementById("LoadingModal");
+                var help_modal = document.getElementById("LoadingModal");
                 var create_test = $(this);
                 // Un-hide the Loading div
                 document.getElementById("loading").hidden = false;
@@ -24,7 +24,7 @@
                 $("a#admin").addClass('isDisabled');
                 document.getElementsByClassName("button")[0].disabled = true;
                 // Submit Form
-                modal1.style.display = "block";
+                help_modal.style.display = "block";
                 document.forms['create_test'].submit()
             });
         });
