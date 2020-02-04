@@ -20,7 +20,7 @@ def create_test(request):
     context = {}
     if request.method == 'POST':  # if the request from the HTML is a post
         form = request.POST
-        project = str(form['project_list'].strip())
+        project = form['project_list'].strip()
         context['project'] = project
 
         try:
@@ -115,17 +115,16 @@ def submit_update(request):
     if request.method == 'POST':  # if the request from the HTML is a post
         request_data = request.POST
         selected = request_data['selected'].strip()
-        print("folder name = " + selected)
 
-    # updates the selected dashboard, throws a general error message if error is encountered
-    try:
-        models.update_dash(selected)
-        raise models.DashboardComplete()
-    except models.DashboardComplete:
-        print("Dashboard updated")
-        messages.success(request, 'The Dashboard was updated successfully')
-    except Exception as e:
-        print("error")
-        messages.error(request, e)
+        # updates the selected dashboard, throws a general error message if error is encountered
+        try:
+            models.update_dash(selected)
+            raise models.DashboardComplete()
+        except models.DashboardComplete:
+            print("Dashboard updated")
+            messages.success(request, 'The Dashboard was updated successfully')
+        except Exception as e:
+            print("error")
+            messages.error(request, e)
     config_data = models.get_config()
     return render(request, 'ads_app/update.html', {'json': config_data})
