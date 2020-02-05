@@ -74,6 +74,37 @@ standardPieChartColorArray = [
     }
 ]
 
+standardTestPlanWitColorArray = [
+    {
+        "value": "Passed",
+        "backgroundColor": "#339947"
+    },
+    {
+        "value": "Blocked",
+        "backgroundColor": "#525151"
+    },
+    {
+        "value": "Not run",
+        "backgroundColor": "#292e6b"
+    },
+    {
+        "value": "Failed",
+        "backgroundColor": "#e31e26"
+    },
+    {
+        "value": "Not applicable",
+        "backgroundColor": "#71338d"
+    },
+    {
+        "value": "In progress",
+        "backgroundColor": "#ffcc05"
+    },
+    {
+        "value": "Inconclusive",
+        "backgroundColor": "#86cdde"
+    },
+]
+
 # noinspection SpellCheckingInspection
 standardWitColorArray = [
     {
@@ -527,7 +558,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "[System.AssignedTo], [System.State], [System.CreatedDate], " \
            "[Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
            "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and not [System.State] in ('Closed', 'Resolved') " \
+           "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
@@ -666,7 +697,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
 
     # region Bug Severity
     name = program_name + " Bug Severity"
-    query_id = return_query_id("All NOT Closed", query_folder)
+    query_id = return_query_id("New Bugs", query_folder)
     chart_type = "ColumnChart"
 
     bug_severity = return_chart(6, 1, name, query_id, chart_type=chart_type)
@@ -1411,7 +1442,7 @@ def return_test_chart(column, row, name, suite, test_plan,
     settings["transformOptions"]["orderBy"]["propertyName"] = "value"
     settings["transformOptions"]["measure"]["propertyName"] = "Tests"
     settings["transformOptions"]["measure"]["aggregation"] = "count"
-    settings["userColors"] = standardPieChartColorArray
+    settings["userColors"] = standardTestPlanWitColorArray
 
     test_chart["settings"] = json.dumps(settings)
     print("Object Sent:")
