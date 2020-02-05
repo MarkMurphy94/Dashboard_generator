@@ -17,8 +17,9 @@ with open(TOKEN_PATH, 'r') as TOKEN_FILE:
 PROJECT = "RnD"
 NOT_FOUND = "not found"
 JSON_ERROR = "json error"
+DATE_FORMAT = " MM/DD-MM/DD"
 MAX_ROW = 7  # maximum number of widgets per row
-VERSION = 'v0.1'  # Application Version
+VERSION = 'v0.2'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
 PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
 
@@ -169,6 +170,7 @@ class DashAlreadyExists(Exception):
 
 # endregion
 
+
 # region Create Test Plan
 def get_pmo_list():
     """
@@ -190,13 +192,17 @@ def create_full_test_plan(test_plan):
     test_plan_id = create_test_plan(test_plan)
     suite_id = str(int(test_plan_id) + 1)
 
-    # region First Article
-    suite_name = "First Article Test"
-    first_article = create_suite(suite_name, test_plan_id, suite_id)
-    # create two child template suites for first Article
-    suite_name = "<product> - Run 1"
-    create_suite(suite_name, test_plan_id, first_article)
-    create_suite(suite_name, test_plan_id, first_article)
+    # region Final Product
+    suite_name = "Final Product Test"
+    final_suite = create_suite(suite_name, test_plan_id, suite_id)
+    # create two child template suites for Final Product
+    suite_name = "<Device #2> - Run 1 <version>" + DATE_FORMAT
+    device_suite = create_suite(suite_name, test_plan_id, final_suite)
+    create_final_product(test_plan_id, device_suite)
+
+    suite_name = "<Device #1> - Run 1 <version>" + DATE_FORMAT
+    device_suite = create_suite(suite_name, test_plan_id, final_suite)
+    create_final_product(test_plan_id, device_suite)
     # endregion
 
     # region Customer Solution
@@ -296,13 +302,13 @@ def create_suite_runs(test_plan_id, suite_id):
     """
         Creates second tier child suites
     """
-    suite_name = "Run 3"
+    suite_name = "Run 3" + DATE_FORMAT
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     create_children_suites(test_plan_id, row_id)
-    suite_name = "Run 2"
+    suite_name = "Run 2" + DATE_FORMAT
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     create_children_suites(test_plan_id, row_id)
-    suite_name = "Run 1"
+    suite_name = "Run 1" + DATE_FORMAT
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     create_children_suites(test_plan_id, row_id)
 
@@ -311,44 +317,67 @@ def create_customer_suite_runs(test_plan_id, suite_id):
     """
         Creates the second tier child suites for Customer Solutions
     """
-    suite_name = "Run 3"
-    row_id = create_suite(suite_name, test_plan_id, suite_id)
-    create_customer_children(test_plan_id, row_id, suite_name)
-    suite_name = "Run 2"
-    row_id = create_suite(suite_name, test_plan_id, suite_id)
-    create_customer_children(test_plan_id, row_id, suite_name)
-    suite_name = "Run 1"
-    row_id = create_suite(suite_name, test_plan_id, suite_id)
-    create_customer_children(test_plan_id, row_id, suite_name)
+    suite_name = "Run 3" + DATE_FORMAT
+    create_customer_suites(test_plan_id, suite_id, suite_name)
+    suite_name = "Run 2" + DATE_FORMAT
+    create_customer_suites(test_plan_id, suite_id, suite_name)
+    suite_name = "Run 1" + DATE_FORMAT
+    create_customer_suites(test_plan_id, suite_id, suite_name)
 
 
 def create_early_system_children(test_plan_id, suite_id):
     """
         Creates the second tier child suites for Early System Test
     """
-    suite_name = "Beta 1/Feature Complete"
+    suite_name = "Beta 1/Feature Complete" + DATE_FORMAT
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     create_children_suites(test_plan_id, row_id)
-    suite_name = "Alpha 3"
+    suite_name = "Alpha 3" + DATE_FORMAT
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     create_children_suites(test_plan_id, row_id)
-    suite_name = "Alpha 2"
+    suite_name = "Alpha 2" + DATE_FORMAT
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     create_children_suites(test_plan_id, row_id)
-    suite_name = "Alpha 1"
+    suite_name = "Alpha 1" + DATE_FORMAT
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     create_children_suites(test_plan_id, row_id)
+
+
+def create_final_product(test_plan_id, suite_id):
+    """
+        Creates the second tier child suites for Final Product
+    """
+    suite_name = "Product Secure"
+    create_suite(suite_name, test_plan_id, suite_id)
+    suite_name = "HW FAT Test Suites"
+    create_suite(suite_name, test_plan_id, suite_id)
+    suite_name = "FW FAT Test Suites"
+    create_suite(suite_name, test_plan_id, suite_id)
+    suite_name = "E2E FAT Test Suites"
+    create_suite(suite_name, test_plan_id, suite_id)
 
 
 def create_children_suites(test_plan, suite_id):
     """
-        Creates the third tier child suites
+        Creates the third tier child suites for Garden and SVE suites
     """
     suite_name = "Automatic Regression"
     create_suite(suite_name, test_plan, suite_id)
     suite_name = "Manual Regression"
     create_suite(suite_name, test_plan, suite_id)
     suite_name = "New Features"
+    create_suite(suite_name, test_plan, suite_id)
+
+
+def create_meter_farm_suites(test_plan, suite_id):
+    """
+        Creates the third tier child suites for Meter Farm suites
+    """
+    suite_name = "System ZZZ"
+    create_suite(suite_name, test_plan, suite_id)
+    suite_name = "System YYY"
+    create_suite(suite_name, test_plan, suite_id)
+    suite_name = "System XXX"
     create_suite(suite_name, test_plan, suite_id)
 
 
@@ -362,6 +391,21 @@ def create_customer_children(test_plan_id, suite_id, parent_suite):
     row_id = create_suite(suite_name, test_plan_id, suite_id)
     suite_name = "Meter Farm " + parent_suite
     row_id = create_suite(suite_name, test_plan_id, suite_id)
+
+
+def create_customer_suites(test_plan_id, suite_id, parent_suite):
+    """
+        Creates third tier child suites for Customer Solutions suite
+    """
+    suite_name = "SVE " + parent_suite
+    row_id = create_suite(suite_name, test_plan_id, suite_id)
+    create_children_suites(test_plan_id, row_id)
+    suite_name = "Garden " + parent_suite
+    row_id = create_suite(suite_name, test_plan_id, suite_id)
+    create_children_suites(test_plan_id, row_id)
+    suite_name = "Meter Farm " + parent_suite
+    row_id = create_suite(suite_name, test_plan_id, suite_id)
+    create_meter_farm_suites(test_plan_id, row_id)
 # endregion
 
 # region Create Full Dashboard
@@ -1078,9 +1122,16 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     # region First Article
     first_article = return_suite_child_id("First Article", test_plan,
                                           test_suite_id)
-    if first_article != NOT_FOUND:
-        suite_list = return_suite_child_list(test_plan, first_article)
-        # Creates a row of First Article widgets per Run found in First Article tree
+    product_suite = return_suite_child_id("First Article", test_plan, test_suite_id)
+    suite_title = "First Article"
+
+    if product_suite == NOT_FOUND:
+        product_suite = return_suite_child_id("Final Product", test_plan, test_suite_id)
+        suite_title = "Final Product"
+
+    if product_suite != NOT_FOUND:
+        suite_list = return_suite_child_list(test_plan, product_suite)
+        # Creates a row of product suite widgets per Run found in product suite tree
         for suite in suite_list:
             suite_id = str(suite['id'])
             suite_name = suite['name']
@@ -1088,7 +1139,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
             count = 0
 
             # region Customer Solution Markdown
-            row_text = "#First Article Test\n ###" + suite_name + " \n#------->"
+            row_text = "#" + suite_title + " Test\n ###" + suite_name + " \n#------->"
 
             row_markdown = return_markdown(1, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
