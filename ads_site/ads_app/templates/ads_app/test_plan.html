@@ -5,8 +5,22 @@
             $(".navbar a").removeClass("active");
             //this will remove the active class from
             //previously active menu item
-
             $("a#test").addClass('active');
+        });
+
+        $(function() {
+             $("#project_type").change(function(){
+                var value = $(this).val();
+
+                if(value == "Agile"){
+                    $("#standard_test_plan").hide();
+                    $("#agile_test_plan").show();
+                }
+                else if(value == "Standard"){
+                    $("#agile_test_plan").hide();
+                    $("#standard_test_plan").show();
+                }
+            });
         });
 
         $(function() {
@@ -37,6 +51,10 @@
         <p>Please Rename or re-organize the generated Test Plan as you see fit</p>
         <form action="create_test" method="POST" id="create_test">
             {% csrf_token %}
+            <select id="project_type" name="project_type">
+                <option>Standard</option>
+                <option>Agile</option>
+            </select>
             <input list="project_list" name="project_list" required>
             <datalist id="project_list">
                 {% for item in pmo_list %}
@@ -59,7 +77,7 @@
             </div>
         </div>
     </div>
-    <div class="box">
+    <div id="standard_test_plan" class="box">
         <h2>Example Test Plan Structure</h2>
         <ul type="disc">
             <li>Test Plan Name</li>
@@ -103,6 +121,46 @@
             <li>Meter Farm Run</li>
             <li>Garden Run</li>
             <li>SVE Run</li>
+        </ul>
+    </div>
+
+    <div id="agile_test_plan" class="box" style="display: none;">
+        <h2>Example Agile Test Plan Structure</h2>
+        <ul type="disc">
+            <li>Test Plan Name</li>
+            <ul type="disc">
+                <li>Sprints</li>
+                <ul type="circle">
+                    <li>Sprint 2</li>
+                    <ul type="circle">
+                        <li>New Feature</li>
+                        <li>Manual Regression</li>
+                        <li>Automated Regression</li>
+                        <li>Meter Farm</li>
+                        <li>Garden</li>
+                        <li>SVE</li>
+                    </ul>
+                    <li>Sprint 1</li>
+                    <ul type="circle">
+                        <li>New Feature</li>
+                        <li>Manual Regression</li>
+                        <li>Automated Regression</li>
+                        <li>Meter Farm</li>
+                        <li>Garden</li>
+                        <li>SVE</li>
+                    </ul>
+                </ul>
+                <li>Final Product</li>
+                <ul type="disc">
+                    <li>&lt;Device> Sprint <#></li>
+                    <ul type="circle">
+                        <li>E2E FAT Test Suites</li>
+                        <li>FW FAT Test Suites </li>
+                        <li>HW FAT test suite</li>
+                        <li>Product Secure</li>
+                    </ul>
+                </ul>
+            </ul>
         </ul>
     </div>
 

@@ -190,6 +190,45 @@ def get_pmo_list():
     return pmo_list
 
 
+def create_agile_test_plan(test_plan):
+    """
+        Creates a test plan based on the name given
+        :return test plan ID
+    """
+    create_iteration(test_plan)  # creates iteration
+    test_plan_id = create_test_plan(test_plan)
+    suite_id = str(int(test_plan_id) + 1)
+
+    # region First Article
+    suite_name = "First Article Test"
+    first_article = create_suite(suite_name, test_plan_id, suite_id)
+    # create two child template suites for first Article
+    suite_name = "<product> - Run 1"
+    create_suite(suite_name, test_plan_id, first_article)
+    create_suite(suite_name, test_plan_id, first_article)
+    # endregion
+
+    # region Customer Solution
+    suite_name = "Customer Solution Test"
+    customer_suite = create_suite(suite_name, test_plan_id, suite_id)
+    create_customer_suite_runs(test_plan_id, customer_suite)
+    # endregion
+
+    # region System Test
+    suite_name = "System Test"
+    system_test = create_suite(suite_name, test_plan_id, suite_id)
+    create_suite_runs(test_plan_id, system_test)
+    # endregion
+
+    # region Early System Test
+    suite_name = "Early System Test"
+    early_system = create_suite(suite_name, test_plan_id, suite_id)
+    create_early_system_children(test_plan_id, early_system)
+    # endregion
+
+    return test_plan_id
+
+
 def create_full_test_plan(test_plan):
     """
         Creates a test plan based on the name given

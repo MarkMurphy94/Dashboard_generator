@@ -40,13 +40,24 @@ def create_test(request):
     if request.method == 'POST':  # if the request from the HTML is a post
         form = request.POST
         project = form['project_list'].strip()
+        project_type = form['project_type'].strip()
         context['project'] = project
 
         try:
-            test_plan_id = models.create_full_test_plan(project)
-            context['test_plan'] = test_plan_id
-            write_to_log(request, action, project)
-            raise models.DashboardComplete(test_plan_id)
+            print(project_type)
+            if project_type == 'Standard':
+                print("Test Plan is: " + project_type)
+                test_plan_id = models.create_full_test_plan(project)
+                context['test_plan'] = test_plan_id
+                write_to_log(request, action, project)
+                raise models.DashboardComplete(test_plan_id)
+            elif project_type == 'Agile':
+                print("Test Plan is 2: " + project_type)
+                test_plan_id = models.create_agile_test_plan(project)
+
+                context['test_plan'] = test_plan_id
+                write_to_log(request, action, project)
+                raise models.DashboardComplete(test_plan_id)
         except models.DashboardComplete:
             print("Test Plan Created")
             messages.success(request, 'The Test Plan was successfully created')
