@@ -1,8 +1,25 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+import datetime
 from .forms import CreateDash
 from . import models
+
+
+def get_user(request):
+    if request.user.is_authenticated:
+        username = request.user.username
+    else:
+        username = "unknown user"
+    return username
+
+
+def write_to_log(request, action, item):
+    with open(models.LOG_PATH, 'a') as log:
+        now = datetime.datetime.now()
+        date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        log.write(date_string + " : " + get_user(request) + " has " + action + ": " + item + "\n")
+        log.close()
 
 
 @login_required
@@ -18,6 +35,7 @@ def test_plan(request):
 
 def create_test(request):
     context = {}
+    action = "created the test plan"
     if request.method == 'POST':  # if the request from the HTML is a post
         form = request.POST
         project = form['project_list'].strip()
@@ -26,12 +44,15 @@ def create_test(request):
         try:
             test_plan_id = models.create_full_test_plan(project)
             context['test_plan'] = test_plan_id
+            write_to_log(request, action, project)
             raise models.DashboardComplete(test_plan_id)
         except models.DashboardComplete:
             print("Test Plan Created")
             messages.success(request, 'The Test Plan was successfully created')
         except Exception as e:
             print("error")
+            action = "encountered an error creating a test plan"
+            write_to_log(request, action, e)
             messages.error(request, e)
 
     return render(request, 'ads_app/done.html', context)
@@ -43,10 +64,12 @@ def create_dash(request):
     folder_key = 'folder_name'
     url_key = 'url'
     global_key = 'global_path'
-    target_key ='target_choice'
+    target_key = 'target_choice'
     name_key = 'short_name'
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
+
+    action = "created the dashboard"
 
     if request.method == 'POST':  # if the request from the HTML is a post
         form = CreateDash(request.POST)
@@ -74,15 +97,16 @@ def create_dash(request):
                 dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
                                                   short_name, test_choice, test_plan_name)
                 context['dash_id'] = dash_id
+                write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)
             except models.DashboardComplete:
                 messages.success(request, 'The Dashboard was successfully created')
                 return render(request, 'ads_app/done.html', context)
             except Exception as error:
                 messages.error(request, "Entry Error: " + str(error))
+                write_to_log(request, "Entry Error: " + str(error))
                 return render(request, 'ads_app/home.html', context)
         else:
-            error_type = "A form field "
             for item in form:
                 error_type = "A form field "
                 if len(str(form[item.name].value())) > 250:
@@ -97,7 +121,6 @@ def create_dash(request):
                     elif str(item.name) == test_plan_key:
                         error_type = "The Test plan name "
                     messages.error(request, error_type + " needs to be less than 250 characters")
-
     return render(request, 'ads_app/home.html', context)
 
 
@@ -115,6 +138,7 @@ def submit_update(request):
     if request.method == 'POST':  # if the request from the HTML is a post
         request_data = request.POST
         selected = request_data['selected'].strip()
+        action = "updated the dashboard"
 
         # updates the selected dashboard, throws a general error message if error is encountered
         try:
@@ -127,4 +151,6 @@ def submit_update(request):
             print("error")
             messages.error(request, e)
     config_data = models.get_config()
+    write_to_log(request, action, selected)
+
     return render(request, 'ads_app/update.html', {'json': config_data})
