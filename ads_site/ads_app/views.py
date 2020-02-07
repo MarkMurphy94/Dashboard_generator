@@ -17,8 +17,9 @@ def get_user(request):
 def write_to_log(request, action, item):
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
-        date_string = now.strftime("%d/%m/%Y %H:%M:%S")
-        log.write(date_string + " : " + get_user(request) + " has " + action + ": " + item + "\n")
+        user = get_user(request)
+        date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+        log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
         log.close()
 
 
@@ -35,7 +36,7 @@ def test_plan(request):
 
 def create_test(request):
     context = {}
-    action = "created the test plan"
+    action = "has created the test plan"
     if request.method == 'POST':  # if the request from the HTML is a post
         form = request.POST
         project = form['project_list'].strip()
@@ -69,7 +70,7 @@ def create_dash(request):
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
 
-    action = "created the dashboard"
+    action = "has created the dashboard"
 
     if request.method == 'POST':  # if the request from the HTML is a post
         form = CreateDash(request.POST)
@@ -104,7 +105,7 @@ def create_dash(request):
                 return render(request, 'ads_app/done.html', context)
             except Exception as error:
                 messages.error(request, "Entry Error: " + str(error))
-                write_to_log(request, "Entry Error: " + str(error))
+                write_to_log(request, "has encountered an Entry Error", str(error))
                 return render(request, 'ads_app/home.html', context)
         else:
             for item in form:
@@ -138,7 +139,7 @@ def submit_update(request):
     if request.method == 'POST':  # if the request from the HTML is a post
         request_data = request.POST
         selected = request_data['selected'].strip()
-        action = "updated the dashboard"
+        action = "has updated the dashboard"
 
         # updates the selected dashboard, throws a general error message if error is encountered
         try:
