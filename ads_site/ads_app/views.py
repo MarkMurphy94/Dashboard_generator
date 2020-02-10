@@ -54,9 +54,8 @@ def create_test(request):
             elif project_type == 'Agile':
                 print("Test Plan is 2: " + project_type)
                 test_plan_id = models.create_agile_test_plan(project)
-
-                context['test_plan'] = test_plan_id
                 write_to_log(request, action, project)
+                context['test_plan'] = test_plan_id
                 raise models.DashboardComplete(test_plan_id)
         except models.DashboardComplete:
             print("Test Plan Created")

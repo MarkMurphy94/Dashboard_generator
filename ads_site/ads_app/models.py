@@ -192,38 +192,26 @@ def get_pmo_list():
 
 def create_agile_test_plan(test_plan):
     """
-        Creates a test plan based on the name given
+        Creates an Agile test plan based on the name given
         :return test plan ID
     """
     create_iteration(test_plan)  # creates iteration
     test_plan_id = create_test_plan(test_plan)
     suite_id = str(int(test_plan_id) + 1)
 
-    # region First Article
-    suite_name = "First Article Test"
-    first_article = create_suite(suite_name, test_plan_id, suite_id)
-    # create two child template suites for first Article
-    suite_name = "<product> - Run 1"
-    create_suite(suite_name, test_plan_id, first_article)
-    create_suite(suite_name, test_plan_id, first_article)
+    # region Final Product
+    suite_name = "Final Product Test"
+    final_suite = create_suite(suite_name, test_plan_id, suite_id)
+    # create a child template suite for Final Product
+    suite_name = "<Device> Sprint <#>" + DATE_FORMAT
+    device_suite = create_suite(suite_name, test_plan_id, final_suite)
+    create_final_product(test_plan_id, device_suite)
     # endregion
 
     # region Customer Solution
-    suite_name = "Customer Solution Test"
-    customer_suite = create_suite(suite_name, test_plan_id, suite_id)
-    create_customer_suite_runs(test_plan_id, customer_suite)
-    # endregion
-
-    # region System Test
-    suite_name = "System Test"
-    system_test = create_suite(suite_name, test_plan_id, suite_id)
-    create_suite_runs(test_plan_id, system_test)
-    # endregion
-
-    # region Early System Test
-    suite_name = "Early System Test"
-    early_system = create_suite(suite_name, test_plan_id, suite_id)
-    create_early_system_children(test_plan_id, early_system)
+    suite_name = "Sprints"
+    sprints_suite = create_suite(suite_name, test_plan_id, suite_id)
+    create_sprint_suite_runs(test_plan_id, sprints_suite)
     # endregion
 
     return test_plan_id
@@ -361,6 +349,17 @@ def create_customer_suite_runs(test_plan_id, suite_id):
         create_customer_suites(test_plan_id, suite_id, suite_name)
 
 
+def create_sprint_suite_runs(test_plan_id, suite_id):
+    """
+        Creates the second tier child suites for Customer Solutions
+    """
+    sprints = ["Sprint 1", "Sprint 2"]
+    for suite_name in sprints:
+        row_id = create_suite(suite_name, test_plan_id, suite_id)
+        create_customer_children(test_plan_id, row_id)
+        create_children_suites(test_plan_id, row_id)
+
+
 def create_early_system_children(test_plan_id, suite_id):
     """
         Creates the second tier child suites for Early System Test
@@ -402,12 +401,12 @@ def create_meter_farm_suites(test_plan, suite_id):
         create_suite(suite_name, test_plan, suite_id)
 
 
-def create_customer_children(test_plan_id, suite_id, parent_suite):
+def create_customer_children(test_plan_id, suite_id):
     """
         Creates third tier child suites for Customer Solutions suite
     """
     for suite_name in CUSTOMER_SUITES:
-        create_suite(suite_name + parent_suite, test_plan_id, suite_id)
+        create_suite(suite_name, test_plan_id, suite_id)
 
 
 def create_customer_suites(test_plan_id, suite_id, parent_suite):
