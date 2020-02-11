@@ -36,7 +36,7 @@ def test_plan(request):
 
 def create_test(request):
     context = {}
-    action = "has created the test plan"
+    action = "created the test plan"
     if request.method == 'POST':  # if the request from the HTML is a post
         form = request.POST
         project = form['project_list'].strip()
@@ -70,7 +70,7 @@ def create_dash(request):
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
 
-    action = "has created the dashboard"
+    action = "created the dashboard"
 
     if request.method == 'POST':  # if the request from the HTML is a post
         form = CreateDash(request.POST)
@@ -105,7 +105,7 @@ def create_dash(request):
                 return render(request, 'ads_app/done.html', context)
             except Exception as error:
                 messages.error(request, "Entry Error: " + str(error))
-                write_to_log(request, "has encountered an Entry Error", str(error))
+                write_to_log(request, "encountered an Entry Error", str(error))
                 return render(request, 'ads_app/home.html', context)
         else:
             for item in form:
@@ -139,7 +139,7 @@ def submit_update(request):
     if request.method == 'POST':  # if the request from the HTML is a post
         request_data = request.POST
         selected = request_data['selected'].strip()
-        action = "has updated the dashboard"
+        action = "updated the dashboard"
 
         # updates the selected dashboard, throws a general error message if error is encountered
         try:
