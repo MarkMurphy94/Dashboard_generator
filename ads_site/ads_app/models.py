@@ -198,7 +198,7 @@ def create_agile_test_plan(test_plan):
     suite_name = "Final Product Test"
     final_suite = create_suite(suite_name, test_plan_id, suite_id)
     # create a child template suite for Final Product
-    suite_name = "<Device> Sprint <#>" + DATE_FORMAT
+    suite_name = "<Device> Sprint <#>"
     device_suite = create_suite(suite_name, test_plan_id, final_suite)
     create_final_product(test_plan_id, device_suite)
     # endregion
@@ -865,8 +865,86 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     create_widget(output_team, overview_id, return_blank_square(14, 3))
     # endregion
 
-    # region Early System Test
+    # region Sprint Row
     starting_row = 5
+
+    # return all children suites of "Sprint" and sort
+    early_system = return_suite_child_id("Sprint", test_plan,
+                                         test_suite_id)
+
+    if early_system != NOT_FOUND:
+        suite_list = return_sprint_child_list(test_plan, early_system)
+
+        # Creates a Early System Test row per Alpha found in Test Plan tree
+        for suite in suite_list:
+            suite_id = str(suite['id'])
+            suite_name = suite['name']
+            starting_column = 2
+            count = 0
+            # suite_name = Return_Suite_Name(suite_id, testPlanId)
+            # region Alpha Markdown
+            row_text = "#" + suite_name + "\n#------->"
+
+            row_markdown = return_markdown(1, starting_row, row_text, height=2)
+            create_widget(output_team, overview_id, row_markdown)
+            count += 1
+            # endregion
+
+            # region Test Case Readiness - Alpha
+            name = "Test Case Readiness " + suite_name
+            test_readiness = return_test_chart(starting_column, starting_row, name,
+                                               suite_id, test_plan)
+            create_widget(output_team, overview_id, test_readiness)
+            starting_column += 2
+            count += 1
+            # endregion
+
+            # region Alpha Overall
+            name = suite_name + " - Overall"
+            group = "Outcome"
+            test_results = True
+            test_readiness = return_test_chart(starting_column, starting_row, name,
+                                               suite_id, test_plan, group=group,
+                                               test_results=test_results)
+            create_widget(output_team, overview_id, test_readiness)
+            starting_column += 2
+            count += 1
+            # endregion
+
+            # create widgets for children suites if found
+            child_list = return_suite_child_full(test_plan, suite_id)
+            child_count = 0
+            for child in child_list:
+                if child_count >= 5:
+                    break
+                else:
+                    child_id = str(child['id'])
+                    name = child['name']
+                child_count += 1
+
+                group = "Outcome"
+                test_results = True
+                test_readiness = return_test_chart(starting_column, starting_row,
+                                                   name, child_id, test_plan,
+                                                   group=group,
+                                                   test_results=test_results)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
+
+            while count <= 7:
+                create_widget(output_team, overview_id,
+                              return_blank_square(starting_column, starting_row))
+                count += 1
+                starting_column += 2
+
+            starting_row += 2  # each widget is of size 2 so we much increment by 2
+    # suite_id = Return_Suite_ID(Alpha + str(count), testPlanId)
+    # endregion
+
+
+    # region Early System Test
 
     # return all children suites of "Early System Test" and sort
     early_system = return_suite_child_id("Early System Test", test_plan,
@@ -1137,7 +1215,9 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         product_suite = return_suite_child_id(suite_title, test_plan, test_suite_id)
 
     if product_suite != NOT_FOUND:
+        print("Found")
         suite_list = return_suite_child_list(test_plan, product_suite)
+        print(suite_list)
         # Creates a row of product suite widgets per Run found in product suite tree
         for suite in suite_list:
             suite_id = str(suite['id'])
@@ -1538,7 +1618,7 @@ def return_suite_child_list(test_plan, suite_id):
     """
     child_list = []
 
-    trigger_list = ['Alpha', 'Beta', 'Run']
+    trigger_list = ['Alpha', 'Beta', 'Run', 'Sprint']
 
     payload = {'api-version': '5.1-preview.1',
                'expand': 'children'
@@ -1555,6 +1635,31 @@ def return_suite_child_list(test_plan, suite_id):
     child_list = sorted(child_list, key=lambda name: child['name'])
     return child_list
 
+
+def return_sprint_child_list(test_plan, suite_id):
+    """
+        Returns the given suite's children suites in a list if they contain
+        one of the row trigger phrases ('Alpha', 'Beta', 'Run')
+
+        :return list of child suites
+    """
+    child_list = []
+
+    trigger_list = ['Alpha', 'Beta', 'Run', 'Sprint']
+
+    payload = {'api-version': '5.1-preview.1',
+               'expand': 'children'
+               }
+    response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/plans/'
+                            + test_plan + '/suites/' + suite_id + '?',
+                            auth=HTTPBasicAuth(USER, TOKEN), params=payload)
+    query_response = response.json()
+
+    for child in query_response['children']:
+        if any(trigger in child['name'] for trigger in trigger_list):
+            child_list.append(child)
+
+    return child_list
 
 def return_suite_child_full(test_plan, suite_id):
     """
