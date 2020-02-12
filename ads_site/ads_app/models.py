@@ -169,7 +169,11 @@ class FolderAlreadyExists(Exception):
 
 
 class DashAlreadyExists(Exception):
-    """Query Folder already Exists"""
+    """Dashboard already Exists"""
+
+
+class DashDoesNotExists(Exception):
+    """Dashboard does not Exists"""
 
 # endregion
 
@@ -1872,7 +1876,7 @@ def clear_dash(team_name, dashboard_id):
                             + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=version)
     if response.status_code != 200:
-        raise DashAlreadyExists("Dashboard with the selected name does not exist")
+        raise DashDoesNotExists("Dashboard with the selected name does not exist")
 
     dash_response = response.json()
     for widgets in dash_response["widgets"]:
