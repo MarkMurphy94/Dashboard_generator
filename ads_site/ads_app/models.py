@@ -173,7 +173,7 @@ class DashAlreadyExists(Exception):
 
 
 class DashDoesNotExists(Exception):
-    """Dashboard does not Exists"""
+    """Dashboard does not Exist"""
 
 # endregion
 
