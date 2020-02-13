@@ -8,6 +8,7 @@ import requests
 
 # reading in token credentials for user
 CONFIGS_PATH = settings.BASE_DIR + r'/ads_app/static/Dashboard configs/'
+LOG_PATH = settings.BASE_DIR + r'/ads_app/static/logs.txt'
 TOKEN_PATH = settings.BASE_DIR + r'/ads_app/static/token.txt'
 with open(TOKEN_PATH, 'r') as TOKEN_FILE:
     USER = TOKEN_FILE.readline().strip()
@@ -168,7 +169,11 @@ class FolderAlreadyExists(Exception):
 
 
 class DashAlreadyExists(Exception):
-    """Query Folder already Exists"""
+    """Dashboard already Exists"""
+
+
+class DashDoesNotExists(Exception):
+    """Dashboard does not Exist"""
 
 # endregion
 
@@ -1870,6 +1875,9 @@ def clear_dash(team_name, dashboard_id):
                             + '/_apis/dashboard/dashboards/' + dashboard_id
                             + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=version)
+    if response.status_code != 200:
+        raise DashDoesNotExists("Dashboard with the selected name does not exist")
+
     dash_response = response.json()
     for widgets in dash_response["widgets"]:
         print(widgets["id"])
