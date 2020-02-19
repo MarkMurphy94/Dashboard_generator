@@ -874,13 +874,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_row = 5
 
     # return all children suites of "Sprint" and sort
-    early_system = return_suite_child_id("Sprint", test_plan,
+    sprint_suite = return_suite_child_id("Sprint", test_plan,
                                          test_suite_id)
 
-    if early_system != NOT_FOUND:
-        suite_list = return_sprint_child_list(test_plan, early_system)
+    if sprint_suite != NOT_FOUND:
+        suite_list = return_sprint_child_list(test_plan, sprint_suite)
 
-        # Creates a Early System Test row per Alpha found in Test Plan tree
+        # Creates a Sprint Test row per Alpha found in Test Plan tree
         for suite in suite_list:
             suite_id = str(suite['id'])
             suite_name = suite['name']
