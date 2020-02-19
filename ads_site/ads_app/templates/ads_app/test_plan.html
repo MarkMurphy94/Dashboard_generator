@@ -13,12 +13,12 @@
                 var value = $(this).val();
 
                 if(value == "Agile"){
-                    $("#standard_test_plan").hide();
+                    $("#waterfall_test_plan").hide();
                     $("#agile_test_plan").show();
                 }
                 else if(value == "Waterfall"){
                     $("#agile_test_plan").hide();
-                    $("#standard_test_plan").show();
+                    $("#waterfall_test_plan").show();
                 }
             });
         });
@@ -77,7 +77,7 @@
             </div>
         </div>
     </div>
-    <div id="standard_test_plan" class="box">
+    <div id="waterfall_test_plan" class="box">
         <h2>Example Test Plan Structure</h2>
         <ul type="disc">
             <li>Test Plan Name</li>
