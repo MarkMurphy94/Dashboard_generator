@@ -203,12 +203,12 @@ def create_agile_test_plan(test_plan):
     suite_name = "Final Product Test"
     final_suite = create_suite(suite_name, test_plan_id, suite_id)
     # create a child template suite for Final Product
-    suite_name = "<Device> Sprint <#>"
+    suite_name = "<Device> Sprint <#>" + DATE_FORMAT
     device_suite = create_suite(suite_name, test_plan_id, final_suite)
     create_final_product(test_plan_id, device_suite)
     # endregion
 
-    # region Customer Solution
+    # region Sprints
     suite_name = "Sprints"
     sprints_suite = create_suite(suite_name, test_plan_id, suite_id)
     create_sprint_suite_runs(test_plan_id, sprints_suite)
@@ -353,9 +353,9 @@ def create_sprint_suite_runs(test_plan_id, suite_id):
     """
         Creates the second tier child suites for Customer Solutions
     """
-    sprints = ["Sprint 1", "Sprint 2"]
+    sprints = ["Sprint 1"]
     for suite_name in sprints:
-        row_id = create_suite(suite_name, test_plan_id, suite_id)
+        row_id = create_suite(suite_name + DATE_FORMAT, test_plan_id, suite_id)
         create_customer_children(test_plan_id, row_id)
         create_children_suites(test_plan_id, row_id)
 

@@ -44,6 +44,9 @@
         <button id="myBtn" class="help">?</button>
     </div>
     <div class="main">
+        <div id="ie_warning" class="alert alert-warning" hidden>
+            <p>You are using Internet Explorer, some features may not be available. For the best experience please use Chrome, Firefox or Edge</p>
+        </div>
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }}">
@@ -55,6 +58,17 @@
         {% block content %}{% endblock %}
 
         <script>
+            $(function ie_version() {
+
+                var user_agent = window.navigator.userAgent;
+                var internet_explorer = user_agent.indexOf("MSIE ");
+
+                if (internet_explorer > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))  // If Internet Explorer, return version number
+                {
+                    document.getElementById("ie_warning").hidden = false;
+                }
+            });
+
             var modal = document.getElementById("myModal");
             var btn = document.getElementById("myBtn");
             var span = document.getElementsByClassName("close")[0];

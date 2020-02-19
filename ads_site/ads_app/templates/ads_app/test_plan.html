@@ -52,7 +52,7 @@
         <form action="create_test" method="POST" id="create_test">
             {% csrf_token %}
             <select id="project_type" name="project_type">
-                <option>Standard</option>
+                <option>Waterfall</option>
                 <option>Agile</option>
             </select>
             <input list="project_list" name="project_list" required>

@@ -141,8 +141,7 @@ body {
 
 /* Sidebar/left column */
 .side {
-  -ms-flex: 20%; /* IE10 */
-  flex: 20%;
+  width: 20%;
   background-color: #f1f1f1;
   padding: 20px;
 }
@@ -150,16 +149,14 @@ body {
 /* Sidebar/right column */
 .right-side {
   float: right;
-  -ms-flex: 20%; /* IE10 */
-  flex: 20%;
+  width: 20%;
   background-color: #f1f1f1;
   padding: 20px;
 }
 
 /* Main column */
 .main {
-  -ms-flex: 80%; /* IE10 */
-  flex: 60%;
+  width: 60%;
   background-color: white;
   padding: 20px;
 }
@@ -183,7 +180,6 @@ body {
   width: 100%;
   left: 0;
   bottom: 0;
-  padding: 20px;
   text-align: center;
   background: #333;
 }
@@ -289,6 +285,13 @@ body {
   border-color: #f5c6cb;
 }
 
+/* Formatting for an Warning Alert*/
+.alert-warning {
+  color: #721c24;
+  background-color: #fff18d;
+  border-color: #ff930d;
+}
+
 /* Formatting for error message */
 .validation-summary-errors {
     color: #eb4034;
@@ -336,7 +339,21 @@ body {
 
 .tg .tg-0lax {
   text-align: left;
-  vertical-align: top
+  vertical-align: top;
+}
+
+/* Formatting for URL label in Update chart */
+.url_label {
+  text-align: center;
+  vertical-align: top;
+}
+
+/* Formatting for hyper link symbol */
+.link_symbol {
+  color: blue;
+  font-size: 1.1em;
+  text-align: center;
+  vertical-align: top;
 }
 
 
@@ -399,15 +416,19 @@ table {
 }
 
 /* Table border thickness */
-.table-bordered td, .table-bordered th {
-    border: 1px solid #dee2e6;
+.table-bordered td {
+     border: 1px solid #dee2e6;
+}
+
+/* Table boarder for Header */
+.table-bordered th {
+     border-right: 1px solid #dee2e6;
 }
 
 /* Table header + data formatting */
 .table td, .table th {
     padding: .75rem;
     vertical-align: top;
-    border-top: 1px solid #dee2e6;
 }
 
 /* Colors every second row to light grey */
@@ -427,7 +448,6 @@ th {
     vertical-align: inherit;
     font-weight: bold;
     background-color: #c9c9c9;
-    border: 0px solid !important;
 }
 
 /* Highlights the table row the mouse is on */
@@ -443,11 +463,12 @@ th {
 
 /* Formatting for table scroll bar */
 #table-scroll {
-  width: 645px;
-  height:420px;
+  height: 58%;
+  min-height: 420px;
+  min
+  width: 80%;
   overflow:auto;
   margin-top:20px;
-  padding: -5px;
 }
 
 
