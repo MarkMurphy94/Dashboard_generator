@@ -22,7 +22,6 @@ def write_to_log(request, action, item):
         user = get_user(request)
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
-        log.close()
 
 
 @receiver(user_login_failed)
