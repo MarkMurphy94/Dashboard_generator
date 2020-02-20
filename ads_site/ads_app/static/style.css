@@ -398,7 +398,6 @@ body {
 
 /* Format for table widget */
 table {
-    width: 100%;
     margin-bottom: 1rem;
     color: #212529;
     display: table;
@@ -465,7 +464,6 @@ th {
 #table-scroll {
   height: 58%;
   min-height: 420px;
-  min
   width: 80%;
   overflow:auto;
   margin-top:20px;
