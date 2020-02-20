@@ -62,72 +62,71 @@
         }
     </script>
 
-    <div class="main">
-        <h1>Update Dashboard</h1>
-        <p>
-            <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
-            <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
-        </p>
-        <div id="table-wrapper">
-            <div id="table-scroll">
-                <table id="table" class="table table-bordered table-striped table-hover" style="undefined;table-layout: fixed; width: 449px">
-                    <colgroup>
-                        <col style="width: 220px">
-                        <col style="width: 94px">
-                        <col style="width: 150px">
-                        <col style="width: 162px">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th class="tg-0lax">Project</th>
-                            <th class="tg-0lax">URL</th>
-                            <th class="tg-0lax">Last Updated</th>
-                            <th class="tg-0lax">Version</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for items in json %}
-                        <tr>
-                            <td class="tg-0lax">{{ items.folderName }}</td>
-                            <td class="tg-0lax"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">Click here</a></td>
-                            <td class="tg-0lax">{{ items.lastUpdate }}</td>
-                            <td class="tg-0lax">{{ items.version }}</td>
-                        </tr>
-                        {%endfor%}
-                    </tbody>
-                </table>
+    <h1>Update Dashboard</h1>
+    <h4>Select the dashboard row you wish to update and click the UPDATE button</h4>
+    <p>
+        <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
+        <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
+    </p>
+    <div id="table-wrapper">
+        <div id="table-scroll">
+            <table id="table" class="table table-bordered table-striped table-hover">
+                <colgroup>
+                    <col style="width: 40%">
+                    <col style="width: 10%">
+                    <col style="width: 20%">
+                    <col style="width: 20%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="tg-0lax">Project</th>
+                        <th class="url_label">URL</th>
+                        <th class="tg-0lax">Last Updated</th>
+                        <th class="tg-0lax">Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for items in json %}
+                    <tr>
+                        <td class="tg-0lax">{{ items.folderName }}</td>
+                        <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">&#x1f517</a></td>
+                        <td class="tg-0lax">{{ items.lastUpdate }}</td>
+                        <td class="tg-0lax">{{ items.version }}</td>
+                    </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <form action="submit_update" method="POST" id="submit_update">
+        {% csrf_token %}
+        <input type="hidden" name="selected" id="selected" value="">
+        <button type="submit" class="button">UPDATE</button>
+    </form>
+    <div id="Error" hidden class="validation-summary-errors">
+        <p>Please select a Dashboard</p>
+    </div>
+    <div id="LoadingModal" class="modal" style="">
+        <div class="loading-modal-content">
+            <div id="loading" hidden>
+                <h1>Please wait...</h1>
+                <br>
+                <div class="loader"></div>
+                <br>
+                <p>Do not refresh the page. This process may take a few minutes.</p>
             </div>
         </div>
-        <form action="submit_update" method="POST" id="submit_update">
-            {% csrf_token %}
-            <input type="hidden" name="selected" id="selected" value="">
-            <button type="submit" class="button">SUBMIT</button>
-        </form>
-        <div id="Error" hidden class="validation-summary-errors">
-            <p>Please select a Dashboard</p>
-        </div>
-        <div id="LoadingModal" class="modal" style="">
-            <div class="loading-modal-content">
-                <div id="loading" hidden>
-                    <h1>Please wait...</h1>
-                    <br>
-                    <div class="loader"></div>
-                    <br>
-                    <p>Do not refresh the page. This process may take a few minutes.</p>
-                </div>
-            </div>
-        </div>
-        <div id="myModal" class="modal" style="display: none;">
-            <!-- Modal content -->
-            <div class="help-modal-content">
-                <span class="close">x</span>
-                <h1>Update Dashboard Help</h1>
-                <p>
-                    Dashboards that have already been created using this tool will appear here. <br>
-                    Updating a dashboard will refresh all the widgets on that dashboard. Use this <br>
-                    feature if there have been new test suites added to a test plan.
-                </p>
-            </div>
+    </div>
+    <div id="myModal" class="modal" style="display: none;">
+        <!-- Modal content -->
+        <div class="help-modal-content">
+            <span class="close">x</span>
+            <h1>Update Dashboard Help</h1>
+            <p>
+                Dashboards that have already been created using this tool will appear here. <br>
+                Updating a dashboard will refresh all the widgets on that dashboard. Use this <br>
+                feature if there have been new test suites added to a test plan.
+            </p>
         </div>
     </div>
 
