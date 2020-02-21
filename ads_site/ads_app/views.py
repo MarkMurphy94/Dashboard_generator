@@ -1,5 +1,7 @@
 from django.contrib import messages
+from django.contrib.auth import user_login_failed
 from django.contrib.auth.decorators import login_required
+from django.dispatch import receiver
 from django.shortcuts import render
 import datetime
 from .forms import CreateDash
@@ -20,7 +22,15 @@ def write_to_log(request, action, item):
         user = get_user(request)
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
-        log.close()
+
+
+@receiver(user_login_failed)
+def attempted_login(sender, credentials, **kwargs):
+    with open(models.LOG_PATH, 'a') as log:
+        now = datetime.datetime.now()
+        date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+        log.write(date_string + " : " + 'login failed for: {credentials}'
+                  .format(credentials=credentials,) + "\n")
 
 
 @login_required

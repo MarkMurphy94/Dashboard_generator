@@ -20,6 +20,7 @@ NOT_FOUND = "not found"
 JSON_ERROR = "json error"
 DATE_FORMAT = " MM/DD-MM/DD"
 MAX_ROW = 7  # maximum number of widgets per row
+MAX_COLUMN = 14  # maximum number of columns per row
 VERSION = 'v0.2'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
 PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
@@ -816,33 +817,29 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
 
     resources_suite = return_suite_child_id("Resource", test_plan,
                                             test_suite_id)
-    # if the resources suite is not found then create two blank widgets instead
-    if resources_suite == NOT_FOUND:
-        # Create and place blank widgets with "Resource Path Not Found" message
-        # on dashboard
-        blank = return_blank_square(2, 3, "#No Resources Test Plan Path found")
-        create_widget(output_team, overview_id, blank)
-        blank = return_blank_square(4, 3, "#No Resources Test Plan Path found")
-        create_widget(output_team, overview_id, blank)
-    else:
+    starting_column = 2
+    # if the resources suite is found then create Resource widgets
+    if resources_suite != NOT_FOUND:
+
         # return the child suite within resources
         name = "All New Feature Test Cases (Resources)"
         suite = return_suite_child_id("New", test_plan,
                                       resources_suite)
-        new_features = return_test_chart(2, 3, name, suite, test_plan)
+        new_features = return_test_chart(starting_column, 3, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
+        starting_column += 2
         # endregion
 
         # region All Manual Regression (Resources)
         name = "All Regression Test Cases"
         suite = return_suite_child_id("Reg", test_plan,
                                       resources_suite)
-        new_features = return_test_chart(4, 3, name, suite, test_plan)
+        new_features = return_test_chart(starting_column, 3, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
+        starting_column += 2
         # endregion
 
     # region SQA Test Features by State
-    # noinspection SpellCheckingInspection
     name = "System Test Features by State (GlobalReqs)"
     query_id = return_query_id("SQA Test Features", query_folder)
     group = "System.State"
@@ -851,10 +848,11 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     direction = "descending"
     scope = "WorkitemTracking.Queries"
 
-    sys_features = return_chart(6, 3, name, query_id, chart_type=chart_type,
+    sys_features = return_chart(starting_column, 3, name, query_id, chart_type=chart_type,
                                 group=group, _property=property_,
                                 direction=direction, scope=scope)
     create_widget(output_team, overview_id, sys_features)
+    starting_column += 2
     # endregion
 
     # region SQA Test Features without test cases
@@ -862,12 +860,14 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     query_title = "SQA Test Features without test cases"
     query_id = return_query_id(query_title, query_folder)
 
-    all_features = return_features_table(8, 3, name, query_id)
+    all_features = return_features_table(starting_column, 3, name, query_id)
     create_widget(output_team, overview_id, all_features)
+    starting_column += 4
     # endregion
 
-    create_widget(output_team, overview_id, return_blank_square(12, 3))
-    create_widget(output_team, overview_id, return_blank_square(14, 3))
+    while starting_column <= MAX_COLUMN:
+        create_widget(output_team, overview_id, return_blank_square(starting_column, 3))
+        starting_column += 2
     # endregion
 
     # region Sprint Row
