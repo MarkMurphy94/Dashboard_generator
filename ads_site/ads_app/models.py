@@ -534,6 +534,12 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
         Populates the given folder with the standard queries
     """
     json_obj = {"name": "New Bugs"}
+    selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
+                       " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
+                       " [System.AssignedTo], [System.State], [System.CreatedDate]," \
+                       " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
+                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags] "
+    from_bugs = "from WorkItems where [System.WorkItemType] = 'Bug' "
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
@@ -542,12 +548,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
         target_clause = "[System.Tags] contains '{}'".format(short_name)
 
     # New Bugs Query
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
-           " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
-           " [System.AssignedTo], [System.State], [System.CreatedDate]," \
-           " [Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and [System.State] in ('New', 'Active') and " + target_clause \
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] in ('New', 'Active') and " + target_clause \
            + " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
@@ -555,12 +557,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All Bugs Query
     json_obj["name"] = short_name + " All"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
-           " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
-           " [System.AssignedTo], [System.State], [System.CreatedDate]," \
-           " [Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and " + target_clause + \
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause + \
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
@@ -568,13 +566,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All closed this week Query
     json_obj["name"] = short_name + " All closed this week"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags], " \
-           "[System.CreatedBy], [System.CreatedDate], " \
-           "[Microsoft.VSTS.Common.Severity], " \
-           "[Microsoft.VSTS.Common.ClosedDate] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and " + target_clause \
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause \
            + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
@@ -583,12 +576,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All created this week Query
     json_obj["name"] = short_name + " All created this week"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags], " \
-           "[System.CreatedBy], [System.CreatedDate], " \
-           "[Microsoft.VSTS.Common.Severity] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and " + target_clause \
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause \
            + " and [System.CreatedDate] > @today - 7 " \
              "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
@@ -597,12 +586,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All Monitored Query
     json_obj["name"] = short_name + " All Monitored"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
-           " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
-           " [System.AssignedTo], [System.State], [System.CreatedDate]," \
-           " [Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and not [System.State] contains 'Closed' " \
+    wiql = selected_columns + from_bugs \
+           + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
            " and [System.Tags] contains 'Monitor' " \
            "order by [System.CreatedDate] desc"
@@ -612,12 +597,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All NOT Closed Query
     json_obj["name"] = short_name + " All NOT Closed"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
-           " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority], " \
-           "[System.AssignedTo], [System.State], [System.CreatedDate], " \
-           "[Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and not [System.State] contains 'Closed' " \
+    wiql = selected_columns + from_bugs \
+           + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
@@ -626,13 +607,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All Resolved this week Query
     json_obj["name"] = short_name + " All resolved this week"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags], " \
-           "[System.CreatedBy], [System.CreatedDate], " \
-           "[Microsoft.VSTS.Common.Severity], " \
-           "[Microsoft.VSTS.Common.ResolvedDate] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and " + target_clause + \
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause + \
            " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
            "and [System.State] = 'Resolved' " \
            "order by [System.CreatedDate] desc"
@@ -642,12 +618,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # RTT Query
     json_obj["name"] = "RTT"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title]," \
-           " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
-           " [System.AssignedTo], [System.State], [System.CreatedDate]," \
-           " [Microsoft.VSTS.Common.ResolvedDate], [System.Tags] " \
-           "from WorkItems where [System.WorkItemType] = 'Bug' " \
-           "and [System.State] = 'Resolved' and " + target_clause + \
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] = 'Resolved' and " + target_clause + \
            " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
