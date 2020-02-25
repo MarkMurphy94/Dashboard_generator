@@ -1,3 +1,5 @@
+from json import JSONDecodeError
+
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
 import datetime
@@ -10,6 +12,7 @@ import requests
 CONFIGS_PATH = settings.BASE_DIR + r'/ads_app/static/Dashboard configs/'
 LOG_PATH = settings.BASE_DIR + r'/ads_app/static/logs.txt'
 TOKEN_PATH = settings.BASE_DIR + r'/ads_app/static/token.txt'
+AGILE_PATH = settings.BASE_DIR + r'/ads_app/static/agile_plans.txt'
 with open(TOKEN_PATH, 'r') as TOKEN_FILE:
     USER = TOKEN_FILE.readline().strip()
     TOKEN = TOKEN_FILE.readline().strip()
@@ -214,6 +217,8 @@ def create_agile_test_plan(test_plan):
     sprints_suite = create_suite(suite_name, test_plan_id, suite_id)
     create_sprint_suite_runs(test_plan_id, sprints_suite)
     # endregion
+
+    create_agile_config(test_plan, test_plan_id, sprints_suite)
 
     return test_plan_id
 
@@ -421,6 +426,34 @@ def create_customer_suites(test_plan_id, suite_id, parent_suite):
             create_meter_farm_suites(test_plan_id, row_id)
         else:
             create_children_suites(test_plan_id, row_id)
+
+
+def create_agile_config(test_plan, test_plan_id, sprints_suite):
+    """
+        Creates a JSON config file with the parameters provided, this is used
+        when performing the update function
+    """
+    now = datetime.datetime.now()
+    date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+
+    data = []
+
+    with open(AGILE_PATH, 'r') as json_file:
+        try:
+            data = json.load(json_file)
+        except JSONDecodeError:  # json loads fails on empty file
+            pass
+
+    config_file = {
+        'test_plan': test_plan,
+        'test_plan_id': test_plan_id,
+        'sprints_suite': sprints_suite,
+    }
+
+    data.append(config_file)
+
+    with open(AGILE_PATH, 'w') as outfile:
+        json.dump(data, outfile)
 # endregion
 
 # region Create Full Dashboard
