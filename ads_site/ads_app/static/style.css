@@ -222,6 +222,10 @@ body {
   max-width: max-content;
 }
 
+.help-paragraph {
+  width: 40%;
+}
+
 /* Formatting for loading modal */
 .loading-modal-content {
   background-color: #fefefe;

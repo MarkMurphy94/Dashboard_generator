@@ -1,0 +1,136 @@
+{% extends "ads_app/base.html" %}
+{% block content%}
+<script>
+
+        $(function() {
+            $(".button").click(function(event) {
+                // Stop form from submitting normally
+                event.preventDefault();
+                var help_modal = document.getElementById("LoadingModal");
+                var submit_update = $(this);
+                console.log(submit_update[0].value);
+                selected = submit_update[0].value;
+                if (selected == ""){
+                    alert(submit_update[0].value)
+                    document.getElementById("Error").hidden = false;
+                    document.getElementById("Error").value = event;
+                }
+                else{
+                    // Un-hide the Loading div
+                    document.getElementById("loading").hidden = false;
+
+                    // Disable Links and Submit button
+                    $("a#test").addClass('isDisabled');
+                    $("a#home").addClass('isDisabled');
+                    $("a#update").addClass('isDisabled');
+                    $("a#admin").addClass('isDisabled');
+                    document.getElementsByClassName("button")[0].disabled = true;
+                    document.getElementById("selected").value = selected;
+                    // Submit Form
+                    help_modal.style.display = "block";
+                    document.forms['submit_agile_update'].submit();
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            //this will remove the active class from
+            //previously active menu item
+            $(".navbar a").removeClass("active");
+            $("a#agile_update").addClass('active');
+        });
+
+        function filter_text() {
+            // Filters the table rows as the user types
+            var input, filter, table, tr, td, i;
+            input = document.getElementById("id_Dash_Name");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("table");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                // Hides the row initially.
+                tr[i].style.display = "none";
+                cell = tr[i].getElementsByTagName("td")[0];
+                if (cell) {
+                    if (cell.innerHTML.toUpperCase().includes(filter)){
+                        tr[i].style.display = "";
+                    }
+                }
+            }
+        }
+    </script>
+
+<h1>Update Agile Test Plan</h1>
+<h4>Select the Test Plan row wish to update and click the Add Sprint button</h4>
+<p>
+    <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
+    <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
+</p>
+<div id="table-wrapper">
+    <div id="table-scroll">
+        <table id="table" class="table table-bordered table-striped table-hover">
+            <colgroup>
+                <col style="width: 32%">
+                <col style="width: 10%">
+                <col style="width: 20%">
+                <col style="width: 18%">
+                <col style="width: 20%">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>Project</th>
+                <th class="url_label">URL</th>
+                <th>Last Updated</th>
+                <th>Current Sprint</th>
+                <th>Update Sprint</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for config in json %}
+                <tr>
+                    <td>{{ config.test_plan }}</td>
+                    <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_testPlans/execute?planId={{ config.test_plan_id }}">&#x1f517</a></td>
+                    <td>{{ config.lastUpdate }}</td>
+                    <td>{{ config.current_sprint }}</td>
+                    <td><button type="submit" class="button" value="{{ config.sprints_suite }}">Add Sprint</button></td>
+                </tr>
+            {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+<form action="submit_agile_update" method="POST" id="submit_agile_update">
+    {% csrf_token %}
+    <input type="hidden" name="selected" id="selected" value="">
+</form>
+<div id="Error" hidden class="validation-summary-errors">
+    <p>Please select a Dashboard</p>
+</div>
+<div id="LoadingModal" class="modal" style="">
+    <div class="loading-modal-content">
+        <div id="loading" hidden>
+            <h1>Please wait...</h1>
+            <br>
+            <div class="loader"></div>
+            <br>
+            <p>Do not refresh the page. This process may take a few minutes.</p>
+        </div>
+    </div>
+</div>
+<div id="myModal" class="modal" style="display: none;">
+    <!-- Modal content -->
+    <div class="help-modal-content help-paragraph">
+        <span class="close">x</span>
+        <h1>Update Agile Test Plan</h1>
+        <p>Use this page to append new sprints to an existing Agile Test Plan.</p>
+        <p>Remember to update your dashboard once you have added your new sprint.</p>
+        <p>
+            The new sprint will display at the top of your test plan, indicating that it is the
+            current sprint. If you would like the a different sprint to display at the top of the
+            dashboard, simply move that sprint to the top of the test plan.
+        </p>
+    </div>
+</div>
+
+{% endblock content %}

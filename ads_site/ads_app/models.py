@@ -328,8 +328,9 @@ def create_suite(suite_name, test_plan_id, suite_id):
                              json=json_obj, params=version)
     suite_response = response.json()
 
-    # indicates that a test plan with suite name already exists
-    if response.status_code != 200:
+    if response.status_code == 404:  # indicates that the test plan was not found
+        raise TestPlanError("Test Plan with Id " + str(test_plan_id) + " not found or no longer exists")
+    if response.status_code != 200:  # indicates that a test plan with suite name already exists
         raise DashAlreadyExists("Test Plan with name " + suite_name
                                 + " already exists")
 
@@ -448,6 +449,8 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
         'test_plan': test_plan,
         'test_plan_id': test_plan_id,
         'sprints_suite': sprints_suite,
+        'current_sprint': "1",
+        'lastUpdate': date_string
     }
 
     data.append(config_file)
@@ -1671,6 +1674,7 @@ def return_sprint_child_list(test_plan, suite_id):
 
     return child_list
 
+
 def return_suite_child_full(test_plan, suite_id):
     """
         Returns the full list of child suites
@@ -2059,4 +2063,52 @@ def update_dash(file):
         config_data['lastUpdate'] = date_string
         json.dump(config_data, outfile)
 
+# endregion
+
+
+# region Update Agile Test Plan
+def get_agile_config():
+    config_data = []
+
+    with open(AGILE_PATH, 'r') as json_file:
+        try:
+            config_data = json.load(json_file)
+        except JSONDecodeError:  # json loads fails on empty file
+            pass
+    return config_data
+
+
+def add_sprint_suite(test_plan_id, suite_id, current_sprint):
+    """
+        Creates the second tier child suites for Customer Solutions
+    """
+    sprints = ["Sprint " + str(current_sprint)]
+    for suite_name in sprints:
+        row_id = create_suite(suite_name + DATE_FORMAT, test_plan_id, suite_id)
+        create_customer_children(test_plan_id, row_id)
+        create_children_suites(test_plan_id, row_id)
+
+
+def update_agile_plan(selected):
+    now = datetime.datetime.now()
+    date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+    test_plan = ''
+    current_sprint = 2
+
+    agile_config = get_agile_config()
+
+    for config in agile_config:
+        if str(config['sprints_suite']) == str(selected):
+            current_sprint = int(config['current_sprint'])
+            current_sprint += 1
+            config['current_sprint'] = str(current_sprint)
+            config['lastUpdate'] = date_string
+            test_plan = config['test_plan_id']
+            break
+
+    add_sprint_suite(test_plan, selected, current_sprint)
+
+    with open(AGILE_PATH, 'w') as outfile:
+        json.dump(agile_config, outfile)
+    # create_agile_config(test_plan, test_plan_id, sprints_suite)
 # endregion
