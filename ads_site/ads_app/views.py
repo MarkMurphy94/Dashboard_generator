@@ -44,6 +44,12 @@ def test_plan(request):
     return render(request, 'ads_app/test_plan.html', {'pmo_list': pmo_list})
 
 
+@login_required
+def agile_update(request):
+    config_data = models.get_agile_config()
+    return render(request, 'ads_app/agile_update.html', {'json': config_data})
+
+
 def create_test(request):
     context = {}
     action = "created the test plan"
@@ -175,3 +181,24 @@ def submit_update(request):
     write_to_log(request, action, selected)
 
     return render(request, 'ads_app/update.html', {'json': config_data})
+
+
+def submit_agile_update(request):
+    if request.method == 'POST':  # if the request from the HTML is a post
+        request_data = request.POST
+        selected = request_data['selected'].strip()
+        action = "updated the agile test plan"
+
+        # updates the selected dashboard, throws a general error message if error is encountered
+        try:
+            models.update_agile_plan(selected)
+            raise models.DashboardComplete()
+        except models.DashboardComplete:
+            print("Test Plan updated")
+            messages.success(request, 'The Test Plan was updated successfully ')
+        except Exception as e:
+            messages.error(request, e)
+    config_data = models.get_agile_config()
+    write_to_log(request, action, selected)
+
+    return render(request, 'ads_app/agile_update.html', {'json': config_data})
