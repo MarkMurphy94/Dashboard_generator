@@ -24,6 +24,7 @@ JSON_ERROR = "json error"
 DATE_FORMAT = " MM/DD-MM/DD"
 MAX_ROW = 7  # maximum number of widgets per row
 MAX_COLUMN = 14  # maximum number of columns per row
+CURRENT_SPRINT_DEFAULT = 2
 VERSION = 'v0.2'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
 PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
@@ -2093,7 +2094,7 @@ def update_agile_plan(selected):
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
     test_plan = ''
-    current_sprint = 2
+    current_sprint = CURRENT_SPRINT_DEFAULT
 
     agile_config = get_agile_config()
 
