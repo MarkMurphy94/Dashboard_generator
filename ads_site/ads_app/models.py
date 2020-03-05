@@ -443,8 +443,9 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
     try:
         with open(AGILE_PATH, 'r') as json_file:
             data = json.load(json_file)
-    except IOError:
-        open(AGILE_PATH, 'w+')
+    except FileNotFoundError:
+        file = open(AGILE_PATH, 'w+')
+        file.close()
     except JSONDecodeError:  # json loads fails on empty file
         pass
 
@@ -2076,8 +2077,9 @@ def get_agile_config():
     try:
         with open(AGILE_PATH, 'r') as json_file:
             config_data = json.load(json_file)
-    except IOError:
-        open(AGILE_PATH, 'w+')
+    except FileNotFoundError:
+        file = open(AGILE_PATH, 'w+')
+        file.close()
     except JSONDecodeError:  # json loads fails on empty file
         pass
     return config_data
