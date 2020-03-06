@@ -440,11 +440,14 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 
     data = []
 
-    with open(AGILE_PATH, 'r') as json_file:
-        try:
+    try:
+        with open(AGILE_PATH, 'r') as json_file:
             data = json.load(json_file)
-        except JSONDecodeError:  # json loads fails on empty file
-            pass
+    except FileNotFoundError:
+        file = open(AGILE_PATH, 'w+')
+        file.close()
+    except JSONDecodeError:  # json loads fails on empty file
+        pass
 
     config_file = {
         'test_plan': test_plan,
@@ -1220,7 +1223,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
-    # region First Article
+    # region First Article/Final Product
     suite_title = "First Article"
     product_suite = return_suite_child_id(suite_title, test_plan, test_suite_id)
 
@@ -1239,7 +1242,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
             starting_column = 2
             count = 0
 
-            # region Customer Solution Markdown
+            # region First Article/Final Product Markdown
             row_text = "#" + suite_title + " Test\n ###" + suite_name + " \n#------->"
 
             row_markdown = return_markdown(1, starting_row, row_text, height=2)
@@ -1247,7 +1250,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
             count += 1
             # endregion
 
-            # region Customer Solution - Test Case Readiness
+            # region First Article/Final Product - Test Case Readiness
             name = suite_name + " - Test Case Readiness"
             test_readiness = return_test_chart(starting_column, starting_row, name,
                                                suite_id, test_plan)
@@ -1256,7 +1259,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
             count += 1
             # endregion
 
-            # region Overall - Customer Solution
+            # region Overall - First Article/Final Product
             name = "Overall " + suite_name
             group = "Outcome"
             test_results = True
@@ -2071,11 +2074,14 @@ def update_dash(file):
 def get_agile_config():
     config_data = []
 
-    with open(AGILE_PATH, 'r') as json_file:
-        try:
+    try:
+        with open(AGILE_PATH, 'r') as json_file:
             config_data = json.load(json_file)
-        except JSONDecodeError:  # json loads fails on empty file
-            pass
+    except FileNotFoundError:
+        file = open(AGILE_PATH, 'w+')
+        file.close()
+    except JSONDecodeError:  # json loads fails on empty file
+        pass
     return config_data
 
 

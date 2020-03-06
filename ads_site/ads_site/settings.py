@@ -131,4 +131,5 @@ LOGIN_URL = 'login'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'ral-smtp.itron.com'
+DEFAULT_FROM_EMAIL = 'gtodashboard@itron.com'
 EMAIL_PORT = 25

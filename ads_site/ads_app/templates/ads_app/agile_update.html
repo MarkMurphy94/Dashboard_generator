@@ -1,6 +1,6 @@
 {% extends "ads_app/base.html" %}
 {% block content%}
-<script>
+    <script>
 
         $(function() {
             $(".button").click(function(event) {
@@ -44,16 +44,15 @@
             var input, filter, table, tr, td, i;
             input = document.getElementById("id_Dash_Name");
             filter = input.value.toUpperCase();
-            table = document.getElementById("table");
+            table = document.getElementById("main-table-body");
             tr = table.getElementsByTagName("tr");
-
-            for (i = 1; i < tr.length; i++) {
+            for (item in tr) {
                 // Hides the row initially.
-                tr[i].style.display = "none";
-                cell = tr[i].getElementsByTagName("td")[0];
+                tr[item].style.display = "none";
+                cell = tr[item].getElementsByTagName("td")[0];
                 if (cell) {
                     if (cell.innerHTML.toUpperCase().includes(filter)){
-                        tr[i].style.display = "";
+                        tr[item].style.display = "";
                     }
                 }
             }
@@ -85,7 +84,7 @@
                 <th>Update Sprint</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="main-table-body">
             {% for config in json %}
                 <tr>
                     <td>{{ config.test_plan }}</td>
