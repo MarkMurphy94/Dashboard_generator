@@ -29,6 +29,7 @@ URL_HEADER = 'https://dev.azure.com/itron/'
 PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
 SUITE_RUNS = ["Run 3" + DATE_FORMAT, "Run 2" + DATE_FORMAT, "Run 1" + DATE_FORMAT]
 CUSTOMER_SUITES = ["SVE ", "Garden ", "Meter Farm "]
+CUSTOMER_KEYS = ["sve", "garden", "meter_farm"]
 
 # settings dictionary for json charts
 standardChartSettings = """
@@ -429,13 +430,14 @@ def create_customer_suites(test_plan_id, suite_id, parent_suite, child_suites):
     """
         Creates third tier child suites for Customer Solutions suite
     """
-    for suite_name in CUSTOMER_SUITES:
-        suite_title = suite_name + parent_suite
-        row_id = create_suite(suite_title, test_plan_id, suite_id)
-        if suite_name == "Meter Farm ":
-            create_meter_farm_suites(test_plan_id, row_id)
-        else:
-            create_children_suites(test_plan_id, row_id, child_suites)
+    for x in range(len(CUSTOMER_SUITES)):
+        if child_suites[CUSTOMER_KEYS[x]]:
+            suite_title = CUSTOMER_SUITES[x] + parent_suite
+            row_id = create_suite(suite_title, test_plan_id, suite_id)
+            if CUSTOMER_SUITES[x] == "Meter Farm ":
+                create_meter_farm_suites(test_plan_id, row_id)
+            else:
+                create_children_suites(test_plan_id, row_id, child_suites)
 
 
 def create_agile_config(test_plan, test_plan_id, sprints_suite):
