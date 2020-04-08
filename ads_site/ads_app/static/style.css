@@ -234,6 +234,19 @@ body {
   max-width: max-content;
 }
 
+/* Content for adding sprint modal */
+.sprint-modal-content {
+  position: center;
+  background-color: #fefefe;
+  margin: auto;
+  height: content;
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: max-content;
+}
+
 /* Set help modal paragraph width */
 .help-paragraph {
   width: 40%;
