@@ -50,11 +50,29 @@ def agile_update(request):
     return render(request, 'ads_app/agile_update.html', {'json': config_data})
 
 
+def checkbox(request, selection):
+    value = [(request.POST.get(selection))]
+    print(str(selection) + " is " + str(value))
+    if value[0] == "on":
+        checked = True
+    else:
+        checked = False
+    return checked
+
+
 def create_test(request):
     context = {}
     action = "created the test plan"
     if request.method == 'POST':  # if the request from the HTML is a post
         form = request.POST
+        child_suites = {
+            'new_feature': checkbox(request, "new_feature"),
+            'manual_regression': checkbox(request, "manual_regression"),
+            'automated_regression': checkbox(request, "automated_regression"),
+            'meter_farm': checkbox(request, "meter_farm"),
+            'garden': checkbox(request, "garden"),
+            'sve': checkbox(request, "sve")
+        }
         project = form['project_list'].strip()
         project_type = form['project_type'].strip()
         context['project'] = project
@@ -63,13 +81,13 @@ def create_test(request):
             print(project_type)
             if project_type == 'Waterfall':
                 print("Test Plan is: " + project_type)
-                test_plan_id = models.create_full_test_plan(project)
+                test_plan_id = models.create_full_test_plan(project, child_suites)
                 context['test_plan'] = test_plan_id
                 write_to_log(request, action, project)
                 raise models.DashboardComplete(test_plan_id)
             elif project_type == 'Agile':
-                print("Test Plan is 2: " + project_type)
-                test_plan_id = models.create_agile_test_plan(project)
+                print("Test Plan is : " + project_type)
+                test_plan_id = models.create_agile_test_plan(project, child_suites)
                 write_to_log(request, action, project)
                 context['test_plan'] = test_plan_id
                 raise models.DashboardComplete(test_plan_id)
@@ -188,10 +206,17 @@ def submit_agile_update(request):
         request_data = request.POST
         selected = request_data['selected'].strip()
         action = "updated the agile test plan"
-
+        child_suites = {
+            'new_feature': checkbox(request, "new_feature"),
+            'manual_regression': checkbox(request, "manual_regression"),
+            'automated_regression': checkbox(request, "automated_regression"),
+            'meter_farm': checkbox(request, "meter_farm"),
+            'garden': checkbox(request, "garden"),
+            'sve': checkbox(request, "sve")
+        }
         # updates the selected dashboard, throws a general error message if error is encountered
         try:
-            models.update_agile_plan(selected)
+            models.update_agile_plan(selected, child_suites)
             raise models.DashboardComplete()
         except models.DashboardComplete:
             print("Test Plan updated")

@@ -62,6 +62,35 @@
                 {% endfor %}
             </datalist>
             <button type="submit" class="button">SUBMIT</button>
+            <div id="child_options">
+                <p>Select the child suites you would like to add to your test plan:</p>
+                <ul type="disc">
+                    <li>
+                        <label>New Feature</label>
+                        <input type="checkbox" name="new_feature" checked="checked">
+                    </li>
+                    <li>
+                        <label>Manual Regression</label>
+                        <input type="checkbox" name="manual_regression" checked="checked">
+                    </li>
+                    <li>
+                        <label>Automated Regression</label>
+                        <input type="checkbox" name="automated_regression" checked="checked">
+                    </li>
+                    <li>
+                        <label>Meter Farm</label>
+                        <input type="checkbox" name="meter_farm" checked="checked">
+                    </li>
+                    <li>
+                        <label>Garden</label>
+                        <input type="checkbox" name="garden" checked="checked">
+                    </li>
+                    <li>
+                        <label>SVE</label>
+                        <input type="checkbox" name="sve" checked="checked">
+                    </li>
+                </ul>
+            </div>
         </form>
     </div>
 
@@ -126,47 +155,38 @@
 
     <div id="agile_test_plan" class="box" style="display: none;">
         <h2>Example Agile Test Plan Structure</h2>
-        <ul type="disc">
-            <li>Test Plan Name</li>
             <ul type="disc">
-                <li>Sprints</li>
-                <ul type="circle">
-                    <li>Sprint 2</li>
-                    <ul type="circle">
-                        <li>New Feature</li>
-                        <li>Manual Regression</li>
-                        <li>Automated Regression</li>
-                        <li>Meter Farm</li>
-                        <li>Garden</li>
-                        <li>SVE</li>
-                    </ul>
-                    <li>Sprint 1</li>
-                    <ul type="circle">
-                        <li>New Feature</li>
-                        <li>Manual Regression</li>
-                        <li>Automated Regression</li>
-                        <li>Meter Farm</li>
-                        <li>Garden</li>
-                        <li>SVE</li>
-                    </ul>
-                </ul>
-                <li>Final Product</li>
+                <li>Test Plan Name</li>
                 <ul type="disc">
-                    <li>&lt;Device> Sprint <#></li>
+                    <li>Sprints</li>
                     <ul type="circle">
-                        <li>E2E FAT Test Suites</li>
-                        <li>FW FAT Test Suites </li>
-                        <li>HW FAT test suite</li>
-                        <li>Product Secure</li>
+                        <li>Sprint 1</li>
+                        <ul type="circle">
+                            <li>New Feature</li>
+                            <li>Manual Regression</li>
+                            <li>Automated Regression</li>
+                            <li>Meter Farm</li>
+                            <li>Garden</li>
+                            <li>SVE</li>
+                        </ul>
+                    </ul>
+                    <li>Final Product</li>
+                    <ul type="disc">
+                        <li>&lt;Device> Sprint <#></li>
+                        <ul type="circle">
+                            <li>E2E FAT Test Suites</li>
+                            <li>FW FAT Test Suites </li>
+                            <li>HW FAT test suite</li>
+                            <li>Product Secure</li>
+                        </ul>
                     </ul>
                 </ul>
             </ul>
-        </ul>
     </div>
 
     <div id="myModal" class="modal" style="display: none;">
         <!-- Modal content -->
-        <div class="help-modal-content">
+        <div class="help-modal-content help-paragraph">
             <span class="close">x</span>
             <h1>Create Test Plan Help</h1>
             <p>
@@ -206,7 +226,7 @@
                     </ul>
                 </ul>
             </ul>
-            <p>Within each Alpha suite under Early System Test and within each Run suite under System Test, <br>
+            <p>Within each Alpha suite under Early System Test and within each Run suite under System Test,
                 the following folders will be generated:</p>
             <ul type="circle">
                 <li>New Features</li>

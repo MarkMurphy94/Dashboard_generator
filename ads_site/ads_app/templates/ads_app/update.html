@@ -73,16 +73,15 @@
             var input, filter, table, tr, td, i;
             input = document.getElementById("id_Dash_Name");
             filter = input.value.toUpperCase();
-            table = document.getElementById("table");
+            table = document.getElementById("main-table-body");
             tr = table.getElementsByTagName("tr");
-
-            for (i = 1; i < tr.length; i++) {
+            for (item in tr) {
                 // Hides the row initially.
-                tr[i].style.display = "none";
-                cell = tr[i].getElementsByTagName("td")[0];
+                tr[item].style.display = "none";
+                cell = tr[item].getElementsByTagName("td")[0];
                 if (cell) {
                     if (cell.innerHTML.toUpperCase().includes(filter)){
-                        tr[i].style.display = "";
+                        tr[item].style.display = "";
                     }
                 }
             }
@@ -123,7 +122,7 @@
                         <th class="tg-0lax">Show on Executive</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="main-table-body">
                     {% for items in json %}
                     <tr>
                         <td class="tg-0lax">{{ items.folderName }}</td>
@@ -162,13 +161,13 @@
     </div>
     <div id="myModal" class="modal" style="display: none;">
         <!-- Modal content -->
-        <div class="help-modal-content">
+        <div class="help-modal-content help-paragraph">
             <span class="close">x</span>
             <h1>Update Dashboard Help</h1>
             <p>
-                Dashboards that have already been created using this tool will appear here. <br>
-                Updating a dashboard will refresh all the widgets on that dashboard. Use this <br>
-                feature if there have been new test suites added to a test plan.
+                Dashboards that have already been created using this tool will appear here.
+                Updating a dashboard will refresh all the widgets on that dashboard. Use this
+                feature if there have been changes made to the test plan.
             </p>
         </div>
     </div>
