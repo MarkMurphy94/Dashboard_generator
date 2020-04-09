@@ -6,6 +6,7 @@ from django.shortcuts import render
 import datetime
 from .forms import CreateDash
 from . import models
+import json
 
 
 def get_user(request):
@@ -194,6 +195,28 @@ def submit_update(request):
             messages.success(request, 'The Dashboard was updated successfully')
         except Exception as e:
             print("error")
+            messages.error(request, e)
+    config_data = models.get_config()
+    write_to_log(request, action, selected)
+
+    return render(request, 'ads_app/update.html', {'json': config_data})
+
+
+def executive(request):
+    if request.method == 'POST':  # if the request from the HTML is a post
+        request_data = request.POST
+        check_list = json.loads(request_data['check_items'])
+        action = "updated the executive dashboard"
+        selected = ''
+
+        # updates the selected dashboard, throws a general error message if error is encountered
+        try:
+            models.update_executive(check_list)
+            raise models.DashboardComplete()
+        except models.DashboardComplete:
+            print("Executive dashboard updated")
+            messages.success(request, 'The executive dashboard was updated successfully')
+        except Exception as e:
             messages.error(request, e)
     config_data = models.get_config()
     write_to_log(request, action, selected)

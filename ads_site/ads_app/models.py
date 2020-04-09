@@ -1,5 +1,4 @@
 from json import JSONDecodeError
-
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
 import datetime
@@ -18,6 +17,8 @@ with open(TOKEN_PATH, 'r') as TOKEN_FILE:
 
 # setting class level variables
 PROJECT = "RnD"
+GTO = 'GTO'
+EXECUTIVE_ID = '1d9b31cb-3538-40f1-8830-92ae1575b269'
 NOT_FOUND = "not found"
 JSON_ERROR = "json error"
 DATE_FORMAT = " MM/DD-MM/DD"
@@ -26,6 +27,7 @@ MAX_COLUMN = 14  # maximum number of columns per row
 CURRENT_SPRINT_DEFAULT = 2
 VERSION = 'v0.2'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
+DASH_HEADER = 'https://dev.azure.com/itron/RnD/_dashboards/dashboard/'
 PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
 SUITE_RUNS = ["Run 3" + DATE_FORMAT, "Run 2" + DATE_FORMAT, "Run 1" + DATE_FORMAT]
 CUSTOMER_SUITES = ["SVE ", "Garden ", "Meter Farm "]
@@ -1242,9 +1244,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         product_suite = return_suite_child_id(suite_title, test_plan, test_suite_id)
 
     if product_suite != NOT_FOUND:
-        print("Found")
         suite_list = return_suite_child_list(test_plan, product_suite)
-        print(suite_list)
         # Creates a row of product suite widgets per Run found in product suite tree
         for suite in suite_list:
             suite_id = str(suite['id'])
@@ -1343,7 +1343,8 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         'folderName': folder_name,
         'folderId': folder_id,
         'version': VERSION,
-        'lastUpdate': date_string
+        'lastUpdate': date_string,
+        'executive': True
     }
 
     with open(file_directory, 'w') as outfile:
@@ -2129,4 +2130,162 @@ def update_agile_plan(selected, child_suites):
     with open(AGILE_PATH, 'w') as outfile:
         json.dump(agile_config, outfile)
     # create_agile_config(test_plan, test_plan_id, sprints_suite)
+# endregion
+
+
+# region Executive Dashboard
+def update_executive(check_list):
+    """
+        Updates the executive dashboard
+    """
+    row = 1
+
+    update_executive_config(check_list)  # update the existing config
+    dash_data = get_config()
+    clear_dash(GTO, EXECUTIVE_ID)
+
+    for dash in dash_data:  # creates a row for each valid dashboard
+        team_name = dash['teamName']
+        dash_id = dash['dashId']
+        test_plan = dash['testPlan']
+        dash_name = dash['folderName']
+        query_folder = dash['folderId']
+        executive = dash['executive']
+
+        if dashboard_exists(team_name, dash_id) and executive:
+            add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row)
+
+            row += 2
+
+
+def update_executive_config(check_list):
+    """
+        Updates the executive dashboard configs with the selections from the GUI
+    """
+    directory = CONFIGS_PATH
+    file_path = os.listdir(directory)
+    file_path.sort()
+    config_data = []
+    for file in file_path:  # loads json file
+        file1 = directory + file
+        with open(file1, 'r') as json_file:
+            config_data = json.load(json_file)
+
+        with open(file1, 'w') as outfile:  # updates and writes json object
+            config_data['executive'] = check_list[config_data['dashId']]
+            json.dump(config_data, outfile)
+
+
+def add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row):
+    """
+        Adds the row to the executive dashboard
+    """
+
+    # mark down widget with link to original dashboard
+
+    # region MarkDown
+    main_text = "#[" + dash_name + "](" + DASH_HEADER + dash_id + ") "
+
+    main_markdown = return_markdown(1, row, main_text, height=2)
+    create_widget(GTO, EXECUTIVE_ID, main_markdown)
+
+    add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
+    add_test_plan_summary(dash_name, test_plan, row)
+    add_bug_trend(dash_name, query_folder, GTO, EXECUTIVE_ID, row)
+
+
+def add_test_plan_summary(dash_name, test_plan, row):
+    """
+        Adds the test plan summary chart to a dashboard
+    """
+    # region Test Plan Summary
+    name = dash_name + " - Summary"
+    suite_id = str(int(test_plan) + 1)
+    group = "Outcome"
+    test_results = True
+    test_readiness = return_test_chart(4, row, name,
+                                       suite_id, test_plan, group=group,
+                                       test_results=test_results)
+    create_widget(GTO, EXECUTIVE_ID, test_readiness)
+    # endregion
+
+
+def add_bug_trend(dash_name, query_folder, output_team, overview_id, row):
+    """
+        Adds the bug trend chart to a dashboard
+    """
+    # region Bug Trend
+    name = dash_name + " Bug Trend"
+    query_id = return_query_id("All NOT Closed", query_folder)
+    history = "last12Weeks"
+
+    bug_chart = return_chart(6, row, name, query_id, history=history, direction="descending")
+    create_widget(output_team, overview_id, bug_chart)
+    # endregion
+
+
+def add_four_square(query_folder, output_team, overview_id, row):
+    """
+        Adds the Bugs charts to a dashboard
+    """
+    # region 4 Query Tile
+    # Creating All Bugs widget
+    name = "All Bugs"
+    color = "#fbbc3d"
+    query_contains = "All NOT Closed"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    all_bugs = return_query_tile(2, row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, all_bugs)
+
+    # Creating Dev Bugs widget
+    name = "Dev Bugs"
+    color = "#e60017"
+    query_contains = "New Bugs"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    dev_bugs = return_query_tile(3, row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, dev_bugs)
+
+    # Increment row
+    row += 1
+
+    # Creating Monitored widget
+    name = "Monitored"
+    color = "#cccccc"
+    query_contains = "All Monitored"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    monitored_tile = return_query_tile(2, row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, monitored_tile)
+
+    # Creating RTT widget
+    name = "RTT"
+    color = "#c9e7e7"
+    query_contains = "RTT"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    rtt_tile = return_query_tile(3, row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, rtt_tile)
+    # endregion
+
+
+def dashboard_exists(output_team, overview_id):
+    """
+        Checks is a dashboard exists
+    """
+    print("team: " + output_team)
+    version = {'api-version': '5.1-preview.2'}
+    response = requests.get(URL_HEADER + PROJECT + '/' + output_team
+                             + '/_apis/dashboard/dashboards/' + overview_id
+                             + '/widgets?', auth=HTTPBasicAuth(USER, TOKEN), params=version)
+
+    print("Object Returned:")
+    print(response.status_code)
+
+    if response.status_code != 200:
+        return False
+
+    return True
+
 # endregion
