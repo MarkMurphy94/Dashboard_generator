@@ -2,6 +2,24 @@
 {% block content%}
     <script>
 
+
+        $(function() {
+            $(".sprint_button").click(function(event) {
+                var modal1 = document.getElementById("sprint_modal");
+                modal1.style.display = "block";
+                var selected = document.getElementById("submit_sprint");
+                selected.value = $(this)[0].value;
+                console.log
+            });
+        });
+
+        $(function() {
+            $(".close").click(function(event) {
+                var modal1 = document.getElementById("sprint_modal");
+                modal1.style.display = "none";
+            });
+        });
+
         $(function() {
             $(".button").click(function(event) {
                 // Stop form from submitting normally
@@ -91,19 +109,55 @@
                     <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_testPlans/execute?planId={{ config.test_plan_id }}">&#x1f517</a></td>
                     <td>{{ config.lastUpdate }}</td>
                     <td>{{ config.current_sprint }}</td>
-                    <td><button type="submit" class="button" value="{{ config.sprints_suite }}">Add Sprint</button></td>
+                    <td><button class="sprint_button" id="sprint_button" value="{{ config.sprints_suite }}">Add Sprint</button></td>
                 </tr>
             {%endfor%}
             </tbody>
         </table>
     </div>
 </div>
-<form action="submit_agile_update" method="POST" id="submit_agile_update">
-    {% csrf_token %}
-    <input type="hidden" name="selected" id="selected" value="">
-</form>
 <div id="Error" hidden class="validation-summary-errors">
     <p>Please select a Dashboard</p>
+</div>
+<div id="sprint_modal" class="modal" style="display: none;">
+    <!-- Modal content -->
+    <div class="sprint-modal-content help-paragraph">
+        <span class="close">x</span>
+        <p>Select the child suites you would like to add to your new sprint:</p>
+        <div id="child_options">
+            <form action="submit_agile_update" method="POST" id="submit_agile_update">
+                <ul type="disc">
+                    <li>
+                        <label>New Feature</label>
+                        <input type="checkbox" name="new_feature" checked="checked">
+                    </li>
+                    <li>
+                        <label>Manual Regression</label>
+                        <input type="checkbox" name="manual_regression" checked="checked">
+                    </li>
+                    <li>
+                        <label>Automated Regression</label>
+                        <input type="checkbox" name="automated_regression" checked="checked">
+                    </li>
+                    <li>
+                        <label>Meter Farm</label>
+                        <input type="checkbox" name="meter_farm" checked="checked">
+                    </li>
+                    <li>
+                        <label>Garden</label>
+                        <input type="checkbox" name="garden" checked="checked">
+                    </li>
+                    <li>
+                        <label>SVE</label>
+                        <input type="checkbox" name="sve" checked="checked">
+                    </li>
+                </ul>
+                {% csrf_token %}
+                <input type="hidden" name="selected" id="selected" value="">
+                <button type="submit" class="button" id="submit_sprint" >Add Sprint</button>
+            </form>
+        </div>
+    </div>
 </div>
 <div id="LoadingModal" class="modal" style="">
     <div class="loading-modal-content">

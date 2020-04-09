@@ -7,7 +7,6 @@ import os
 import json
 import requests
 
-
 # reading in token credentials for user
 CONFIGS_PATH = settings.BASE_DIR + r'/ads_app/static/Dashboard configs/'
 LOG_PATH = settings.BASE_DIR + r'/ads_app/static/logs.txt'
@@ -30,7 +29,7 @@ URL_HEADER = 'https://dev.azure.com/itron/'
 PMO_PATH = settings.BASE_DIR + r'/ads_app/static/PMO_List.txt'
 SUITE_RUNS = ["Run 3" + DATE_FORMAT, "Run 2" + DATE_FORMAT, "Run 1" + DATE_FORMAT]
 CUSTOMER_SUITES = ["SVE ", "Garden ", "Meter Farm "]
-
+CUSTOMER_KEYS = ["sve", "garden", "meter_farm"]
 
 # settings dictionary for json charts
 standardChartSettings = """
@@ -180,6 +179,7 @@ class DashAlreadyExists(Exception):
 class DashDoesNotExists(Exception):
     """Dashboard does not Exist"""
 
+
 # endregion
 
 
@@ -195,7 +195,7 @@ def get_pmo_list():
     return pmo_list
 
 
-def create_agile_test_plan(test_plan):
+def create_agile_test_plan(test_plan, child_suites):
     """
         Creates an Agile test plan based on the name given
         :return test plan ID
@@ -216,7 +216,7 @@ def create_agile_test_plan(test_plan):
     # region Sprints
     suite_name = "Sprints"
     sprints_suite = create_suite(suite_name, test_plan_id, suite_id)
-    create_sprint_suite_runs(test_plan_id, sprints_suite)
+    create_sprint_suite_runs(test_plan_id, sprints_suite, child_suites)
     # endregion
 
     create_agile_config(test_plan, test_plan_id, sprints_suite)
@@ -224,7 +224,7 @@ def create_agile_test_plan(test_plan):
     return test_plan_id
 
 
-def create_full_test_plan(test_plan):
+def create_full_test_plan(test_plan, child_suites):
     """
         Creates a test plan based on the name given
         :return test plan ID
@@ -249,19 +249,19 @@ def create_full_test_plan(test_plan):
     # region Customer Solution
     suite_name = "Customer Solution Test"
     customer_suite = create_suite(suite_name, test_plan_id, suite_id)
-    create_customer_suite_runs(test_plan_id, customer_suite)
+    create_customer_suite_runs(test_plan_id, customer_suite, child_suites)
     # endregion
 
     # region System Test
     suite_name = "System Test"
     system_test = create_suite(suite_name, test_plan_id, suite_id)
-    create_suite_runs(test_plan_id, system_test)
+    create_suite_runs(test_plan_id, system_test, child_suites)
     # endregion
 
     # region Early System Test
     suite_name = "Early System Test"
     early_system = create_suite(suite_name, test_plan_id, suite_id)
-    create_early_system_children(test_plan_id, early_system)
+    create_early_system_children(test_plan_id, early_system, child_suites)
     # endregion
 
     return test_plan_id
@@ -330,7 +330,8 @@ def create_suite(suite_name, test_plan_id, suite_id):
     suite_response = response.json()
 
     if response.status_code == 404:  # indicates that the test plan was not found
-        raise TestPlanError("Test Plan with Id " + str(test_plan_id) + " not found or no longer exists")
+        raise TestPlanError(
+            "Test Plan with Id " + str(test_plan_id) + " not found or no longer exists")
     if response.status_code != 200:  # indicates that a test plan with suite name already exists
         raise DashAlreadyExists("Test Plan with name " + suite_name
                                 + " already exists")
@@ -340,35 +341,35 @@ def create_suite(suite_name, test_plan_id, suite_id):
     return suite_response["value"][0]["id"]
 
 
-def create_suite_runs(test_plan_id, suite_id):
+def create_suite_runs(test_plan_id, suite_id, child_suites):
     """
         Creates second tier child suites
     """
     for suite_name in SUITE_RUNS:
         row_id = create_suite(suite_name, test_plan_id, suite_id)
-        create_children_suites(test_plan_id, row_id)
+        create_children_suites(test_plan_id, row_id, child_suites)
 
 
-def create_customer_suite_runs(test_plan_id, suite_id):
+def create_customer_suite_runs(test_plan_id, suite_id, child_suites):
     """
         Creates the second tier child suites for Customer Solutions
     """
     for suite_name in SUITE_RUNS:
-        create_customer_suites(test_plan_id, suite_id, suite_name)
+        create_customer_suites(test_plan_id, suite_id, suite_name, child_suites)
 
 
-def create_sprint_suite_runs(test_plan_id, suite_id):
+def create_sprint_suite_runs(test_plan_id, suite_id, child_suites):
     """
         Creates the second tier child suites for Customer Solutions
     """
     sprints = ["Sprint 1"]
     for suite_name in sprints:
         row_id = create_suite(suite_name + DATE_FORMAT, test_plan_id, suite_id)
-        create_customer_children(test_plan_id, row_id)
-        create_children_suites(test_plan_id, row_id)
+        create_customer_children(test_plan_id, row_id, child_suites)
+        create_children_suites(test_plan_id, row_id, child_suites)
 
 
-def create_early_system_children(test_plan_id, suite_id):
+def create_early_system_children(test_plan_id, suite_id, child_suites):
     """
         Creates the second tier child suites for Early System Test
     """
@@ -376,7 +377,7 @@ def create_early_system_children(test_plan_id, suite_id):
                    "Alpha 2" + DATE_FORMAT, "Alpha 1" + DATE_FORMAT]
     for suite_name in suite_names:
         row_id = create_suite(suite_name, test_plan_id, suite_id)
-        create_children_suites(test_plan_id, row_id)
+        create_children_suites(test_plan_id, row_id, child_suites)
 
 
 def create_final_product(test_plan_id, suite_id):
@@ -390,13 +391,17 @@ def create_final_product(test_plan_id, suite_id):
         create_suite(suite_name, test_plan_id, suite_id)
 
 
-def create_children_suites(test_plan, suite_id):
+def create_children_suites(test_plan, suite_id, child_suites):
     """
         Creates the third tier child suites for Garden and SVE suites
     """
     suite_names = ["Automatic Regression", "Manual Regression", "New Features"]
-    for suite_name in suite_names:
-        create_suite(suite_name, test_plan, suite_id)
+    if child_suites["automated_regression"]:
+        create_suite(suite_names[0], test_plan, suite_id)
+    if child_suites["manual_regression"]:
+        create_suite(suite_names[1], test_plan, suite_id)
+    if child_suites["new_feature"]:
+        create_suite(suite_names[2], test_plan, suite_id)
 
 
 def create_meter_farm_suites(test_plan, suite_id):
@@ -409,25 +414,30 @@ def create_meter_farm_suites(test_plan, suite_id):
         create_suite(suite_name, test_plan, suite_id)
 
 
-def create_customer_children(test_plan_id, suite_id):
+def create_customer_children(test_plan_id, suite_id, child_suites):
     """
         Creates third tier child suites for Customer Solutions suite
     """
-    for suite_name in CUSTOMER_SUITES:
-        create_suite(suite_name, test_plan_id, suite_id)
+    if child_suites["sve"]:
+        create_suite(CUSTOMER_SUITES[0], test_plan_id, suite_id)
+    if child_suites["garden"]:
+        create_suite(CUSTOMER_SUITES[1], test_plan_id, suite_id)
+    if child_suites["meter_farm"]:
+        create_suite(CUSTOMER_SUITES[2], test_plan_id, suite_id)
 
 
-def create_customer_suites(test_plan_id, suite_id, parent_suite):
+def create_customer_suites(test_plan_id, suite_id, parent_suite, child_suites):
     """
         Creates third tier child suites for Customer Solutions suite
     """
-    for suite_name in CUSTOMER_SUITES:
-        suite_title = suite_name + parent_suite
-        row_id = create_suite(suite_title, test_plan_id, suite_id)
-        if suite_name == "Meter Farm ":
-            create_meter_farm_suites(test_plan_id, row_id)
-        else:
-            create_children_suites(test_plan_id, row_id)
+    for x in range(len(CUSTOMER_SUITES)):
+        if child_suites[CUSTOMER_KEYS[x]]:
+            suite_title = CUSTOMER_SUITES[x] + parent_suite
+            row_id = create_suite(suite_title, test_plan_id, suite_id)
+            if CUSTOMER_SUITES[x] == "Meter Farm ":
+                create_meter_farm_suites(test_plan_id, row_id)
+            else:
+                create_children_suites(test_plan_id, row_id, child_suites)
 
 
 def create_agile_config(test_plan, test_plan_id, sprints_suite):
@@ -461,6 +471,8 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 
     with open(AGILE_PATH, 'w') as outfile:
         json.dump(data, outfile)
+
+
 # endregion
 
 # region Create Full Dashboard
@@ -832,7 +844,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column = 2
     # if the resources suite is found then create Resource widgets
     if resources_suite != NOT_FOUND:
-
         # return the child suite within resources
         name = "All New Feature Test Cases (Resources)"
         suite = return_suite_child_id("New", test_plan,
@@ -959,7 +970,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # suite_id = Return_Suite_ID(Alpha + str(count), testPlanId)
     # endregion
-
 
     # region Early System Test
 
@@ -2067,6 +2077,7 @@ def update_dash(file):
         config_data['lastUpdate'] = date_string
         json.dump(config_data, outfile)
 
+
 # endregion
 
 
@@ -2085,18 +2096,18 @@ def get_agile_config():
     return config_data
 
 
-def add_sprint_suite(test_plan_id, suite_id, current_sprint):
+def add_sprint_suite(test_plan_id, suite_id, current_sprint, child_suites):
     """
         Creates the second tier child suites for Customer Solutions
     """
     sprints = ["Sprint " + str(current_sprint)]
     for suite_name in sprints:
         row_id = create_suite(suite_name + DATE_FORMAT, test_plan_id, suite_id)
-        create_customer_children(test_plan_id, row_id)
-        create_children_suites(test_plan_id, row_id)
+        create_customer_children(test_plan_id, row_id, child_suites)
+        create_children_suites(test_plan_id, row_id, child_suites)
 
 
-def update_agile_plan(selected):
+def update_agile_plan(selected, child_suites):
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
     test_plan = ''
@@ -2113,7 +2124,7 @@ def update_agile_plan(selected):
             test_plan = config['test_plan_id']
             break
 
-    add_sprint_suite(test_plan, selected, current_sprint)
+    add_sprint_suite(test_plan, selected, current_sprint, child_suites)
 
     with open(AGILE_PATH, 'w') as outfile:
         json.dump(agile_config, outfile)

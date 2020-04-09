@@ -38,6 +38,18 @@ body {
   cursor: pointer;
 }
 
+.sprint_button {
+  margin-top: 10px;
+  background-color: #f1f1f1;
+  border-radius: 4px;
+  border: 1px solid #333;
+  color: black;
+  padding: 3px 3px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 /* Button hover formatting */
 .button:hover {
   background-color: #666;
@@ -215,6 +227,19 @@ body {
   background-color: #fefefe;
   margin: auto;
   height: 80%;
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: max-content;
+}
+
+/* Content for adding sprint modal */
+.sprint-modal-content {
+  position: center;
+  background-color: #fefefe;
+  margin: auto;
+  height: content;
   overflow: auto;
   padding: 20px;
   border: 1px solid #888;
