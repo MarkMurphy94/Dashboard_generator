@@ -34,6 +34,33 @@
             });
         });
 
+        $(function() {
+            $("#executive").submit(function(event) {
+                // Stop form from submitting normally
+                event.preventDefault();
+                var help_modal = document.getElementById("LoadingModal");
+
+                temp = document.getElementsByClassName("check_box");
+
+                checked = {};
+
+                for (item in temp){
+                    if(temp[item].type == "checkbox"){
+                        checked[temp[item].name] = temp[item].checked;
+                    }
+                }
+                document.getElementById("check_items").value = JSON.stringify(checked);
+
+                // Un-hide the Loading div
+                document.getElementById("loading").hidden = false;
+
+                // Submit Form
+                help_modal.style.display = "block";
+                document.forms['executive'].submit();
+
+            });
+        });
+
         $(document).ready(function () {
             //this will remove the active class from
             //previously active menu item
@@ -68,6 +95,15 @@
         <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
         <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
     </p>
+    <div class="div_width">
+        <a class="button float_left" target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/1d9b31cb-3538-40f1-8830-92ae1575b269">Go to Executive Dashboard</a>
+
+        <form class="float_right" action="executive" method="POST" id="executive">
+            {% csrf_token %}
+            <input type="hidden" name="check_items" id="check_items" value="">
+            <button type="submit" class="button">Update Executive Dashboard</button>
+        </form>
+    </div>
     <div id="table-wrapper">
         <div id="table-scroll">
             <table id="table" class="table table-bordered table-striped table-hover">
@@ -75,7 +111,8 @@
                     <col style="width: 40%">
                     <col style="width: 10%">
                     <col style="width: 20%">
-                    <col style="width: 20%">
+                    <col style="width: 10%">
+                    <col style="width: 10%">
                 </colgroup>
                 <thead>
                     <tr>
@@ -83,6 +120,7 @@
                         <th class="url_label">URL</th>
                         <th class="tg-0lax">Last Updated</th>
                         <th class="tg-0lax">Version</th>
+                        <th class="tg-0lax">Show on Executive</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,6 +130,11 @@
                         <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">&#x1f517</a></td>
                         <td class="tg-0lax">{{ items.lastUpdate }}</td>
                         <td class="tg-0lax">{{ items.version }}</td>
+                        {% if items.executive %}
+                        <td ><input class="check_box" type="checkbox" name="{{ items.dashId }}" checked></td>
+                        {% else %}
+                        <td ><input class="check_box" type="checkbox" name="{{ items.dashId }}" ></td>
+                        {% endif %}
                     </tr>
                     {%endfor%}
                 </tbody>
