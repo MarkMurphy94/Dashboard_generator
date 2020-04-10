@@ -185,6 +185,13 @@ body {
   padding: 20px;
 }
 
+/* creates a div that is 80% width */
+.div_width {
+  width: 80%;
+  z-index:1;
+  position: relative;
+}
+
 /* Footer */
 .footer {
   position: fixed;
@@ -394,6 +401,15 @@ body {
     color: #fff;
 }
 
+/* float divs to the right */
+.float_right {
+  float: right;
+}
+
+/* float divs to the left */
+.float_left {
+  float: left;
+}
 
 /* Used to highlight selected row on table */
 .selected {
