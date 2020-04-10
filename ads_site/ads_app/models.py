@@ -280,6 +280,13 @@ def create_iteration(test_plan):
                              auth=HTTPBasicAuth(USER, TOKEN),
                              json=iteration, params=version)
     dash_response = response.json()
+    print(response.status_code)
+    if response.status_code == 400:
+        raise DashAlreadyExists("""
+                                Failed to create iteration.
+                                Do not include these characters in your test plan name: 
+                                \ / $ ? * : " & < # % +
+                                """)
 
 
 def create_test_plan(test_plan):
