@@ -975,7 +975,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 starting_column += 2
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
-    # suite_id = Return_Suite_ID(Alpha + str(count), testPlanId)
     # endregion
 
     # region Early System Test
@@ -993,7 +992,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
             suite_name = suite['name']
             starting_column = 2
             count = 0
-            # suite_name = Return_Suite_Name(suite_id, testPlanId)
             # region Alpha Markdown
             row_text = "#Early \n #System Test \n ###" + suite_name + "\n#------->"
 
@@ -1065,7 +1063,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 starting_column += 2
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
-    # suite_id = Return_Suite_ID(Alpha + str(count), testPlanId)
     # endregion
 
     # region System Test
@@ -1377,7 +1374,6 @@ def return_test_plan_id(test_plan, continuation_token=''):
     query_response = response.json()
     for child in query_response["value"]:
         if test_plan in child["name"]:
-            # if(type == child["name"].split(' ')[0]):
             return str(child["id"])
     if continue_key not in response.headers._store:
         raise TestPlanError("Test Plan: " + test_plan + " not Found in Azure")
@@ -1459,7 +1455,6 @@ def return_query_name(name, folder):
     query_response = response.json()
     for child in query_response["children"]:
         if name in child["name"]:
-            # if(type == child["name"].split(' ')[0]):
             return child["name"]
     return NOT_FOUND
 
@@ -2135,5 +2130,4 @@ def update_agile_plan(selected, child_suites):
 
     with open(AGILE_PATH, 'w') as outfile:
         json.dump(agile_config, outfile)
-    # create_agile_config(test_plan, test_plan_id, sprints_suite)
 # endregion
