@@ -98,7 +98,7 @@ def create_test(request):
         except Exception as e:
             print("error")
             action = "encountered an error creating a test plan"
-            write_to_log(request, action, e)
+            write_to_log(request, action, str(e))
             messages.error(request, e)
 
     return render(request, 'ads_app/done.html', context)
