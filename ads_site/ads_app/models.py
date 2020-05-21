@@ -22,7 +22,7 @@ EXECUTIVE_ID = '1d9b31cb-3538-40f1-8830-92ae1575b269'
 NOT_FOUND = "not found"
 JSON_ERROR = "json error"
 DATE_FORMAT = " MM/DD-MM/DD"
-MAX_ROW = 7  # maximum number of widgets per row
+MAX_WIDGETS = 7  # maximum number of widgets per row
 MAX_COLUMN = 14  # maximum number of columns per row
 CURRENT_SPRINT_DEFAULT = 2
 VERSION = 'v0.2'  # Application Version
@@ -970,7 +970,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
@@ -1058,7 +1058,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
@@ -1144,7 +1144,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 starting_column += 2
                 count += 1
                 # endregion
-            while count <= 7:
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
@@ -1230,7 +1230,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
@@ -1320,7 +1320,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
