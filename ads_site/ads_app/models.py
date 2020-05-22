@@ -22,8 +22,8 @@ EXECUTIVE_ID = '1d9b31cb-3538-40f1-8830-92ae1575b269'
 NOT_FOUND = "not found"
 JSON_ERROR = "json error"
 DATE_FORMAT = " MM/DD-MM/DD"
-MAX_WIDGETS = 7  # maximum number of widgets per row
-MAX_COLUMN = 14  # maximum number of columns per row
+MAX_WIDGETS = 10  # maximum number of widgets per row
+MAX_COLUMN = 2*MAX_WIDGETS  # maximum number of columns per row, most widgets take 2 columns
 CURRENT_SPRINT_DEFAULT = 2
 VERSION = 'v0.2'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
@@ -1025,9 +1025,8 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
 
             # create widgets for children suites if found
             child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
             for child in child_list:
-                if child_count >= 5:
+                if starting_column > MAX_COLUMN:
                     break
                 else:
                     child_id = str(child['id'])
@@ -1045,7 +1044,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                         name = suite_name + "- Automated Regression"
                     else:
                         name = child['name']
-                child_count += 1
 
                 group = "Outcome"
                 test_results = True
