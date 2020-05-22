@@ -22,7 +22,7 @@ EXECUTIVE_ID = '1d9b31cb-3538-40f1-8830-92ae1575b269'
 NOT_FOUND = "not found"
 JSON_ERROR = "json error"
 DATE_FORMAT = " MM/DD-MM/DD"
-MAX_WIDGETS = 10  # maximum number of widgets per row
+MAX_WIDGETS = 9  # maximum number of widgets per row, set to meet max limit of 200 per dashboard
 MAX_COLUMN = 2*MAX_WIDGETS  # maximum number of columns per row, most widgets take 2 columns
 CURRENT_SPRINT_DEFAULT = 2
 VERSION = 'v0.2'  # Application Version
@@ -844,6 +844,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     sys_features = return_chart(16, 1, name, query_id, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, sys_features)
     # endregion
+
+    # region Fill out with Blank widgets
+    while starting_column <= MAX_COLUMN:
+        create_widget(output_team, overview_id, return_blank_square(starting_column, 3))
+        starting_column += 2
+    # endregion
+
     # endregion
 
     # region Second Row Widgets
@@ -897,9 +904,12 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 4
     # endregion
 
+    # region Fill out with Blank widgets
     while starting_column <= MAX_COLUMN:
         create_widget(output_team, overview_id, return_blank_square(starting_column, 3))
         starting_column += 2
+    # endregion
+
     # endregion
 
     # region Sprint Row
@@ -1056,11 +1066,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
+            # region Fill out with Blank widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1142,11 +1154,14 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 starting_column += 2
                 count += 1
                 # endregion
+
+            # region Fill out with Blank widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1228,11 +1243,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
+            # region Fill out with Blank widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1318,11 +1335,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
+            # region Fill out with Blank widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
