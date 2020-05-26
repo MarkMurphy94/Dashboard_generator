@@ -846,8 +846,10 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
     # region Fill out with Blank widgets
+    starting_column = 18
+
     while starting_column <= MAX_COLUMN:
-        create_widget(output_team, overview_id, return_blank_square(starting_column, 3))
+        create_widget(output_team, overview_id, return_blank_square(starting_column, 1))
         starting_column += 2
     # endregion
 
