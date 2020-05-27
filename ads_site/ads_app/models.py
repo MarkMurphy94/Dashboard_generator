@@ -862,7 +862,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     create_widget(output_team, overview_id, sys_features)
     # endregion
 
-    # region Fill out with Blank widgets
+    # region Fill In with Blank Widgets
     starting_column += 2
 
     while starting_column <= MAX_COLUMN:
@@ -888,7 +888,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         new_features = return_test_chart(starting_column, starting_row, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
         starting_column += 2
-        # endregion
 
         # region All Manual Regression (Resources)
         name = "All Regression Test Cases"
@@ -925,7 +924,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 4
     # endregion
 
-    # region Fill out with Blank widgets
+    # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row))
         starting_column += 2
@@ -1088,7 +1087,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            # region Fill out with Blank widgets
+            # region Fill In with Blank Widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
@@ -1178,7 +1177,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            # region Fill out with Blank widgets
+            # region Fill In with Blank Widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
@@ -1267,7 +1266,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            # region Fill out with Blank widgets
+            # region Fill In with Blank Widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
@@ -1360,7 +1359,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            # region Fill out with Blank widgets
+            # region Fill In with Blank Widgets
             while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
