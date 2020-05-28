@@ -22,8 +22,8 @@ EXECUTIVE_ID = '1d9b31cb-3538-40f1-8830-92ae1575b269'
 NOT_FOUND = "not found"
 JSON_ERROR = "json error"
 DATE_FORMAT = " MM/DD-MM/DD"
-MAX_ROW = 7  # maximum number of widgets per row
-MAX_COLUMN = 14  # maximum number of columns per row
+MAX_WIDGETS = 8  # maximum number of widgets per row, set to meet max limit of 200 per dashboard
+MAX_COLUMN = 2*MAX_WIDGETS  # maximum number of columns per row, most widgets take 2 columns
 CURRENT_SPRINT_DEFAULT = 2
 VERSION = 'v0.2'  # Application Version
 URL_HEADER = 'https://dev.azure.com/itron/'
@@ -724,6 +724,10 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         in the query folder provided, and the test suites found in the given
         test plan.
     """
+
+    starting_column = 1
+    starting_row = 1
+
     # region First Widget Row
     test_suite_id = str(int(test_plan) + 1)
     url = url.strip()
@@ -736,114 +740,138 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     main_text = "#" + program_name + tree_link + "\n # \n " \
                                                  "#Overall Program Test Status \n #------->"
 
-    main_markdown = return_markdown(1, 1, main_text)
+    main_markdown = return_markdown(starting_column, starting_row, main_text)
     create_widget(output_team, overview_id, main_markdown)
     # endregion
 
     # region 4 Query Tile
     # Creating All Bugs widget
+    starting_column += 1
     name = "All Bugs"
     color = "#fbbc3d"
     query_contains = "All NOT Closed"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
-    all_bugs = return_query_tile(2, 1, name, query_name, query_id, color)
+    all_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, all_bugs)
 
     # Creating Dev Bugs widget
+    starting_column += 1
     name = "Dev Bugs"
     color = "#e60017"
     query_contains = "New Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
-    dev_bugs = return_query_tile(3, 1, name, query_name, query_id, color)
+    dev_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, dev_bugs)
 
     # Creating Monitored widget
+    starting_column -= 1
+    starting_row += 1
     name = "Monitored"
     color = "#cccccc"
     query_contains = "All Monitored"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
-    monitored_tile = return_query_tile(2, 2, name, query_name, query_id, color)
+    monitored_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, monitored_tile)
 
     # Creating RTT widget
+    starting_column += 1
     name = "RTT"
     color = "#c9e7e7"
     query_contains = "RTT"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
-    rtt_tile = return_query_tile(3, 2, name, query_name, query_id, color)
+    rtt_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, rtt_tile)
     # endregion
 
     # region Bug Trend
+    starting_column += 1
+    starting_row -= 1
     name = program_name + " Bug Trend"
     query_id = return_query_id("All NOT Closed", query_folder)
     history = "last12Weeks"
 
-    bug_trend = return_chart(4, 1, name, query_id, history=history, direction="descending")
+    bug_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
     create_widget(output_team, overview_id, bug_trend)
     # endregion
 
     # region Bug Severity
+    starting_column += 2
     name = program_name + " Bug Severity"
     query_id = return_query_id("New Bugs", query_folder)
     chart_type = "ColumnChart"
 
-    bug_severity = return_chart(6, 1, name, query_id, chart_type=chart_type)
+    bug_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
     create_widget(output_team, overview_id, bug_severity)
     # endregion
 
     # region RTT Trend
+    starting_column += 2
     name = program_name + " RTT Trend"
     query_id = return_query_id("RTT", query_folder)
     history = "last12Weeks"
 
-    rtt_trend = return_chart(8, 1, name, query_id, history=history, direction="descending")
+    rtt_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
     create_widget(output_team, overview_id, rtt_trend)
     # endregion
 
     # region RTT Severity
+    starting_column += 2
     name = "RTT Severity"
     query_id = return_query_id("RTT", query_folder)
     chart_type = "ColumnChart"
     # property_ = "value"
 
-    rtt_severity = return_chart(10, 1, name, query_id, chart_type=chart_type)
+    rtt_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
     create_widget(output_team, overview_id, rtt_severity)
     # endregion
 
     # region Arrival Last 7 Days
+    starting_column += 2
     name = program_name + " Arrival Last 7 Days"
     query_id = return_query_id("All created this week", query_folder)
     chart_type = "stackBarChart"
     series = "System.CreatedDate"
 
-    arrival_7_days = return_chart(12, 1, name, query_id, chart_type=chart_type, series=series)
+    arrival_7_days = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, arrival_7_days)
     # endregion
 
     # region Resolved Last 7 Days
+    starting_column += 2
     name = program_name + " Resolved Last 7 Days"
     query_id = return_query_id("All resolved this week", query_folder)
     chart_type = "stackBarChart"
     series = "Microsoft.VSTS.Common.ResolvedDate"
 
-    sys_features = return_chart(14, 1, name, query_id, chart_type=chart_type, series=series)
+    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, sys_features)
     # endregion
 
     # region Closed Last 7 Days
+    starting_column += 2
     name = program_name + " Closed Last 7 Days"
     query_id = return_query_id("All closed this week", query_folder)
     chart_type = "stackBarChart"
     series = "Microsoft.VSTS.Common.ClosedDate"
 
-    sys_features = return_chart(16, 1, name, query_id, chart_type=chart_type, series=series)
+    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, sys_features)
     # endregion
+
+    # region Fill In with Blank Widgets
+    starting_column += 2
+
+    while starting_column <= MAX_COLUMN:
+        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row))
+        starting_column += 2
+    # endregion
+
+    starting_row += 2
+
     # endregion
 
     # region Second Row Widgets
@@ -857,16 +885,15 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         name = "All New Feature Test Cases (Resources)"
         suite = return_suite_child_id("New", test_plan,
                                       resources_suite)
-        new_features = return_test_chart(starting_column, 3, name, suite, test_plan)
+        new_features = return_test_chart(starting_column, starting_row, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
         starting_column += 2
-        # endregion
 
         # region All Manual Regression (Resources)
         name = "All Regression Test Cases"
         suite = return_suite_child_id("Reg", test_plan,
                                       resources_suite)
-        new_features = return_test_chart(starting_column, 3, name, suite, test_plan)
+        new_features = return_test_chart(starting_column, starting_row, name, suite, test_plan)
         create_widget(output_team, overview_id, new_features)
         starting_column += 2
         # endregion
@@ -880,7 +907,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     direction = "descending"
     scope = "WorkitemTracking.Queries"
 
-    sys_features = return_chart(starting_column, 3, name, query_id, chart_type=chart_type,
+    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type,
                                 group=group, _property=property_,
                                 direction=direction, scope=scope)
     create_widget(output_team, overview_id, sys_features)
@@ -892,18 +919,21 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     query_title = "SQA Test Features without test cases"
     query_id = return_query_id(query_title, query_folder)
 
-    all_features = return_features_table(starting_column, 3, name, query_id)
+    all_features = return_features_table(starting_column, starting_row, name, query_id)
     create_widget(output_team, overview_id, all_features)
     starting_column += 4
     # endregion
 
+    # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
-        create_widget(output_team, overview_id, return_blank_square(starting_column, 3))
+        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row))
         starting_column += 2
     # endregion
 
+    starting_row += 2
+    # endregion
+
     # region Sprint Row
-    starting_row = 5
 
     # return all children suites of "Sprint" and sort
     sprint_suite = return_suite_child_id("Sprint", test_plan,
@@ -916,13 +946,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         for suite in suite_list:
             suite_id = str(suite['id'])
             suite_name = suite['name']
-            starting_column = 2
+            starting_column = 1
             count = 0
             # suite_name = Return_Suite_Name(suite_id, testPlanId)
             # region Alpha Markdown
             row_text = "#" + suite_name + "\n#------->"
 
-            row_markdown = return_markdown(1, starting_row, row_text, height=2)
+            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
             count += 1
             # endregion
@@ -970,7 +1000,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
@@ -992,13 +1022,14 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         for suite in suite_list:
             suite_id = str(suite['id'])
             suite_name = suite['name']
-            starting_column = 2
+            starting_column = 1
             count = 0
             # region Alpha Markdown
             row_text = "#Early \n #System Test \n ###" + suite_name + "\n#------->"
 
-            row_markdown = return_markdown(1, starting_row, row_text, height=2)
+            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
+            starting_column += 1
             count += 1
             # endregion
 
@@ -1025,9 +1056,8 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
 
             # create widgets for children suites if found
             child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
             for child in child_list:
-                if child_count >= 5:
+                if starting_column > MAX_COLUMN:
                     break
                 else:
                     child_id = str(child['id'])
@@ -1045,7 +1075,6 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                         name = suite_name + "- Automated Regression"
                     else:
                         name = child['name']
-                child_count += 1
 
                 group = "Outcome"
                 test_results = True
@@ -1058,11 +1087,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            # region Fill In with Blank Widgets
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1077,14 +1108,15 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         for suite in suite_list:
             suite_id = str(suite['id'])
             suite_name = suite['name']
-            starting_column = 2
+            starting_column = 1
             count = 0
 
             # region System Test Markdown
             row_text = "#System Test \n ###" + suite_name + "\n#------->"
 
-            row_markdown = return_markdown(1, starting_row, row_text, height=2)
+            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
+            starting_column += 1
             count += 1
             # endregion
 
@@ -1144,11 +1176,14 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 starting_column += 2
                 count += 1
                 # endregion
-            while count <= 7:
+
+            # region Fill In with Blank Widgets
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1163,14 +1198,15 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         for suite in suite_list:
             suite_id = str(suite['id'])
             suite_name = suite['name']
-            starting_column = 2
+            starting_column = 1
             count = 0
 
             # region Customer Solution Markdown
             row_text = "#Customer Solution \n ###" + suite_name + " \n#------->"
 
-            row_markdown = return_markdown(1, starting_row, row_text, height=2)
+            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
+            starting_column += 1
             count += 1
             # endregion
 
@@ -1230,11 +1266,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            # region Fill In with Blank Widgets
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1253,14 +1291,15 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
         for suite in suite_list:
             suite_id = str(suite['id'])
             suite_name = suite['name']
-            starting_column = 2
+            starting_column = 1
             count = 0
 
             # region First Article/Final Product Markdown
             row_text = "#" + suite_title + " Test\n ###" + suite_name + " \n#------->"
 
-            row_markdown = return_markdown(1, starting_row, row_text, height=2)
+            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
+            starting_column += 1
             count += 1
             # endregion
 
@@ -1320,11 +1359,13 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= 7:
+            # region Fill In with Blank Widgets
+            while count <= MAX_WIDGETS:
                 create_widget(output_team, overview_id,
                               return_blank_square(starting_column, starting_row))
                 count += 1
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
