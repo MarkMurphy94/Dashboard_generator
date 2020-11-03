@@ -508,7 +508,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
     make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
-    create_config(team_name, url, dash_id, test_plan, folder, query_folder)
+    create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, short_name)
     return dash_id
 
 
@@ -1362,7 +1362,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
 
-def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
+def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, targeted_project, global_path, short_name):
     """
         Creates a JSON config file with the parameters provided, this is used
         when performing the update function
@@ -1378,6 +1378,9 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         'testPlan': test_plan,
         'folderName': folder_name,
         'folderId': folder_id,
+        'targetedProject': targeted_project,
+        'global_path': global_path,
+        'short_name': short_name,
         'version': VERSION,
         'lastUpdate': date_string,
         'executive': True
@@ -1494,7 +1497,7 @@ def return_query_name(name, folder):
 
 def return_query_id(name, folder):
     """
-        Returns the query id if a query if it is found in the given folder
+        Returns the query id of a query if it is found in the given folder
 
         :returns query id if found, if not found returns NotFound variable
     """
@@ -2048,8 +2051,12 @@ def get_config():
     config_data = []
     for file in file_path:
         file1 = directory + file
+        no_data = {"folderName": file + " -- CONFIG IS EMPTY --"}
         with open(file1, 'r') as json_file:
-            config_data.append(json.load(json_file))
+            if os.stat(file1).st_size == 0:  # Checks if dashboard config file is empty
+                config_data.append(no_data)
+            else:
+                config_data.append(json.load(json_file))
     return config_data
 
 
