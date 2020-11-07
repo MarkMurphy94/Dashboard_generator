@@ -594,7 +594,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     """
         Populates the given folder with the standard queries
     """
-    json_obj = {"name": "New Bugs"}
+    json_obj = {"name": "Dev Bugs"}
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
@@ -608,13 +608,13 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     else:
         target_clause = "[System.Tags] contains '{}'".format(short_name)
 
-    # New Bugs Query
+    # Dev Bugs Query
     wiql = selected_columns + from_bugs \
            + "and [System.State] in ('New', 'Active') and " + target_clause \
            + " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created New Bugs Query for: " + short_name)
+    print("Created Dev Bugs Query for: " + short_name)
 
     # All Bugs Query
     json_obj["name"] = short_name + " All"
@@ -759,7 +759,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     name = "Dev Bugs"
     color = "#e60017"
-    query_contains = "New Bugs"
+    query_contains = "Dev Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     dev_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
@@ -801,7 +801,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     # region Bug Severity
     starting_column += 2
     name = program_name + " Bug Severity"
-    query_id = return_query_id("New Bugs", query_folder)
+    query_id = return_query_id("Dev Bugs", query_folder)
     chart_type = "ColumnChart"
 
     bug_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
@@ -2283,7 +2283,7 @@ def add_four_square(query_folder, output_team, overview_id, row):
     # Creating Dev Bugs widget
     name = "Dev Bugs"
     color = "#e60017"
-    query_contains = "New Bugs"
+    query_contains = "Dev Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     dev_bugs = return_query_tile(3, row, name, query_name, query_id, color)
