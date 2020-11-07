@@ -487,7 +487,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 # region Create Full Dashboard
 
 
-def create_full_dash(folder, url, global_path, target_choice, short_name,
+def create_full_dash(folder, url, global_path, target_choice, target_project_name,
                      test_choice, test_suite):
     """
         Calls functions to complete the tasks below:
@@ -505,7 +505,7 @@ def create_full_dash(folder, url, global_path, target_choice, short_name,
     test_plan = return_suite_test_plan_id(test_suite, test_choice)
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
-    populate_baseline_query_folder(query_folder, target_choice, global_path, short_name)
+    populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
     make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
     create_config(team_name, url, dash_id, test_plan, folder, query_folder)
@@ -590,7 +590,7 @@ def create_query_folder(folder):
     return query_response['id']
 
 
-def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, short_name):
+def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
     """
         Populates the given folder with the standard queries
     """
@@ -604,9 +604,9 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}'".format(short_name)
+        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
     else:
-        target_clause = "[System.Tags] contains '{}'".format(short_name)
+        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
 
     # Dev Bugs Query
     wiql = selected_columns + from_bugs \
@@ -614,7 +614,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            + " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created Dev Bugs Query for: " + short_name)
+    print("Created Dev Bugs Query for: " + target_project_name)
 
     # All closed this week Query
     json_obj["name"] = "All closed this week"
@@ -624,7 +624,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All closed this week Query for: " + short_name)
+    print("Created All closed this week Query for: " + target_project_name)
 
     # All created this week Query
     json_obj["name"] = "All created this week"
@@ -634,7 +634,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
              "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All created this week Query for: " + short_name)
+    print("Created All created this week Query for: " + target_project_name)
 
     # Monitored Query
     json_obj["name"] = "Monitored"
@@ -645,7 +645,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created Monitored Query for: " + short_name)
+    print("Created Monitored Query for: " + target_project_name)
 
     # All Bugs Query
     json_obj["name"] = "All Bugs"
@@ -655,7 +655,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All Bugs Query for: " + short_name)
+    print("Created All Bugs Query for: " + target_project_name)
 
     # All Resolved this week Query
     json_obj["name"] = "All resolved this week"
@@ -666,7 +666,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All Resolved This Week Query for: " + short_name)
+    print("Created All Resolved This Week Query for: " + target_project_name)
 
     # RTT Query
     json_obj["name"] = "RTT"
@@ -675,7 +675,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created RTT Query for: " + short_name)
+    print("Created RTT Query for: " + target_project_name)
 
     # SQA Test Features Query
     json_obj["name"] = "SQA Test Features"
@@ -688,7 +688,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                                                "order by [System.Id] "
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created SQA Test Features Query for: " + short_name)
+    print("Created SQA Test Features Query for: " + target_project_name)
 
     # SQA Test Features without test cases
     json_obj["name"] = "SQA Test Features without test cases"
@@ -705,7 +705,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
     print("Created SQA Test Features without test cases Query for: "
-          + short_name)
+          + target_project_name)
 
 
 def make_dash(output_team, url, test_plan, program_name, query_folder,
