@@ -656,15 +656,15 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     create_query(json_obj, query_folder)
     print("Created All Monitored Query for: " + short_name)
 
-    # All NOT Closed Query
-    json_obj["name"] = "All NOT Closed"
+    # All Bugs Query
+    json_obj["name"] = "All Bugs"
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All NOT Closed Query for: " + short_name)
+    print("Created All Bugs Query for: " + short_name)
 
     # All Resolved this week Query
     json_obj["name"] = "All resolved this week"
@@ -749,7 +749,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     name = "All Bugs"
     color = "#fbbc3d"
-    query_contains = "All NOT Closed"
+    query_contains = "All Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     all_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
@@ -791,7 +791,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     starting_row -= 1
     name = program_name + " Bug Trend"
-    query_id = return_query_id("All NOT Closed", query_folder)
+    query_id = return_query_id("All Bugs", query_folder)
     history = "last12Weeks"
 
     bug_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
@@ -1877,7 +1877,7 @@ def return_widget_obj(_type):
                         "backgroundColor": "#3f9bd8"
                     }
                 ],
-                "lastArtifactName": "All NOT Closed by Severity"
+                "lastArtifactName": "All Bugs by Severity"
             },
             "settingsVersion": {
                 "major": 3,
@@ -1994,9 +1994,9 @@ def return_widget_obj(_type):
             "settings": {
                 "defaultBackgroundColor": "#fbbc3d",
                 "queryId": "94d32c67-eaf8-42fe-b2f9-4919a32ffe81",
-                "queryName": "PEA1.5 All NOT Closed",
+                "queryName": "PEA1.5 All Bugs",
                 "colorRules": [],
-                "lastArtifactName": "PEA1.5 All NOT Closed"
+                "lastArtifactName": "PEA1.5 All Bugs"
             },
             "settingsVersion": {
                 "patch": 0,
@@ -2258,7 +2258,7 @@ def add_bug_trend(dash_name, query_folder, output_team, overview_id, row):
     """
     # region Bug Trend
     name = dash_name + " Bug Trend"
-    query_id = return_query_id("All NOT Closed", query_folder)
+    query_id = return_query_id("All Bugs", query_folder)
     history = "last12Weeks"
 
     bug_chart = return_chart(6, row, name, query_id, history=history, direction="descending")
@@ -2274,7 +2274,7 @@ def add_four_square(query_folder, output_team, overview_id, row):
     # Creating All Bugs widget
     name = "All Bugs"
     color = "#fbbc3d"
-    query_contains = "All NOT Closed"
+    query_contains = "All Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     all_bugs = return_query_tile(2, row, name, query_name, query_id, color)
