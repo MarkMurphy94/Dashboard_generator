@@ -645,8 +645,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     create_query(json_obj, query_folder)
     print("Created All created this week Query for: " + short_name)
 
-    # All Monitored Query
-    json_obj["name"] = "All Monitored"
+    # Monitored Query
+    json_obj["name"] = "Monitored"
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
@@ -654,7 +654,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All Monitored Query for: " + short_name)
+    print("Created Monitored Query for: " + short_name)
 
     # All Bugs Query
     json_obj["name"] = "All Bugs"
@@ -770,7 +770,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_row += 1
     name = "Monitored"
     color = "#cccccc"
-    query_contains = "All Monitored"
+    query_contains = "Monitored"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     monitored_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
@@ -2295,7 +2295,7 @@ def add_four_square(query_folder, output_team, overview_id, row):
     # Creating Monitored widget
     name = "Monitored"
     color = "#cccccc"
-    query_contains = "All Monitored"
+    query_contains = "Monitored"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     monitored_tile = return_query_tile(2, row, name, query_name, query_id, color)
