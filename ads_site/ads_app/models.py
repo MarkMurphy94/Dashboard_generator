@@ -626,7 +626,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     print("Created All Bugs Query for: " + short_name)
 
     # All closed this week Query
-    json_obj["name"] = short_name + " All closed this week"
+    json_obj["name"] = "All closed this week"
     wiql = selected_columns + from_bugs \
            + "and " + target_clause \
            + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
@@ -636,7 +636,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     print("Created All closed this week Query for: " + short_name)
 
     # All created this week Query
-    json_obj["name"] = short_name + " All created this week"
+    json_obj["name"] = "All created this week"
     wiql = selected_columns + from_bugs \
            + "and " + target_clause \
            + " and [System.CreatedDate] > @today - 7 " \
@@ -646,7 +646,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     print("Created All created this week Query for: " + short_name)
 
     # All Monitored Query
-    json_obj["name"] = short_name + " All Monitored"
+    json_obj["name"] = "All Monitored"
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
@@ -657,7 +657,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     print("Created All Monitored Query for: " + short_name)
 
     # All NOT Closed Query
-    json_obj["name"] = short_name + " All NOT Closed"
+    json_obj["name"] = "All NOT Closed"
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
@@ -667,7 +667,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     print("Created All NOT Closed Query for: " + short_name)
 
     # All Resolved this week Query
-    json_obj["name"] = short_name + " All resolved this week"
+    json_obj["name"] = "All resolved this week"
     wiql = selected_columns + from_bugs \
            + "and " + target_clause + \
            " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
