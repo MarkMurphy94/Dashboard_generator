@@ -616,15 +616,6 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     create_query(json_obj, query_folder)
     print("Created Dev Bugs Query for: " + short_name)
 
-    # All Bugs Query
-    json_obj["name"] = short_name + " All"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause + \
-           " order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created All Bugs Query for: " + short_name)
-
     # All closed this week Query
     json_obj["name"] = "All closed this week"
     wiql = selected_columns + from_bugs \
