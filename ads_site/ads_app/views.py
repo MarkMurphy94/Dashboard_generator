@@ -126,7 +126,7 @@ def create_dash(request):
             url = form.cleaned_data[url_key]
             global_path = form.cleaned_data[global_key]
             target_choice = form.cleaned_data[target_key]
-            short_name = form.cleaned_data[name_key]
+            target_project_name = form.cleaned_data[name_key]
             test_choice = form.cleaned_data[choice_key]
             test_plan_name = form.cleaned_data[test_plan_key]
 
@@ -135,13 +135,13 @@ def create_dash(request):
             context[url_key] = url
             context[global_key] = global_path
             context[target_key] = target_choice
-            context[name_key] = short_name
+            context[name_key] = target_project_name
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name
 
             try:
                 dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
-                                                  short_name, test_choice, test_plan_name)
+                                                  target_project_name, test_choice, test_plan_name)
                 context['dash_id'] = dash_id
                 write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)

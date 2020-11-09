@@ -487,7 +487,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 # region Create Full Dashboard
 
 
-def create_full_dash(folder, url, global_path, target_choice, short_name,
+def create_full_dash(folder, url, global_path, target_choice, target_project_name,
                      test_choice, test_suite):
     """
         Calls functions to complete the tasks below:
@@ -505,7 +505,7 @@ def create_full_dash(folder, url, global_path, target_choice, short_name,
     test_plan = return_suite_test_plan_id(test_suite, test_choice)
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
-    populate_baseline_query_folder(query_folder, target_choice, global_path, short_name)
+    populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
     make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
     create_config(team_name, url, dash_id, test_plan, folder, query_folder)
@@ -590,11 +590,11 @@ def create_query_folder(folder):
     return query_response['id']
 
 
-def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, short_name):
+def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
     """
         Populates the given folder with the standard queries
     """
-    json_obj = {"name": "New Bugs"}
+    json_obj = {"name": "Dev Bugs"}
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
@@ -604,49 +604,40 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}'".format(short_name)
+        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
     else:
-        target_clause = "[System.Tags] contains '{}'".format(short_name)
+        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
 
-    # New Bugs Query
+    # Dev Bugs Query
     wiql = selected_columns + from_bugs \
            + "and [System.State] in ('New', 'Active') and " + target_clause \
            + " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created New Bugs Query for: " + short_name)
-
-    # All Bugs Query
-    json_obj["name"] = short_name + " All"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause + \
-           " order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created All Bugs Query for: " + short_name)
+    print("Created Dev Bugs Query for: " + target_project_name)
 
     # All closed this week Query
-    json_obj["name"] = short_name + " All closed this week"
+    json_obj["name"] = "All closed this week"
     wiql = selected_columns + from_bugs \
            + "and " + target_clause \
            + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All closed this week Query for: " + short_name)
+    print("Created All closed this week Query for: " + target_project_name)
 
     # All created this week Query
-    json_obj["name"] = short_name + " All created this week"
+    json_obj["name"] = "All created this week"
     wiql = selected_columns + from_bugs \
            + "and " + target_clause \
            + " and [System.CreatedDate] > @today - 7 " \
              "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All created this week Query for: " + short_name)
+    print("Created All created this week Query for: " + target_project_name)
 
-    # All Monitored Query
-    json_obj["name"] = short_name + " All Monitored"
+    # Monitored Query
+    json_obj["name"] = "Monitored"
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
@@ -654,20 +645,20 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All Monitored Query for: " + short_name)
+    print("Created Monitored Query for: " + target_project_name)
 
-    # All NOT Closed Query
-    json_obj["name"] = short_name + " All NOT Closed"
+    # All Bugs Query
+    json_obj["name"] = "All Bugs"
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
            " order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All NOT Closed Query for: " + short_name)
+    print("Created All Bugs Query for: " + target_project_name)
 
     # All Resolved this week Query
-    json_obj["name"] = short_name + " All resolved this week"
+    json_obj["name"] = "All resolved this week"
     wiql = selected_columns + from_bugs \
            + "and " + target_clause + \
            " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
@@ -675,7 +666,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created All Resolved This Week Query for: " + short_name)
+    print("Created All Resolved This Week Query for: " + target_project_name)
 
     # RTT Query
     json_obj["name"] = "RTT"
@@ -684,7 +675,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
            " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created RTT Query for: " + short_name)
+    print("Created RTT Query for: " + target_project_name)
 
     # SQA Test Features Query
     json_obj["name"] = "SQA Test Features"
@@ -697,7 +688,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                                                "order by [System.Id] "
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
-    print("Created SQA Test Features Query for: " + short_name)
+    print("Created SQA Test Features Query for: " + target_project_name)
 
     # SQA Test Features without test cases
     json_obj["name"] = "SQA Test Features without test cases"
@@ -714,7 +705,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
     print("Created SQA Test Features without test cases Query for: "
-          + short_name)
+          + target_project_name)
 
 
 def make_dash(output_team, url, test_plan, program_name, query_folder,
@@ -749,7 +740,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     name = "All Bugs"
     color = "#fbbc3d"
-    query_contains = "All NOT Closed"
+    query_contains = "All Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     all_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
@@ -759,7 +750,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     name = "Dev Bugs"
     color = "#e60017"
-    query_contains = "New Bugs"
+    query_contains = "Dev Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     dev_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
@@ -770,7 +761,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_row += 1
     name = "Monitored"
     color = "#cccccc"
-    query_contains = "All Monitored"
+    query_contains = "Monitored"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     monitored_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
@@ -791,7 +782,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     starting_row -= 1
     name = program_name + " Bug Trend"
-    query_id = return_query_id("All NOT Closed", query_folder)
+    query_id = return_query_id("All Bugs", query_folder)
     history = "last12Weeks"
 
     bug_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
@@ -801,7 +792,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     # region Bug Severity
     starting_column += 2
     name = program_name + " Bug Severity"
-    query_id = return_query_id("New Bugs", query_folder)
+    query_id = return_query_id("Dev Bugs", query_folder)
     chart_type = "ColumnChart"
 
     bug_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
@@ -1877,7 +1868,7 @@ def return_widget_obj(_type):
                         "backgroundColor": "#3f9bd8"
                     }
                 ],
-                "lastArtifactName": "All NOT Closed by Severity"
+                "lastArtifactName": "All Bugs by Severity"
             },
             "settingsVersion": {
                 "major": 3,
@@ -1994,9 +1985,9 @@ def return_widget_obj(_type):
             "settings": {
                 "defaultBackgroundColor": "#fbbc3d",
                 "queryId": "94d32c67-eaf8-42fe-b2f9-4919a32ffe81",
-                "queryName": "PEA1.5 All NOT Closed",
+                "queryName": "PEA1.5 All Bugs",
                 "colorRules": [],
-                "lastArtifactName": "PEA1.5 All NOT Closed"
+                "lastArtifactName": "PEA1.5 All Bugs"
             },
             "settingsVersion": {
                 "patch": 0,
@@ -2258,7 +2249,7 @@ def add_bug_trend(dash_name, query_folder, output_team, overview_id, row):
     """
     # region Bug Trend
     name = dash_name + " Bug Trend"
-    query_id = return_query_id("All NOT Closed", query_folder)
+    query_id = return_query_id("All Bugs", query_folder)
     history = "last12Weeks"
 
     bug_chart = return_chart(6, row, name, query_id, history=history, direction="descending")
@@ -2274,7 +2265,7 @@ def add_four_square(query_folder, output_team, overview_id, row):
     # Creating All Bugs widget
     name = "All Bugs"
     color = "#fbbc3d"
-    query_contains = "All NOT Closed"
+    query_contains = "All Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     all_bugs = return_query_tile(2, row, name, query_name, query_id, color)
@@ -2283,7 +2274,7 @@ def add_four_square(query_folder, output_team, overview_id, row):
     # Creating Dev Bugs widget
     name = "Dev Bugs"
     color = "#e60017"
-    query_contains = "New Bugs"
+    query_contains = "Dev Bugs"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     dev_bugs = return_query_tile(3, row, name, query_name, query_id, color)
@@ -2295,7 +2286,7 @@ def add_four_square(query_folder, output_team, overview_id, row):
     # Creating Monitored widget
     name = "Monitored"
     color = "#cccccc"
-    query_contains = "All Monitored"
+    query_contains = "Monitored"
     query_name = return_query_name(query_contains, query_folder)
     query_id = return_query_id(query_contains, query_folder)
     monitored_tile = return_query_tile(2, row, name, query_name, query_id, color)
