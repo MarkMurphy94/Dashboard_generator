@@ -2098,6 +2098,174 @@ def clear_dash(team_name, dashboard_id):
     print("Dashboard cleared")
 
 
+def return_query_folder_children(folder):
+    payload = {'api-version': '4.1',
+               '$expand': 'clauses',
+               '$depth': 1
+               }
+    response = requests.get(URL_HEADER + PROJECT + '/_apis/wit/queries/'
+                            + folder + '?', auth=HTTPBasicAuth(USER, TOKEN),
+                            params=payload)
+    query_response = response.json()
+    # print(query_response)
+    for child in query_response["children"]:
+        print(query_response["children"]["name"])
+        return child["name"]
+    return NOT_FOUND
+
+
+def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
+    """
+        Populates the given folder with the standard queries
+    """
+    json_obj = {"name": "Dev Bugs"}
+    selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
+                       " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
+                       " [System.AssignedTo], [System.State], [System.CreatedDate]," \
+                       " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
+                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags] "
+    from_bugs = "from WorkItems where [System.WorkItemType] = 'Bug' "
+
+    # Target clause is dependent on User's GUI choice
+    if str(target_choice) == '0':
+        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
+    else:
+        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
+
+    # Dev Bugs Query
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] in ('New', 'Active') and " + target_clause \
+           + " and not [System.Tags] contains 'Monitor'"
+    json_obj["wiql"] = {"wiql": wiql}
+    print(json_obj["wiql"])
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created Dev Bugs Query for: " + target_project_name)
+
+    # All Bugs Query
+    # json_obj["name"] = "All Bugs"
+    # wiql = selected_columns + from_bugs \
+    #        + "and " + target_clause + \
+    #        " order by [System.CreatedDate] desc"
+    # json_obj["wiql"] = {"wiql": wiql}
+    # print(json_obj)
+    # update_query(json_obj, query_folder, json_obj["name"])
+    # print("Created All Bugs Query for: " + target_project_name)
+
+    # All closed this week Query
+    json_obj["name"] = "All closed this week"
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause \
+           + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
+             "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created All closed this week Query for: " + target_project_name)
+
+    # All created this week Query
+    json_obj["name"] = "All created this week"
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause \
+           + " and [System.CreatedDate] > @today - 7 " \
+             "order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created All created this week Query for: " + target_project_name)
+
+    # Monitored Query
+    json_obj["name"] = "Monitored"
+    wiql = selected_columns + from_bugs \
+           + "and not [System.State] contains 'Closed' " \
+             "and " + target_clause + \
+           " and [System.Tags] contains 'Monitor' " \
+           "order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created All Monitored Query for: " + target_project_name)
+
+    # All Bugs Query
+    json_obj["name"] = "All Bugs"
+    wiql = selected_columns + from_bugs \
+           + "and not [System.State] contains 'Closed' " \
+             "and " + target_clause + \
+             " order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created All NOT Closed Query for: " + target_project_name)
+
+    # All Resolved this week Query
+    json_obj["name"] = "All resolved this week"
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause + \
+           " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
+           "and [System.State] = 'Resolved' " \
+           "order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created All Resolved This Week Query for: " + target_project_name)
+
+    # RTT Query
+    json_obj["name"] = "RTT"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] = 'Resolved' and " + target_clause + \
+           " and not [System.Tags] contains 'Monitor'"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created RTT Query for: " + target_project_name)
+
+    # SQA Test Features Query
+    json_obj["name"] = "SQA Test Features"
+    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+           "[System.AssignedTo], [System.State], [System.Tags] " \
+           "from WorkItems " \
+           "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
+           "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
+           "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
+                                               "order by [System.Id] "
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created SQA Test Features Query for: " + target_project_name)
+
+    # SQA Test Features without test cases
+    json_obj["name"] = "SQA Test Features without test cases"
+    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+           "[System.AssignedTo], [System.State], [System.Tags] " \
+           "from WorkItemLinks " \
+           "where (Source.[System.WorkItemType] = 'Feature' " \
+           "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+           "and Source.[System.IterationPath] under " \
+           + repr(global_reqs_path) + ") " \
+                                      "and (Target.[System.WorkItemType] = 'Test Case') " \
+                                      "and Source.[System.State] <> 'Removed' " \
+                                      "order by [System.Id] mode (DoesNotContain)"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Created SQA Test Features without test cases Query for: "
+          + target_project_name)
+
+
+def update_query(json_obj, query_folder, query_name):
+    """
+        Submits the query json object to ADS
+
+    """
+    version = {'api-version': '4.1'}
+    print("eeeeeeeeeeeeeeeeeeeee")
+    query_id = return_query_id(query_name, query_folder)
+    # print(query_id)
+    response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
+                              + query_id + '?',
+                              auth=HTTPBasicAuth(USER, TOKEN), json=json_obj,
+                              params=version)
+    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+    # if query name != query_name, rename to query_name - for older dashboards
+
+    # print(response.json())
+    if response.status_code != 200:
+        print(response.status_code)
+        raise QueryUpdateError("Error updating query")
+
+
 def update_dash(file):
     """
         Updates a dashboard based on the given dashboard config file
@@ -2117,12 +2285,14 @@ def update_dash(file):
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
+    update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name)
     clear_dash(team_name, dash_id)
     populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id)
     print("Dashboard Updated")
 
     now = datetime.datetime.now()
-    date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+    localtime = reference.LocalTimezone()
+    date_string = now.strftime("%m/%d/%Y %H:%M:%S, " + localtime.tzname(now))
     with open(file_directory, 'w') as outfile:
         config_data['lastUpdate'] = date_string
         json.dump(config_data, outfile)
