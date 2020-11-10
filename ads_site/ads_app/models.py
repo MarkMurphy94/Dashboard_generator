@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
+from pytz import reference
 import datetime
 import os
 import json
@@ -176,6 +177,10 @@ class FolderAlreadyExists(Exception):
 
 class DashAlreadyExists(Exception):
     """Dashboard already Exists"""
+
+
+class QueryUpdateError(Exception):
+    """Folders do not support WIQL"""
 
 
 class DashDoesNotExists(Exception):
@@ -506,7 +511,7 @@ def create_full_dash(folder, url, global_path, target_choice, short_name,
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, short_name)
-    make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
     create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, short_name)
     return dash_id
@@ -717,8 +722,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
           + short_name)
 
 
-def make_dash(output_team, url, test_plan, program_name, query_folder,
-              overview_id):
+def populate_dash(output_team, url, test_plan, program_name, query_folder,
+                  overview_id):
     """
         Populates a given dashboard with widgets based on the queries
         in the query folder provided, and the test suites found in the given
@@ -2074,11 +2079,14 @@ def update_dash(file):
         url = config_data['url']
         dash_id = config_data['dashId']
         test_plan = config_data['testPlan']
-        folder = config_data['folderName']
+        target_choice = config_data['targetedProject']
+        global_reqs_path = config_data['global_path']
+        target_project_name = config_data['short_name']
+        folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
     clear_dash(team_name, dash_id)
-    make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id)
     print("Dashboard Updated")
 
     now = datetime.datetime.now()
