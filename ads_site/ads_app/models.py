@@ -513,7 +513,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
     populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
-    create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, short_name)
+    create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
     return dash_id
 
 
@@ -2107,10 +2107,11 @@ def return_query_folder_children(folder):
                             + folder + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=payload)
     query_response = response.json()
-    # print(query_response)
+    queries = []
     for child in query_response["children"]:
-        print(query_response["children"]["name"])
-        return child["name"]
+        queries.append(child["name"])
+        print(queries)
+        # return queries
     return NOT_FOUND
 
 
