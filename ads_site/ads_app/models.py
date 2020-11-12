@@ -187,6 +187,10 @@ class DashDoesNotExists(Exception):
     """Dashboard does not Exist"""
 
 
+class QueryFolderNotFound(Exception):
+    """Query folder not found"""
+
+
 # endregion
 
 
@@ -2106,13 +2110,14 @@ def return_query_folder_children(folder):
     response = requests.get(URL_HEADER + PROJECT + '/_apis/wit/queries/'
                             + folder + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=payload)
+    if response.status_code != 200:
+        raise QueryFolderNotFound
     query_response = response.json()
     queries = []
     for child in query_response["children"]:
         queries.append(child["name"])
-        print(queries)
-        # return queries
-    return NOT_FOUND
+    # print(queries)
+    return queries
 
 
 def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
@@ -2138,9 +2143,9 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
            + "and [System.State] in ('New', 'Active') and " + target_clause \
            + " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = {"wiql": wiql}
-    print(json_obj["wiql"])
+    # print(json_obj)
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created Dev Bugs Query for: " + target_project_name)
+    print("Updated Dev Bugs Query for: " + target_project_name)
 
     # All Bugs Query
     # json_obj["name"] = "All Bugs"
@@ -2160,7 +2165,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created All closed this week Query for: " + target_project_name)
+    print("Updated All closed this week Query for: " + target_project_name)
 
     # All created this week Query
     json_obj["name"] = "All created this week"
@@ -2170,7 +2175,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
              "order by [System.CreatedDate] desc"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created All created this week Query for: " + target_project_name)
+    print("Updated All created this week Query for: " + target_project_name)
 
     # Monitored Query
     json_obj["name"] = "Monitored"
@@ -2181,7 +2186,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created All Monitored Query for: " + target_project_name)
+    print("Updated All Monitored Query for: " + target_project_name)
 
     # All Bugs Query
     json_obj["name"] = "All Bugs"
@@ -2191,7 +2196,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
              " order by [System.CreatedDate] desc"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created All NOT Closed Query for: " + target_project_name)
+    print("Updated All NOT Closed Query for: " + target_project_name)
 
     # All Resolved this week Query
     json_obj["name"] = "All resolved this week"
@@ -2202,7 +2207,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created All Resolved This Week Query for: " + target_project_name)
+    print("Updated All Resolved This Week Query for: " + target_project_name)
 
     # RTT Query
     json_obj["name"] = "RTT"
@@ -2211,7 +2216,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
            " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created RTT Query for: " + target_project_name)
+    print("Updated RTT Query for: " + target_project_name)
 
     # SQA Test Features Query
     json_obj["name"] = "SQA Test Features"
@@ -2224,7 +2229,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
                                                "order by [System.Id] "
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created SQA Test Features Query for: " + target_project_name)
+    print("Updated SQA Test Features Query for: " + target_project_name)
 
     # SQA Test Features without test cases
     json_obj["name"] = "SQA Test Features without test cases"
@@ -2240,8 +2245,20 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
                                       "order by [System.Id] mode (DoesNotContain)"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Created SQA Test Features without test cases Query for: "
+    print("Updated SQA Test Features without test cases Query for: "
           + target_project_name)
+
+
+def return_legacy_name(query_name):
+    legacy = {
+        "All Bugs": "All NOT Closed",
+        "Dev Bugs": "New Bugs",
+        "Monitored": "All Monitored",
+        "All closed this week": "All closed this week",
+        "All created this week": "All created this week",
+        "All resolved this week": "All resolved this week"
+    }
+    return legacy.get(query_name, "LEGACY NAME NOT FOUND")
 
 
 def update_query(json_obj, query_folder, query_name):
@@ -2249,22 +2266,32 @@ def update_query(json_obj, query_folder, query_name):
         Submits the query json object to ADS
 
     """
-    version = {'api-version': '4.1'}
-    print("eeeeeeeeeeeeeeeeeeeee")
-    query_id = return_query_id(query_name, query_folder)
-    # print(query_id)
-    response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
+    version = {'api-version': '6.0'}
+    print("-----------------------------")
+    print(query_name)
+    if query_name not in return_query_folder_children(query_folder):  # for backwards compatibility
+        print(return_legacy_name(query_name))
+        query_id = return_query_id(return_legacy_name(query_name), query_folder)
+        print(query_id)
+        rename_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
+                                   + query_id + '?',
+                                   auth=HTTPBasicAuth(USER, TOKEN), json={"name": query_name},
+                                   params=version)
+        if rename_response.status_code != 200:
+            print(rename_response.status_code)
+            raise QueryUpdateError("Error renaming query")
+    else:
+        query_id = return_query_id(query_name, query_folder)
+
+    wiql_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
                               + query_id + '?',
                               auth=HTTPBasicAuth(USER, TOKEN), json=json_obj,
                               params=version)
-    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-
-    # if query name != query_name, rename to query_name - for older dashboards
-
     # print(response.json())
-    if response.status_code != 200:
-        print(response.status_code)
+    if wiql_response.status_code != 200:
+        print(wiql_response.status_code)
         raise QueryUpdateError("Error updating query")
+    print("-----------------------------")
 
 
 def update_dash(file):
