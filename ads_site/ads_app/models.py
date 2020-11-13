@@ -2116,7 +2116,7 @@ def return_query_folder_children(folder):
     queries = []
     for child in query_response["children"]:
         queries.append(child["name"])
-    # print(queries)
+
     return queries
 
 
@@ -2143,7 +2143,6 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
            + "and [System.State] in ('New', 'Active') and " + target_clause \
            + " and not [System.Tags] contains 'Monitor'"
     json_obj["wiql"] = {"wiql": wiql}
-    # print(json_obj)
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated Dev Bugs Query for: " + target_project_name)
 
@@ -2250,6 +2249,10 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
 
 
 def return_legacy_name(query_name):
+    """
+        Return the legacy name corresponding to the current widget
+
+    """
     legacy = {
         "All Bugs": "All NOT Closed",
         "Dev Bugs": "New Bugs",
@@ -2265,14 +2268,14 @@ def update_query(json_obj, query_folder, query_name):
     """
         Submits the query json object to ADS
 
+        If the dashboard uses the old query names, translate the query name to find the correct ID,
+        then submit the new query name to ADS.
+
     """
     version = {'api-version': '6.0'}
     print("-----------------------------")
-    print(query_name)
-    if query_name not in return_query_folder_children(query_folder):  # for backwards compatibility
-        print(return_legacy_name(query_name))
-        query_id = return_query_id(return_legacy_name(query_name), query_folder)
-        print(query_id)
+    if query_name not in return_query_folder_children(query_folder):  # for compatibility with legacy dashboards
+        query_id = return_query_id(return_legacy_name(query_name), query_folder)    # find the correct query id
         rename_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
                                    + query_id + '?',
                                    auth=HTTPBasicAuth(USER, TOKEN), json={"name": query_name},
@@ -2287,7 +2290,6 @@ def update_query(json_obj, query_folder, query_name):
                               + query_id + '?',
                               auth=HTTPBasicAuth(USER, TOKEN), json=json_obj,
                               params=version)
-    # print(response.json())
     if wiql_response.status_code != 200:
         print(wiql_response.status_code)
         raise QueryUpdateError("Error updating query")
