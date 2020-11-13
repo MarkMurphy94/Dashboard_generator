@@ -2146,16 +2146,6 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated Dev Bugs Query for: " + target_project_name)
 
-    # All Bugs Query
-    # json_obj["name"] = "All Bugs"
-    # wiql = selected_columns + from_bugs \
-    #        + "and " + target_clause + \
-    #        " order by [System.CreatedDate] desc"
-    # json_obj["wiql"] = {"wiql": wiql}
-    # print(json_obj)
-    # update_query(json_obj, query_folder, json_obj["name"])
-    # print("Created All Bugs Query for: " + target_project_name)
-
     # All closed this week Query
     json_obj["name"] = "All closed this week"
     wiql = selected_columns + from_bugs \
