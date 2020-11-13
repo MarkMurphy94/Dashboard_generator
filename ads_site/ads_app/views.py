@@ -194,7 +194,7 @@ def submit_update(request):
             print("Dashboard updated")
             messages.success(request, 'The Dashboard was updated successfully')
         except Exception as e:
-            print("error")
+            print("error: " + str(e))
             messages.error(request, e)
     config_data = models.get_config()
     write_to_log(request, action, selected)

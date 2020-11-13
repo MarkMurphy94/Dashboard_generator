@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
+from pytz import reference
 import datetime
 import os
 import json
@@ -178,8 +179,16 @@ class DashAlreadyExists(Exception):
     """Dashboard already Exists"""
 
 
+class QueryUpdateError(Exception):
+    """Folders do not support WIQL"""
+
+
 class DashDoesNotExists(Exception):
     """Dashboard does not Exist"""
+
+
+class QueryFolderNotFound(Exception):
+    """Query folder not found"""
 
 
 # endregion
@@ -506,9 +515,9 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
-    make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
-    create_config(team_name, url, dash_id, test_plan, folder, query_folder)
+    create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
     return dash_id
 
 
@@ -708,8 +717,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
           + target_project_name)
 
 
-def make_dash(output_team, url, test_plan, program_name, query_folder,
-              overview_id):
+def populate_dash(output_team, url, test_plan, program_name, query_folder,
+                  overview_id):
     """
         Populates a given dashboard with widgets based on the queries
         in the query folder provided, and the test suites found in the given
@@ -1362,7 +1371,7 @@ def make_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
 
-def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
+def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, targeted_project, global_path, short_name):
     """
         Creates a JSON config file with the parameters provided, this is used
         when performing the update function
@@ -1378,6 +1387,9 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id):
         'testPlan': test_plan,
         'folderName': folder_name,
         'folderId': folder_id,
+        'targetedProject': targeted_project,
+        'global_path': global_path,
+        'short_name': short_name,
         'version': VERSION,
         'lastUpdate': date_string,
         'executive': True
@@ -1494,7 +1506,7 @@ def return_query_name(name, folder):
 
 def return_query_id(name, folder):
     """
-        Returns the query id if a query if it is found in the given folder
+        Returns the query id of a query if it is found in the given folder
 
         :returns query id if found, if not found returns NotFound variable
     """
@@ -2048,8 +2060,12 @@ def get_config():
     config_data = []
     for file in file_path:
         file1 = directory + file
+        no_data = {"folderName": file + " -- CONFIG IS EMPTY --"}
         with open(file1, 'r') as json_file:
-            config_data.append(json.load(json_file))
+            if os.stat(file1).st_size == 0:  # Checks if dashboard config file is empty
+                config_data.append(no_data)
+            else:
+                config_data.append(json.load(json_file))
     return config_data
 
 
@@ -2086,6 +2102,190 @@ def clear_dash(team_name, dashboard_id):
     print("Dashboard cleared")
 
 
+def return_query_folder_children(folder):
+    payload = {'api-version': '4.1',
+               '$expand': 'clauses',
+               '$depth': 1
+               }
+    response = requests.get(URL_HEADER + PROJECT + '/_apis/wit/queries/'
+                            + folder + '?', auth=HTTPBasicAuth(USER, TOKEN),
+                            params=payload)
+    if response.status_code != 200:
+        raise QueryFolderNotFound
+    query_response = response.json()
+    queries = []
+    for child in query_response["children"]:
+        queries.append(child["name"])
+
+    return queries
+
+
+def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
+    """
+        Populates the given folder with the standard queries
+    """
+    json_obj = {"name": "Dev Bugs"}
+    selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
+                       " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
+                       " [System.AssignedTo], [System.State], [System.CreatedDate]," \
+                       " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
+                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags] "
+    from_bugs = "from WorkItems where [System.WorkItemType] = 'Bug' "
+
+    # Target clause is dependent on User's GUI choice
+    if str(target_choice) == '0':
+        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
+    else:
+        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
+
+    # Dev Bugs Query
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] in ('New', 'Active') and " + target_clause \
+           + " and not [System.Tags] contains 'Monitor'"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated Dev Bugs Query for: " + target_project_name)
+
+    # All closed this week Query
+    json_obj["name"] = "All closed this week"
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause \
+           + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
+             "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated All closed this week Query for: " + target_project_name)
+
+    # All created this week Query
+    json_obj["name"] = "All created this week"
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause \
+           + " and [System.CreatedDate] > @today - 7 " \
+             "order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated All created this week Query for: " + target_project_name)
+
+    # Monitored Query
+    json_obj["name"] = "Monitored"
+    wiql = selected_columns + from_bugs \
+           + "and not [System.State] contains 'Closed' " \
+             "and " + target_clause + \
+           " and [System.Tags] contains 'Monitor' " \
+           "order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated All Monitored Query for: " + target_project_name)
+
+    # All Bugs Query
+    json_obj["name"] = "All Bugs"
+    wiql = selected_columns + from_bugs \
+           + "and not [System.State] contains 'Closed' " \
+             "and " + target_clause + \
+             " order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated All NOT Closed Query for: " + target_project_name)
+
+    # All Resolved this week Query
+    json_obj["name"] = "All resolved this week"
+    wiql = selected_columns + from_bugs \
+           + "and " + target_clause + \
+           " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
+           "and [System.State] = 'Resolved' " \
+           "order by [System.CreatedDate] desc"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated All Resolved This Week Query for: " + target_project_name)
+
+    # RTT Query
+    json_obj["name"] = "RTT"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] = 'Resolved' and " + target_clause + \
+           " and not [System.Tags] contains 'Monitor'"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated RTT Query for: " + target_project_name)
+
+    # SQA Test Features Query
+    json_obj["name"] = "SQA Test Features"
+    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+           "[System.AssignedTo], [System.State], [System.Tags] " \
+           "from WorkItems " \
+           "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
+           "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
+           "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
+                                               "order by [System.Id] "
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated SQA Test Features Query for: " + target_project_name)
+
+    # SQA Test Features without test cases
+    json_obj["name"] = "SQA Test Features without test cases"
+    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+           "[System.AssignedTo], [System.State], [System.Tags] " \
+           "from WorkItemLinks " \
+           "where (Source.[System.WorkItemType] = 'Feature' " \
+           "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+           "and Source.[System.IterationPath] under " \
+           + repr(global_reqs_path) + ") " \
+                                      "and (Target.[System.WorkItemType] = 'Test Case') " \
+                                      "and Source.[System.State] <> 'Removed' " \
+                                      "order by [System.Id] mode (DoesNotContain)"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated SQA Test Features without test cases Query for: "
+          + target_project_name)
+
+
+def return_legacy_name(query_name):
+    """
+        Return the legacy name corresponding to the current widget
+
+    """
+    legacy = {
+        "All Bugs": "All NOT Closed",
+        "Dev Bugs": "New Bugs",
+        "Monitored": "All Monitored",
+        "All closed this week": "All closed this week",
+        "All created this week": "All created this week",
+        "All resolved this week": "All resolved this week"
+    }
+    return legacy.get(query_name, "LEGACY NAME NOT FOUND")
+
+
+def update_query(json_obj, query_folder, query_name):
+    """
+        Submits the query json object to ADS
+
+        If the dashboard uses the old query names, translate the query name to find the correct ID,
+        then submit the new query name to ADS.
+
+    """
+    version = {'api-version': '6.0'}
+    print("-----------------------------")
+    if query_name not in return_query_folder_children(query_folder):  # for compatibility with legacy dashboards
+        query_id = return_query_id(return_legacy_name(query_name), query_folder)    # find the correct query id
+        rename_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
+                                   + query_id + '?',
+                                   auth=HTTPBasicAuth(USER, TOKEN), json={"name": query_name},
+                                   params=version)
+        if rename_response.status_code != 200:
+            print(rename_response.status_code)
+            raise QueryUpdateError("Error renaming query")
+    else:
+        query_id = return_query_id(query_name, query_folder)
+
+    wiql_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
+                              + query_id + '?',
+                              auth=HTTPBasicAuth(USER, TOKEN), json=json_obj,
+                              params=version)
+    if wiql_response.status_code != 200:
+        print(wiql_response.status_code)
+        raise QueryUpdateError("Error updating query")
+    print("-----------------------------")
+
+
 def update_dash(file):
     """
         Updates a dashboard based on the given dashboard config file
@@ -2099,15 +2299,20 @@ def update_dash(file):
         url = config_data['url']
         dash_id = config_data['dashId']
         test_plan = config_data['testPlan']
-        folder = config_data['folderName']
+        target_choice = config_data['targetedProject']
+        global_reqs_path = config_data['global_path']
+        target_project_name = config_data['short_name']
+        folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
+    update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name)
     clear_dash(team_name, dash_id)
-    make_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id)
     print("Dashboard Updated")
 
     now = datetime.datetime.now()
-    date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+    localtime = reference.LocalTimezone()
+    date_string = now.strftime("%m/%d/%Y %H:%M:%S, " + localtime.tzname(now))
     with open(file_directory, 'w') as outfile:
         config_data['lastUpdate'] = date_string
         json.dump(config_data, outfile)
