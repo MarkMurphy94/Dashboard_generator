@@ -1,4 +1,3 @@
-from json import JSONDecodeError
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
 from pytz import reference
@@ -791,7 +790,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     starting_row -= 1
     name = program_name + " Bug Trend"
-    query_id = return_query_id("All Bugs", query_folder)
+    query_id = return_query_id("Dev Bugs", query_folder)
     history = "last12Weeks"
 
     bug_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
@@ -2054,6 +2053,10 @@ def sort_child_list(child_list):
 
 
 def get_config():
+    """
+        Returns a json object of all dashboard config files
+        :return: config_data
+    """
     directory = CONFIGS_PATH
     file_path = os.listdir(directory)
     file_path.sort()
@@ -2066,6 +2069,21 @@ def get_config():
                 config_data.append(no_data)
             else:
                 config_data.append(json.load(json_file))
+    return config_data
+
+
+def get_selected_config(selected_file):
+    """
+        Returns the config for a selected dashboard in a json object
+        :param selected_file:
+        :return config_data:
+    """
+    directory = CONFIGS_PATH
+    config_data = []
+    file = directory + selected_file + ".txt"
+    with open(file, 'r') as json_file:
+        items = json.load(json_file)
+        config_data.append(items)
     return config_data
 
 
