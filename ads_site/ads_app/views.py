@@ -187,7 +187,7 @@ def select_row(request):
         config_data = models.get_selected_config(selected)
         return render(request, 'ads_app/update_selected.html', {'json': config_data})
     except Exception as error:  # if config file is empty, throw error
-        messages.error(request, "Error: " + str(error))
+        messages.error(request, "Error: The config file is empty")
         config_data = models.get_config()
         write_to_log(request, "encountered an Entry Error", str(error))
         return render(request, 'ads_app/update.html', {'json': config_data})
@@ -263,28 +263,6 @@ def submit_update(request):
                         error_type = "The Test plan name "
                     messages.error(request, error_type + " needs to be less than 250 characters")
     return render(request, 'ads_app/update_selected.html', context)
-
-
-def submit_update1(request):
-    if request.method == 'POST':  # if the request from the HTML is a post
-        request_data = request.POST
-        selected = request_data['selected'].strip()
-        action = "updated the dashboard"
-
-        # updates the selected dashboard, throws a general error message if error is encountered
-        try:
-            models.update_dash(selected)
-            raise models.DashboardComplete()
-        except models.DashboardComplete:
-            print("Dashboard updated")
-            messages.success(request, 'The Dashboard was updated successfully')
-        except Exception as e:
-            print("error: " + str(e))
-            messages.error(request, e)
-    config_data = models.get_config()
-    write_to_log(request, action, selected)
-
-    return render(request, 'ads_app/update.html', {'json': config_data})
 
 
 def executive(request):
