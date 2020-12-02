@@ -726,9 +726,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
 
     starting_column = 1
     starting_row = 1
+    test_suite_id = str(int(test_plan) + 1)
 
     # region First Widget Row
-    test_suite_id = str(int(test_plan) + 1)
     url = url.strip()
     tree_link = "\n"
 

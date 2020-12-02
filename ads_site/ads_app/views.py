@@ -219,7 +219,7 @@ def submit_update(request):
             target_choice = form.cleaned_data[target_key]
             target_project_name = form.cleaned_data[name_key]
             test_choice = form.cleaned_data[choice_key]
-            test_plan_name = form.cleaned_data[test_plan_key]
+            test_plan_name_or_id = form.cleaned_data[test_plan_key]
 
             # Adding form values to context
             context[folder_key] = folder_name
@@ -228,14 +228,14 @@ def submit_update(request):
             context[target_key] = target_choice
             context[name_key] = target_project_name
             context[choice_key] = test_choice
-            context[test_plan_key] = test_plan_name
+            context[test_plan_key] = test_plan_name_or_id
 
             try:
                 config = models.get_selected_config(folder_name)
                 json_config = config[0]
                 dash_id = json_config["dashId"]
                 folder_id = json_config["folderId"]
-                models.create_config(team_name, url, dash_id, test_plan_name, folder_name, folder_id, target_choice, global_path, target_project_name)
+                models.create_config(team_name, url, dash_id, test_plan_name_or_id, folder_name, folder_id, target_choice, global_path, target_project_name)
                 models.update_dash(folder_name)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
