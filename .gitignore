@@ -4,3 +4,5 @@
 /ads_site/.idea/modules.xml
 /ads_site/.idea/misc.xml
 /ads_site/.idea/ads_site.iml
+/ads_site/ads_app/static/logs.txt
+/.idea/*
