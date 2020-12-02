@@ -186,7 +186,7 @@ def select_row(request):
     try:
         config_data = models.get_selected_config(selected)
         return render(request, 'ads_app/update_selected.html', {'json': config_data})
-    except Exception as error:  # if config file is empty, throw error
+    except FileNotFoundError as error:  # if config file is empty, throw error
         messages.error(request, "Error: The config file is empty")
         config_data = models.get_config()
         write_to_log(request, "encountered an Entry Error", str(error))

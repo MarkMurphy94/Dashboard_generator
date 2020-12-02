@@ -510,7 +510,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     # PROJECT = 'SoftwareProducts'
     team_name = 'GTO'  # 'SQA'
     check_folder_exists(folder)
-    test_plan = return_suite_test_plan_id(test_suite, test_choice)
+    test_plan = return_test_plan_id(test_suite, test_choice)
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
@@ -537,14 +537,14 @@ def check_folder_exists(folder):
         raise FolderAlreadyExists("Query Folder with name " + folder + " already exists")
 
 
-def return_suite_test_plan_id(test_suite, test_choice):
+def return_test_plan_id(test_suite, test_choice):
     """
         Returns test plan ID given test suite ID and testChoice
 
         :return test plan id as a string
     """
     if test_choice == "1":
-        test_plan_id = return_test_plan_id(test_suite)
+        test_plan_id = find_test_plan_id_by_name(test_suite)
     else:
         test_plan_id = int(test_suite) - 1
         check_test_plan_id(test_plan_id)
@@ -1398,7 +1398,7 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, ta
         json.dump(config_file, outfile)
 
 
-def return_test_plan_id(test_plan, continuation_token=''):
+def find_test_plan_id_by_name(test_plan, continuation_token=''):
     """
         Returns test plan ID, calls recursively until the test plan is found or
         there is no more continuation tokens in the rest api response.
@@ -1421,7 +1421,7 @@ def return_test_plan_id(test_plan, continuation_token=''):
             return str(child["id"])
     if continue_key not in response.headers._store:
         raise TestPlanError("Test Plan: " + test_plan + " not Found in Azure")
-    return return_test_plan_id(test_plan, response.headers._store[continue_key][1])
+    return find_test_plan_id_by_name(test_plan, response.headers._store[continue_key][1])
 
 
 def check_test_plan_id(test_plan):
