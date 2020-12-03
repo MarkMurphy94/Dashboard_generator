@@ -496,7 +496,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 
 
 def create_full_dash(folder, url, global_path, target_choice, target_project_name,
-                     test_choice, test_suite):
+                     test_choice, test_suite, creating_dashboard):
     """
         Calls functions to complete the tasks below:
          - Verifies query folder does not exist
@@ -514,7 +514,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
-    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, creating_dashboard)
 
     create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
     return dash_id
@@ -717,7 +717,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
 
 def populate_dash(output_team, url, test_plan, program_name, query_folder,
-                  overview_id):
+                  overview_id, creating_dashboard):
     """
         Populates a given dashboard with widgets based on the queries
         in the query folder provided, and the test suites found in the given
@@ -726,7 +726,14 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
 
     starting_column = 1
     starting_row = 1
-    test_suite_id = str(int(test_plan) + 1)
+
+    # if creating a dashboard, adds 1 to plan id to get suite id
+    # If updating, uses suite id submitted and subtracts 1 to get plan id
+    if creating_dashboard:
+        test_suite_id = str(int(test_plan) + 1)
+    else:
+        test_suite_id = str(int(test_plan))
+        test_plan = str(int(test_plan) - 1)
 
     # region First Widget Row
     url = url.strip()
@@ -2304,7 +2311,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file):
+def update_dash(file, creating_dashboard):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2325,7 +2332,8 @@ def update_dash(file):
 
     update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name)
     clear_dash(team_name, dash_id)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, creating_dashboard)
+
     print("Dashboard Updated")
 
     now = datetime.datetime.now()
@@ -2333,6 +2341,7 @@ def update_dash(file):
     date_string = now.strftime("%m/%d/%Y %H:%M:%S, " + localtime.tzname(now))
     with open(file_directory, 'w') as outfile:
         config_data['lastUpdate'] = date_string
+        config_data['testPlan'] = str(int(test_plan) - 1)  # resets test plan value after update
         json.dump(config_data, outfile)
 
 

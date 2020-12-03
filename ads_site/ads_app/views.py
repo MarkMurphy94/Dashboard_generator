@@ -141,7 +141,7 @@ def create_dash(request):
 
             try:
                 dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
-                                                  target_project_name, test_choice, test_plan_name)
+                                                  target_project_name, test_choice, test_plan_name, True)
                 context['dash_id'] = dash_id
                 write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)
@@ -236,7 +236,7 @@ def submit_update(request):
                 dash_id = json_config["dashId"]
                 folder_id = json_config["folderId"]
                 models.create_config(team_name, url, dash_id, test_plan_name_or_id, folder_name, folder_id, target_choice, global_path, target_project_name)
-                models.update_dash(folder_name)
+                models.update_dash(folder_name, False)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)  # Populates link with dashboard ID
