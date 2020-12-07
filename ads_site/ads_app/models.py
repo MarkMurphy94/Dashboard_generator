@@ -1,4 +1,3 @@
-from json import JSONDecodeError
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
 from pytz import reference
@@ -474,7 +473,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
     except FileNotFoundError:
         file = open(AGILE_PATH, 'w+')
         file.close()
-    except JSONDecodeError:  # json loads fails on empty file
+    except ValueError:  # json loads fails on empty file
         pass
 
     config_file = {
@@ -511,7 +510,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     # PROJECT = 'SoftwareProducts'
     team_name = 'GTO'  # 'SQA'
     check_folder_exists(folder)
-    test_plan = return_suite_test_plan_id(test_suite, test_choice)
+    test_plan = return_test_plan_id(test_suite, test_choice)
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
@@ -538,14 +537,14 @@ def check_folder_exists(folder):
         raise FolderAlreadyExists("Query Folder with name " + folder + " already exists")
 
 
-def return_suite_test_plan_id(test_suite, test_choice):
+def return_test_plan_id(test_suite, test_choice):
     """
         Returns test plan ID given test suite ID and testChoice
 
         :return test plan id as a string
     """
     if test_choice == "1":
-        test_plan_id = return_test_plan_id(test_suite)
+        test_plan_id = find_test_plan_id_by_name(test_suite)
     else:
         test_plan_id = int(test_suite) - 1
         check_test_plan_id(test_plan_id)
@@ -728,8 +727,10 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column = 1
     starting_row = 1
 
-    # region First Widget Row
+    # adds 1 to plan id to get suite id
     test_suite_id = str(int(test_plan) + 1)
+
+    # region First Widget Row
     url = url.strip()
     tree_link = "\n"
 
@@ -791,7 +792,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 1
     starting_row -= 1
     name = program_name + " Bug Trend"
-    query_id = return_query_id("All Bugs", query_folder)
+    query_id = return_query_id("Dev Bugs", query_folder)
     history = "last12Weeks"
 
     bug_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
@@ -1399,7 +1400,7 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, ta
         json.dump(config_file, outfile)
 
 
-def return_test_plan_id(test_plan, continuation_token=''):
+def find_test_plan_id_by_name(test_plan, continuation_token=''):
     """
         Returns test plan ID, calls recursively until the test plan is found or
         there is no more continuation tokens in the rest api response.
@@ -1422,7 +1423,7 @@ def return_test_plan_id(test_plan, continuation_token=''):
             return str(child["id"])
     if continue_key not in response.headers._store:
         raise TestPlanError("Test Plan: " + test_plan + " not Found in Azure")
-    return return_test_plan_id(test_plan, response.headers._store[continue_key][1])
+    return find_test_plan_id_by_name(test_plan, response.headers._store[continue_key][1])
 
 
 def check_test_plan_id(test_plan):
@@ -2054,6 +2055,10 @@ def sort_child_list(child_list):
 
 
 def get_config():
+    """
+        Returns a json object of all dashboard config files
+        :return: config_data
+    """
     directory = CONFIGS_PATH
     file_path = os.listdir(directory)
     file_path.sort()
@@ -2066,6 +2071,21 @@ def get_config():
                 config_data.append(no_data)
             else:
                 config_data.append(json.load(json_file))
+    return config_data
+
+
+def get_selected_config(selected_file):
+    """
+        Returns the config for a selected dashboard in a json object
+        :param selected_file:
+        :return config_data:
+    """
+    directory = CONFIGS_PATH
+    config_data = []
+    file = directory + selected_file + ".txt"
+    with open(file, 'r') as json_file:
+        items = json.load(json_file)
+        config_data.append(items)
     return config_data
 
 
@@ -2308,6 +2328,7 @@ def update_dash(file):
     update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name)
     clear_dash(team_name, dash_id)
     populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id)
+
     print("Dashboard Updated")
 
     now = datetime.datetime.now()
@@ -2331,7 +2352,7 @@ def get_agile_config():
     except FileNotFoundError:
         file = open(AGILE_PATH, 'w+')
         file.close()
-    except JSONDecodeError:  # json loads fails on empty file
+    except ValueError:  # json loads fails on empty file
         pass
     return config_data
 

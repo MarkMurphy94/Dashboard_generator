@@ -180,26 +180,90 @@ def done(request):
     return render(request, 'ads_app/done.html')
 
 
+def select_row(request):
+    request_data = request.POST
+    selected = request_data['selected'].strip()
+    try:
+        config_data = models.get_selected_config(selected)
+        return render(request, 'ads_app/update_selected.html', {'json': config_data})
+    except FileNotFoundError as error:  # if config file is empty, throw error
+        messages.error(request, "Error: The config file is empty")
+        config_data = models.get_config()
+        write_to_log(request, "encountered an Entry Error", str(error))
+        return render(request, 'ads_app/update.html', {'json': config_data})
+
+
 def submit_update(request):
+    context = {}
+    # Setting dictionary key values
+    folder_key = 'folder_name'
+    url_key = 'url'
+    global_key = 'global_path'
+    target_key = 'target_choice'
+    name_key = 'short_name'
+    choice_key = 'test_choice'
+    test_plan_key = 'test_plan_name'
+
+    team_name = "GTO"
+    action = "updated the dashboard"
+
     if request.method == 'POST':  # if the request from the HTML is a post
-        request_data = request.POST
-        selected = request_data['selected'].strip()
-        action = "updated the dashboard"
+        form = CreateDash(request.POST)
+        print(form)
+        if form.is_valid():
 
-        # updates the selected dashboard, throws a general error message if error is encountered
-        try:
-            models.update_dash(selected)
-            raise models.DashboardComplete()
-        except models.DashboardComplete:
-            print("Dashboard updated")
-            messages.success(request, 'The Dashboard was updated successfully')
-        except Exception as e:
-            print("error: " + str(e))
-            messages.error(request, e)
-    config_data = models.get_config()
-    write_to_log(request, action, selected)
+            # stripping form values
+            folder_name = form.cleaned_data[folder_key]
+            url = form.cleaned_data[url_key]
+            global_path = form.cleaned_data[global_key]
+            target_choice = form.cleaned_data[target_key]
+            target_project_name = form.cleaned_data[name_key]
+            test_choice = form.cleaned_data[choice_key]
+            test_plan_name_or_id = form.cleaned_data[test_plan_key]
 
-    return render(request, 'ads_app/update.html', {'json': config_data})
+            # Adding form values to context
+            context[folder_key] = folder_name
+            context[url_key] = url
+            context[global_key] = global_path
+            context[target_key] = target_choice
+            context[name_key] = target_project_name
+            context[choice_key] = test_choice
+            context[test_plan_key] = test_plan_name_or_id
+
+            try:
+                config = models.get_selected_config(folder_name)
+                json_config = config[0]
+                dash_id = json_config["dashId"]
+                folder_id = json_config["folderId"]
+                test_plan_id = models.return_test_plan_id(test_plan_name_or_id, test_choice)
+                models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id, target_choice, global_path, target_project_name)
+                models.update_dash(folder_name)
+                context["dash_id"] = dash_id
+                write_to_log(request, action, folder_name)
+                raise models.DashboardComplete(dash_id)  # Populates link with dashboard ID
+            except models.DashboardComplete:
+                messages.success(request, 'The Dashboard was successfully updated')
+                return render(request, 'ads_app/done.html', context)
+            except Exception as error:
+                messages.error(request, "Entry Error: " + str(error))
+                write_to_log(request, "encountered an Entry Error", str(error))
+                return render(request, 'ads_app/update_selected.html', context)
+        else:
+            for item in form:
+                error_type = "A form field "
+                if len(str(form[item.name].value())) > 250:
+                    if str(item.name) == folder_key:
+                        error_type = "Project name"
+                    elif str(item.name) == url_key:
+                        error_type = "The URL to MRS tree"
+                    elif str(item.name) == global_key:
+                        error_type = "Global Reqs iteration path"
+                    elif str(item.name) == name_key:
+                        error_type = "The Test Project "
+                    elif str(item.name) == test_plan_key:
+                        error_type = "The Test plan name "
+                    messages.error(request, error_type + " needs to be less than 250 characters")
+    return render(request, 'ads_app/update_selected.html', context)
 
 
 def executive(request):

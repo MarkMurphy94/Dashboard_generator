@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^done', views.done, name='Complete'),
     url(r'^create_dash', views.create_dash, name='Create Dashboard'),
     url(r'^submit_update', views.submit_update, name='Submit Update'),
+    url(r'^select_row', views.select_row, name='Select Row'),
     url(r'^submit_agile_update', views.submit_agile_update, name='Submit Update'),
     url(r'^executive', views.executive, name='executive'),
 ]

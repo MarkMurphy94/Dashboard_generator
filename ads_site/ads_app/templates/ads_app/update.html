@@ -124,7 +124,7 @@
                 </thead>
                 <tbody id="main-table-body">
                     {% for items in json %}
-                    <tr>
+                    <tr id="table_row">
                         <td class="tg-0lax">{{ items.folderName }}</td>
                         <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/{{ items.dashId }}">&#x1f517</a></td>
                         <td class="tg-0lax">{{ items.lastUpdate }}</td>
@@ -140,7 +140,7 @@
             </table>
         </div>
     </div>
-    <form action="submit_update" method="POST" id="submit_update">
+    <form action="select_row" method="POST" id="submit_update">
         {% csrf_token %}
         <input type="hidden" name="selected" id="selected" value="">
         <button type="submit" class="button">UPDATE</button>
