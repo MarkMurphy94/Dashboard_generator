@@ -3,6 +3,9 @@ This webapp is designed to create standardized test plans and dashboards for GTO
 
 ## Before you deploy...
 
+- Generate a Personal Access Token.
+  - Do this if you have write access to all test plans and queries. Otherwise get a copy from Mark Murphy or Jorge Rincon
+  - Click User Settings > Personal access tokens in the top-right menu in ADS. Then click "+New Token". Save your token somewhere safe.
 - Determine the IP address the tool will be hosted on.
   - In the instructions below, this address is referred to by <HOST_ADDRESS>
 - Determine the port you will be using.
@@ -24,6 +27,7 @@ $ pip install virtualenv            # any virtual environment which allows you t
 $ git clone https://itron@dev.azure.com/itron/SoftwareProducts/_git/ADS_DASH_TOOL
 $ cd ADS_DASH_TOOL
 $ vim ads_site/settings.py          # add '<HOST_ADDRESS>' to ALLOWED_HOSTS array
+$ vim ads_site/ads_app/static/token.txt    # copy your personal access token here
 ```
 - Setup your virtual environment:
 ```
@@ -36,7 +40,7 @@ $ source venv/bin/activate          # activate your virtual environment
 - Run the server at <HOST_ADDRESS>:<PORT>
 ```
 (venv)$ cd ads_site                 # this is the folder that contains manage.py
-(venv)$ python manage.py migrate    # update the database schema if a new version is used
+(venv)$ python manage.py migrate    # update the database schema. This may not be required if you are using an existing database.
 (venv)$ nohup python manage.py runserver <HOST ADDRESS>:<PORT> &   # run server in the background. all output is written to nohup.out
 ```
 
@@ -65,11 +69,11 @@ $ cp nohup.out logs/nohup.old.#             # copy logs to archive using increme
 ```
 - Checkout the latest version and run the server
 ```
-$ git checkout -f v#.#
+$ git checkout v#.#                         # checkout the latest version
 $ virtualenv venv                           # create venv folder to hold virtualenv configs
 $ source venv/bin/activate
 (venv)$ pip install -r requirements
-$ vim ads_site/settings.py                  # add '<HOST_ADDRESS>' to ALLOWED_HOSTS array
+(venv)$ vim ads_site/settings.py            # add '<HOST_ADDRESS>' to ALLOWED_HOSTS array if it's not already there
 (venv)$ python manage.py migrate
 (venv)$ nohup python manage.py runserver <HOST_ADDRESS>:<PORT> &   # run server in the background. all output is written to nohup.out
 ```
