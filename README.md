@@ -11,6 +11,9 @@ This webapp is designed to create standardized test plans and dashboards for GTO
 - Determine the port you will be using.
   - In the instructions below, this port is referred to by <PORT>
   - If no port is specified, the tool will run on port :8000.
+- Git Reminders!
+  - Each time you perform a git command, you will be prompted for 'itron@dev.azure.com' credentials. Generate these in the Clone menu by clicking "Generate Git Credentials".
+  - It may be handy to keep this password in your clipboard until you're finished with the deploy.
 
 ---
 
