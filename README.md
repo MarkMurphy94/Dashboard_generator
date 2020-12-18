@@ -59,10 +59,9 @@ $ git fetch --all --tags
 ```
 - Shut down the server
 ```
-$ <graceful shutdown>?                      # best method currently is to find the existing process and kill it
-        OR
-$ ps -aux | grep {'runserver' OR <PORT>}    # find the pid of the current server
-$ kill <pid>                                # kill process using the pid found above
+$ ps -aux | grep {'runserver' OR <PORT>}    # find the pid of the current server ON THE CORRECT PORT
+$ kill -2 <pid>                             # kill process using the pid found above using SIGINT (SIGINT = Ctrl+C)
+                                            # repeat this process 2 or 3 times until there are no more server processes running on the port.
 ```
 - Archive the nohup.out
 ```
