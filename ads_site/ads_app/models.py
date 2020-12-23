@@ -2397,6 +2397,7 @@ def update_executive(check_list):
     """
         Updates the executive dashboard
     """
+    print("\nUpdating Executive Dashboard...\n")
     row = 1
 
     update_executive_config(check_list)  # update the existing config
@@ -2411,7 +2412,8 @@ def update_executive(check_list):
         query_folder = dash['folderId']
         executive = dash['executive']
 
-        if dashboard_exists(team_name, dash_id) and executive:
+        if executive and dashboard_exists(team_name, dash_id):
+            print("Adding executive row for " + dash_name)
             add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row)
 
             row += 2
@@ -2534,13 +2536,13 @@ def dashboard_exists(output_team, overview_id):
         Checks is a dashboard exists
     """
     print("team: " + output_team)
+    print("id: " + overview_id)
     version = {'api-version': '5.1-preview.2'}
     response = requests.get(URL_HEADER + PROJECT + '/' + output_team
                              + '/_apis/dashboard/dashboards/' + overview_id
                              + '/widgets?', auth=HTTPBasicAuth(USER, TOKEN), params=version)
 
-    print("Object Returned:")
-    print(response.status_code)
+    print("Object Returned:" + str(response.status_code))
 
     if response.status_code != 200:
         return False
