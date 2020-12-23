@@ -190,6 +190,10 @@ class QueryFolderNotFound(Exception):
     """Query folder not found"""
 
 
+class TestPlanNotFound(Exception):
+    """Test plan not found3"""
+
+
 # endregion
 
 
@@ -2462,6 +2466,19 @@ def add_test_plan_summary(dash_name, test_plan, row):
     # region Test Plan Summary
     name = dash_name + " - Summary"
     suite_id = str(int(test_plan) + 1)
+    api_params = {'api-version': '6.0-preview.1',
+                'asTreeView': True}
+    response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
+                                + test_plan + '/suites?',
+                                auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
+    if response.status_code != 200:
+        raise TestPlanNotFound
+    test_plan_tree = response.json()["value"]
+    for child_suite in test_plan_tree[0]["children"]:
+        if "Sprints" in child_suite["name"]:
+            suite_id = str(child_suite["id"])
+            print("Agile plan detected. Test plan summary will reference 'Sprints' suite")
+    print("Generating test plan summary for suite ID: " + suite_id)
     group = "Outcome"
     test_results = True
     test_readiness = return_test_chart(4, row, name,
