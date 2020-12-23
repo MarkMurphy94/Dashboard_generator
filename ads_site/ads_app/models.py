@@ -2465,7 +2465,10 @@ def add_test_plan_summary(dash_name, test_plan, row):
     """
     # region Test Plan Summary
     name = dash_name + " - Summary"
+    # top level suite ID = test plan ID + 1
     suite_id = str(int(test_plan) + 1)
+
+    # API call to retrieve test plan tree
     api_params = {'api-version': '6.0-preview.1',
                 'asTreeView': True}
     response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
@@ -2473,6 +2476,9 @@ def add_test_plan_summary(dash_name, test_plan, row):
                                 auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
     if response.status_code != 200:
         raise TestPlanNotFound
+
+    # test plan tree contains array "value"
+    # value[0] contains array "children", which contains each child suite in the test plan
     test_plan_tree = response.json()["value"]
     for child_suite in test_plan_tree[0]["children"]:
         if "Sprints" in child_suite["name"]:
