@@ -2448,7 +2448,6 @@ def add_executive_row(dash_name, dash_id, test_plan, query_folder, row):
 
     add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
     add_test_plan_summary(dash_name, test_plan, row)
-    # add_bug_trend(dash_name, query_folder, GTO, EXECUTIVE_ID, row)
 
 
 def add_test_plan_summary(dash_name, test_plan, row):
@@ -2530,18 +2529,6 @@ def dashboard_exists(output_team, overview_id):
         return False
 
     return True
-
-
-# def add_bug_trend(dash_name, query_folder, output_team, overview_id, row):
-#     """
-#         Adds the bug trend chart to a dashboard
-#     """
-#     name = dash_name + " Bug Trend"
-#     query_id = return_query_id("All Bugs", query_folder)
-#     history = "last12Weeks"
-#
-#     bug_chart = return_chart(6, row, name, query_id, history=history, direction="descending")
-#     create_widget(output_team, overview_id, bug_chart)
 
 
 # endregion
