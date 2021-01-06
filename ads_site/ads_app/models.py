@@ -2412,7 +2412,7 @@ def update_executive(check_list):
         executive = dash['executive']
 
         if dashboard_exists(team_name, dash_id) and executive:
-            add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row)
+            add_executive_row(dash_name, dash_id, test_plan, query_folder, row)
 
             row += 2
 
@@ -2435,14 +2435,12 @@ def update_executive_config(check_list):
             json.dump(config_data, outfile)
 
 
-def add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row):
+def add_executive_row(dash_name, dash_id, test_plan, query_folder, row):
     """
         Adds the row to the executive dashboard
     """
 
-    # mark down widget with link to original dashboard
-
-    # region MarkDown
+    # markdown widget with link to original dashboard
     main_text = "#[" + dash_name + "](" + DASH_HEADER + dash_id + ") "
 
     main_markdown = return_markdown(1, row, main_text, height=2)
@@ -2450,7 +2448,6 @@ def add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, ro
 
     add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
     add_test_plan_summary(dash_name, test_plan, row)
-    add_bug_trend(dash_name, query_folder, GTO, EXECUTIVE_ID, row)
 
 
 def add_test_plan_summary(dash_name, test_plan, row):
@@ -2466,20 +2463,6 @@ def add_test_plan_summary(dash_name, test_plan, row):
                                        suite_id, test_plan, group=group,
                                        test_results=test_results)
     create_widget(GTO, EXECUTIVE_ID, test_readiness)
-    # endregion
-
-
-def add_bug_trend(dash_name, query_folder, output_team, overview_id, row):
-    """
-        Adds the bug trend chart to a dashboard
-    """
-    # region Bug Trend
-    name = dash_name + " Bug Trend"
-    query_id = return_query_id("All Bugs", query_folder)
-    history = "last12Weeks"
-
-    bug_chart = return_chart(6, row, name, query_id, history=history, direction="descending")
-    create_widget(output_team, overview_id, bug_chart)
     # endregion
 
 
@@ -2546,5 +2529,6 @@ def dashboard_exists(output_team, overview_id):
         return False
 
     return True
+
 
 # endregion
