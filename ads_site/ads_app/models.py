@@ -2406,6 +2406,12 @@ def update_executive(check_list):
 
     update_executive_config(check_list)  # update the existing config
     dash_data = get_config()
+    # get a list of agile test plan ids
+    agile_config = get_agile_config()
+    agile_plan_ids = []
+    for plan in agile_config:
+        agile_plan_ids.append(plan['test_plan_id'])
+
     clear_dash(GTO, EXECUTIVE_ID)
 
     for dash in dash_data:  # creates a row for each valid dashboard
@@ -2418,7 +2424,9 @@ def update_executive(check_list):
 
         if executive and dashboard_exists(team_name, dash_id):
             print("Adding executive row for " + dash_name)
-            add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row)
+            # check if this dashboard's test plan is an agile plan
+            is_agile_plan = test_plan in agile_plan_ids
+            add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, is_agile_plan, row)
 
             row += 2
 
@@ -2441,7 +2449,7 @@ def update_executive_config(check_list):
             json.dump(config_data, outfile)
 
 
-def add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row):
+def add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, is_agile_plan, row):
     """
         Adds the row to the executive dashboard
     """
@@ -2455,11 +2463,11 @@ def add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, ro
     create_widget(GTO, EXECUTIVE_ID, main_markdown)
 
     add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
-    add_test_plan_summary(dash_name, test_plan, row)
+    add_test_plan_summary(dash_name, test_plan, is_agile_plan, row)
     add_bug_trend(dash_name, query_folder, GTO, EXECUTIVE_ID, row)
 
 
-def add_test_plan_summary(dash_name, test_plan, row):
+def add_test_plan_summary(dash_name, test_plan, is_agile_plan, row):
     """
         Adds the test plan summary chart to a dashboard
     """
@@ -2468,22 +2476,26 @@ def add_test_plan_summary(dash_name, test_plan, row):
     # top level suite ID = test plan ID + 1
     suite_id = str(int(test_plan) + 1)
 
-    # API call to retrieve test plan tree
-    api_params = {'api-version': '6.0-preview.1',
-                'asTreeView': True}
-    response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
+    # if this project has an agile test plan, only summarize the Sprints suite children.
+    if is_agile_plan:
+        # API call to retrieve test plan tree
+        api_params = {'api-version': '6.0-preview.1',
+                    'asTreeView': True}
+        response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
                                 + test_plan + '/suites?',
                                 auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
-    if response.status_code != 200:
-        raise TestPlanNotFound
+        if response.status_code != 200:
+            raise TestPlanNotFound
 
-    # test plan tree contains array "value"
-    # value[0] contains array "children", which contains each child suite in the test plan
-    test_plan_tree = response.json()["value"]
-    for child_suite in test_plan_tree[0]["children"]:
-        if "Sprints" in child_suite["name"]:
-            suite_id = str(child_suite["id"])
-            print("Agile plan detected. Test plan summary will reference 'Sprints' suite")
+        # test plan tree contains array "value"
+        # value[0] contains array "children", which contains each child suite in the test plan
+        test_plan_tree = response.json()["value"]
+        for child_suite in test_plan_tree[0]["children"]:
+            if "Sprints" in child_suite["name"]:
+                suite_id = str(child_suite["id"])
+                print("Agile plan detected. Test plan summary will reference 'Sprints' suite")
+                break
+
     print("Generating test plan summary for suite ID: " + suite_id)
     group = "Outcome"
     test_results = True
