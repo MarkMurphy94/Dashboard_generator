@@ -866,8 +866,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # region Fill In with Blank Widgets
     starting_column += 2
 
-    while starting_column <= MAX_COLUMN:
-        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row))
+    if starting_column <= MAX_COLUMN:
+        remainder = MAX_COLUMN - starting_column
+        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
 
@@ -926,8 +927,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
     # region Fill In with Blank Widgets
-    while starting_column <= MAX_COLUMN:
-        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row))
+    if starting_column <= MAX_COLUMN:
+        remainder = MAX_COLUMN - starting_column + 2
+        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
 
@@ -1001,9 +1003,10 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= MAX_WIDGETS:
+            if count <= MAX_WIDGETS:
+                remainder = MAX_COLUMN - starting_column
                 create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
+                              return_blank_square(starting_column, starting_row, remainder))
                 count += 1
                 starting_column += 2
 
@@ -1089,9 +1092,10 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
+            if count <= MAX_WIDGETS:
+                remainder = MAX_COLUMN - starting_column
                 create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
+                              return_blank_square(starting_column, starting_row, remainder))
                 count += 1
                 starting_column += 2
             # endregion
@@ -1179,9 +1183,10 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
+            if count <= MAX_WIDGETS:
+                remainder = MAX_COLUMN - starting_column
                 create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
+                              return_blank_square(starting_column, starting_row, remainder))
                 count += 1
                 starting_column += 2
             # endregion
@@ -1268,9 +1273,10 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
+            if count <= MAX_WIDGETS:
+                remainder = MAX_COLUMN - starting_column
                 create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
+                              return_blank_square(starting_column, starting_row, remainder))
                 count += 1
                 starting_column += 2
             # endregion
@@ -1361,9 +1367,10 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
+            if count <= MAX_WIDGETS:
+                remainder = MAX_COLUMN - starting_column
                 create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
+                              return_blank_square(starting_column, starting_row, remainder))
                 count += 1
                 starting_column += 2
             # endregion
@@ -1605,7 +1612,7 @@ def return_suite_child_id(suite_name, test_plan, suite_id):
     return NOT_FOUND
 
 
-def return_blank_square(column, row, name=" "):
+def return_blank_square(column, row, remainder, name=" "):
     """
         Returns a json template for each widget type
 
@@ -1615,7 +1622,7 @@ def return_blank_square(column, row, name=" "):
     """
     blank_square = return_widget_obj("Markdown")
     blank_square["settings"] = name
-    blank_square["size"]["columnSpan"] = 2
+    blank_square["size"]["columnSpan"] = remainder
     blank_square["size"]["rowSpan"] = 2
     blank_square["position"]["column"] = column
     blank_square["position"]["row"] = row
