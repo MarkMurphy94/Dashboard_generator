@@ -190,6 +190,10 @@ class QueryFolderNotFound(Exception):
     """Query folder not found"""
 
 
+class TestPlanNotFound(Exception):
+    """Test plan not found"""
+
+
 # endregion
 
 
@@ -2397,10 +2401,17 @@ def update_executive(check_list):
     """
         Updates the executive dashboard
     """
+    print("\nUpdating Executive Dashboard...\n")
     row = 1
 
     update_executive_config(check_list)  # update the existing config
     dash_data = get_config()
+    # get a list of agile test plan ids
+    agile_config = get_agile_config()
+    agile_plan_ids = []
+    for plan in agile_config:
+        agile_plan_ids.append(str(plan['test_plan_id']))
+
     clear_dash(GTO, EXECUTIVE_ID)
 
     for dash in dash_data:  # creates a row for each valid dashboard
@@ -2411,8 +2422,11 @@ def update_executive(check_list):
         query_folder = dash['folderId']
         executive = dash['executive']
 
-        if dashboard_exists(team_name, dash_id) and executive:
-            add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row)
+        if executive and dashboard_exists(team_name, dash_id):
+            print("Adding executive row for " + dash_name)
+            # check if this dashboard's test plan is an agile plan
+            is_agile_plan = test_plan in agile_plan_ids
+            add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row)
 
             row += 2
 
@@ -2435,51 +2449,57 @@ def update_executive_config(check_list):
             json.dump(config_data, outfile)
 
 
-def add_executive_row(dash_name, dash_id, test_plan, team_name, query_folder, row):
+def add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row):
     """
         Adds the row to the executive dashboard
     """
 
-    # mark down widget with link to original dashboard
-
-    # region MarkDown
+    # markdown widget with link to original dashboard
     main_text = "#[" + dash_name + "](" + DASH_HEADER + dash_id + ") "
 
     main_markdown = return_markdown(1, row, main_text, height=2)
     create_widget(GTO, EXECUTIVE_ID, main_markdown)
 
     add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
-    add_test_plan_summary(dash_name, test_plan, row)
-    add_bug_trend(dash_name, query_folder, GTO, EXECUTIVE_ID, row)
+    add_test_plan_summary(dash_name, test_plan, is_agile_plan, row)
 
 
-def add_test_plan_summary(dash_name, test_plan, row):
+def add_test_plan_summary(dash_name, test_plan, is_agile_plan, row):
     """
         Adds the test plan summary chart to a dashboard
     """
     # region Test Plan Summary
     name = dash_name + " - Summary"
+    # top level suite ID = test plan ID + 1
     suite_id = str(int(test_plan) + 1)
+
+    # if this project has an agile test plan, only summarize the Sprints suite children.
+    if is_agile_plan:
+        # API call to retrieve test plan tree
+        api_params = {'api-version': '6.0-preview.1',
+                    'asTreeView': True}
+        response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
+                                + test_plan + '/suites?',
+                                auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
+        if response.status_code != 200:
+            raise TestPlanNotFound
+
+        # test plan tree contains array "value"
+        # value[0] contains array "children", which contains each child suite in the test plan
+        test_plan_tree = response.json()["value"]
+        for child_suite in test_plan_tree[0]["children"]:
+            if "Sprints" in child_suite["name"]:
+                suite_id = str(child_suite["id"])
+                print("Agile plan detected. Test plan summary will reference 'Sprints' suite")
+                break
+
+    print("Generating test plan summary for suite ID: " + suite_id)
     group = "Outcome"
     test_results = True
     test_readiness = return_test_chart(4, row, name,
                                        suite_id, test_plan, group=group,
                                        test_results=test_results)
     create_widget(GTO, EXECUTIVE_ID, test_readiness)
-    # endregion
-
-
-def add_bug_trend(dash_name, query_folder, output_team, overview_id, row):
-    """
-        Adds the bug trend chart to a dashboard
-    """
-    # region Bug Trend
-    name = dash_name + " Bug Trend"
-    query_id = return_query_id("All Bugs", query_folder)
-    history = "last12Weeks"
-
-    bug_chart = return_chart(6, row, name, query_id, history=history, direction="descending")
-    create_widget(output_team, overview_id, bug_chart)
     # endregion
 
 
@@ -2534,17 +2554,18 @@ def dashboard_exists(output_team, overview_id):
         Checks is a dashboard exists
     """
     print("team: " + output_team)
+    print("id: " + overview_id)
     version = {'api-version': '5.1-preview.2'}
     response = requests.get(URL_HEADER + PROJECT + '/' + output_team
                              + '/_apis/dashboard/dashboards/' + overview_id
                              + '/widgets?', auth=HTTPBasicAuth(USER, TOKEN), params=version)
 
-    print("Object Returned:")
-    print(response.status_code)
+    print("Object Returned:" + str(response.status_code))
 
     if response.status_code != 200:
         return False
 
     return True
+
 
 # endregion
