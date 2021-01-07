@@ -2410,7 +2410,7 @@ def update_executive(check_list):
     agile_config = get_agile_config()
     agile_plan_ids = []
     for plan in agile_config:
-        agile_plan_ids.append(plan['test_plan_id'])
+        agile_plan_ids.append(str(plan['test_plan_id']))
 
     clear_dash(GTO, EXECUTIVE_ID)
 
