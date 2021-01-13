@@ -866,8 +866,8 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # region Fill In with Blank Widgets
     starting_column += 2
 
-    if starting_column <= MAX_COLUMN:
-        remainder = MAX_COLUMN - starting_column
+    while starting_column <= MAX_COLUMN:
+        remainder = min(MAX_COLUMN - starting_column + 2, 10)
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
@@ -927,8 +927,8 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
     # region Fill In with Blank Widgets
-    if starting_column <= MAX_COLUMN:
-        remainder = MAX_COLUMN - starting_column + 2
+    while starting_column <= MAX_COLUMN:
+        remainder = min(MAX_COLUMN - starting_column + 2, 10)
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
@@ -1003,12 +1003,12 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            if count <= MAX_WIDGETS:
-                remainder = MAX_COLUMN - starting_column
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row, remainder))
-                count += 1
+            # region Fill In with Blank Widgets
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1092,11 +1092,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            if count <= MAX_WIDGETS:
-                remainder = MAX_COLUMN - starting_column
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row, remainder))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
             # endregion
 
@@ -1183,11 +1181,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            if count <= MAX_WIDGETS:
-                remainder = MAX_COLUMN - starting_column
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row, remainder))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
             # endregion
 
@@ -1273,12 +1269,11 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            if count <= MAX_WIDGETS:
-                remainder = MAX_COLUMN - starting_column
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row, remainder))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
+
             # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
@@ -1367,11 +1362,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            if count <= MAX_WIDGETS:
-                remainder = MAX_COLUMN - starting_column
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row, remainder))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
             # endregion
 
