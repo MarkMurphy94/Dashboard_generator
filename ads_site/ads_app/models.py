@@ -959,6 +959,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
 
             row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
+            starting_column += 1
             count += 1
             # endregion
 
