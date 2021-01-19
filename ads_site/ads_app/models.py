@@ -867,7 +867,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 2
 
     while starting_column <= MAX_COLUMN:
-        remainder = min(MAX_COLUMN - starting_column + 2, 10)
+        remainder = min(MAX_COLUMN - starting_column + 2, 10)  # returns the minimum value in the given range
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
