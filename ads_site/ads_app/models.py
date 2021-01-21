@@ -2248,9 +2248,14 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
            + "and [System.State] <> 'Closed' " \
            "and " + target_clause + \
            " and [System.CreatedDate] >= @today - 1"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated New Issues last 24 hours Query for: " + target_project_name)
+    if json_obj["name"] not in return_query_folder_children(query_folder):  # New query, will create if not in folder
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created New Issues last 24 hours Query for: " + target_project_name)
+    else:
+        json_obj["wiql"] = {"wiql": wiql}
+        update_query(json_obj["wiql"], query_folder, json_obj["name"])
+        print("Updated New Issues last 24 hours Query for: " + target_project_name)
 
     # Cannot Reproduce Query
     json_obj["name"] = "Cannot Reproduce"
@@ -2258,9 +2263,14 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
            + "and [System.State] <> 'Closed' " \
            "and " + target_clause + \
            " and [System.Reason] = 'Cannot reproduce' "
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated Cannot Reproduce Query for: " + target_project_name)
+    if json_obj["name"] not in return_query_folder_children(query_folder):  # New query, will create if not in folder
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created Cannot Reproduce Query for: " + target_project_name)
+    else:
+        json_obj["wiql"] = {"wiql": wiql}
+        update_query(json_obj["wiql"], query_folder, json_obj["name"])
+        print("Updated Cannot Reproduce Query for: " + target_project_name)
 
     # All Bugs Query
     json_obj["name"] = "All Bugs"
