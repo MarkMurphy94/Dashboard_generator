@@ -659,6 +659,26 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     create_query(json_obj, query_folder)
     print("Created Monitored Query for: " + target_project_name)
 
+    # New Issues last 24 hours Query
+    json_obj["name"] = "New Issues last 24 hours"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.CreatedDate] >= @today - 1"
+    json_obj["wiql"] = wiql
+    create_query(json_obj, query_folder)
+    print("Created New Issues last 24 hours Query for: " + target_project_name)
+
+    # Cannot Reproduce Query
+    json_obj["name"] = "Cannot Reproduce"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.reason] = 'Cannot Reproduce' "
+    json_obj["wiql"] = wiql
+    create_query(json_obj, query_folder)
+    print("Created Cannot Reproduce Query for: " + target_project_name)
+
     # All Bugs Query
     json_obj["name"] = "All Bugs"
     wiql = selected_columns + from_bugs \
@@ -770,8 +790,18 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     dev_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, dev_bugs)
 
+    # Creating New Issues last 24 hours widget
+    starting_column += 1
+    name = "New Issues"
+    color = "#fbbc3d"
+    query_contains = "New Issues last 24 hours"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    new_issues_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, new_issues_tile)
+
     # Creating Monitored widget
-    starting_column -= 1
+    starting_column -= 2
     starting_row += 1
     name = "Monitored"
     color = "#cccccc"
@@ -790,6 +820,16 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id(query_contains, query_folder)
     rtt_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, rtt_tile)
+
+    # Creating Cannot Reproduce widget
+    starting_column += 1
+    name = "Cannot Reproduce"
+    color = "#fbfd52"
+    query_contains = "Cannot Reproduce"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    cannot_reproduce_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, cannot_reproduce_tile)
     # endregion
 
     # region Bug Trend
@@ -2202,6 +2242,26 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated All Monitored Query for: " + target_project_name)
 
+    # New Issues last 24 hours Query
+    json_obj["name"] = "New Issues last 24 hours"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.CreatedDate] >= @today - 1"
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated New Issues last 24 hours Query for: " + target_project_name)
+
+    # Cannot Reproduce Query
+    json_obj["name"] = "Cannot Reproduce"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.Reason] = 'Cannot reproduce' "
+    json_obj["wiql"] = {"wiql": wiql}
+    update_query(json_obj["wiql"], query_folder, json_obj["name"])
+    print("Updated Cannot Reproduce Query for: " + target_project_name)
+
     # All Bugs Query
     json_obj["name"] = "All Bugs"
     wiql = selected_columns + from_bugs \
@@ -2306,8 +2366,8 @@ def update_query(json_obj, query_folder, query_name):
                               auth=HTTPBasicAuth(USER, TOKEN), json=json_obj,
                               params=version)
     if wiql_response.status_code != 200:
-        print(wiql_response.status_code)
-        raise QueryUpdateError("Error updating query")
+        print(wiql_response.status_code, wiql_response.reason)
+        raise QueryUpdateError("Error updating query: " + str(wiql_response.reason))
     print("-----------------------------")
 
 
