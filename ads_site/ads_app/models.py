@@ -611,8 +611,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
                        " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
-                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags] "
-    from_bugs = "from WorkItems where [System.WorkItemType] = 'Bug' "
+                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags]"
+    from_bugs = " from WorkItems where [System.WorkItemType] = 'Bug' "
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
@@ -630,7 +630,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
     # All closed this week Query
     json_obj["name"] = "All closed this week"
-    wiql = selected_columns + from_bugs \
+    wiql = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
            + "and " + target_clause \
            + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
@@ -2154,8 +2154,8 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
                        " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
-                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags] "
-    from_bugs = "from WorkItems where [System.WorkItemType] = 'Bug' "
+                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags]"
+    from_bugs = " from WorkItems where [System.WorkItemType] = 'Bug' "
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
@@ -2173,7 +2173,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
 
     # All closed this week Query
     json_obj["name"] = "All closed this week"
-    wiql = selected_columns + from_bugs \
+    wiql = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
            + "and " + target_clause \
            + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
