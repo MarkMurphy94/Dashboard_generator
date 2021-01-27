@@ -94,15 +94,36 @@
         <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
         <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
     </p>
-    <div class="div_width">
-        <a class="button float_left" target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/1d9b31cb-3538-40f1-8830-92ae1575b269">Go to Executive Dashboard</a>
-
-        <form class="float_right" action="executive" method="POST" id="executive">
-            {% csrf_token %}
-            <input type="hidden" name="check_items" id="check_items" value="">
-            <button type="submit" class="button">Update Executive Dashboard</button>
-        </form>
-    </div>
+    <table class="div_width">
+        <tbody>
+            <tr>
+                <td>
+                    <div id="Error" hidden class="validation-summary-errors float_left">
+                        <p>Please select a Dashboard</p>
+                    </div>
+                </td>
+                <td>
+                    <a class="button float_right" target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_dashboards/dashboard/1d9b31cb-3538-40f1-8830-92ae1575b269">Go to Executive Dashboard</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <form class="float_left" action="select_row" method="POST" id="submit_update">
+                        {% csrf_token %}
+                        <input type="hidden" name="selected" id="selected" value="">
+                        <button type="submit" class="button">Update Project Dashboard</button>
+                    </form>
+                </td>
+                <td>
+                    <form class="float_right" action="executive" method="POST" id="executive">
+                        {% csrf_token %}
+                        <input type="hidden" name="check_items" id="check_items" value="">
+                        <button type="submit" class="button">Update Executive Dashboard</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     <div id="table-wrapper">
         <div id="table-scroll">
             <table id="table" class="table table-bordered table-striped table-hover">
@@ -139,14 +160,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-    <form action="select_row" method="POST" id="submit_update">
-        {% csrf_token %}
-        <input type="hidden" name="selected" id="selected" value="">
-        <button type="submit" class="button">UPDATE</button>
-    </form>
-    <div id="Error" hidden class="validation-summary-errors">
-        <p>Please select a Dashboard</p>
     </div>
     <div id="LoadingModal" class="modal" style="">
         <div class="loading-modal-content">
