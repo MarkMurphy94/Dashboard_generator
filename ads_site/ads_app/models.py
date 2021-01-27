@@ -518,7 +518,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
-    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path)
 
     create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
     return dash_id
@@ -689,7 +689,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     create_query(json_obj, query_folder)
     print("Created RTT Query for: " + target_project_name)
 
-    if "N/A" not in global_reqs_path:
+    if global_reqs_path != "N/A":
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
         wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
@@ -722,7 +722,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
 
 def populate_dash(output_team, url, test_plan, program_name, query_folder,
-                  overview_id):
+                  overview_id, global_reqs_path):
     """
         Populates a given dashboard with widgets based on the queries
         in the query folder provided, and the test suites found in the given
@@ -904,7 +904,8 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         starting_column += 2
         # endregion
 
-    if "SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder):
+    if ("SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder)) \
+            and global_reqs_path != "N/A":
         # region SQA Test Features by State
         name = "System Test Features by State (GlobalReqs)"
         query_id = return_query_id("SQA Test Features", query_folder)
@@ -2257,7 +2258,8 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated RTT Query for: " + target_project_name)
 
-    if "SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder):
+    if ("SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder)) \
+            and global_reqs_path != "N/A":
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
         wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
@@ -2287,7 +2289,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
         update_query(json_obj["wiql"], query_folder, json_obj["name"])
         print("Updated SQA Test Features without test cases Query for: "
               + target_project_name)
-    elif "N/A" not in global_reqs_path:
+    elif global_reqs_path != "N/A":
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
         wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
@@ -2388,7 +2390,7 @@ def update_dash(file):
 
     update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name)
     clear_dash(team_name, dash_id)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
 
     print("Dashboard Updated")
 
