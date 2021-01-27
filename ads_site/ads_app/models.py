@@ -769,7 +769,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     create_widget(output_team, overview_id, main_markdown)
     # endregion
 
-    # region 4 Query Tile
+    # region 6 Query Tile
     # Creating All Bugs widget
     starting_column += 1
     name = "All Bugs"
