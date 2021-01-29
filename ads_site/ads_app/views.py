@@ -31,7 +31,7 @@ def attempted_login(sender, credentials, **kwargs):
         now = datetime.datetime.now()
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + 'login failed for: {credentials}'
-                  .format(credentials=credentials,) + "\n")
+                  .format(credentials=credentials['username']) + "\n")
 
 
 @login_required
