@@ -18,6 +18,11 @@ def get_user(request):
 
 
 def write_to_log(request, action, item):
+    """
+        Writes one action to the log file set by LOG_PATH.
+        Format: <Timestamp> : <User> <Action>: <Item>
+        Example: 12/31/2020 23:59:59 : admin created the test plan: ADS Test 4
+    """
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
         user = get_user(request)
@@ -27,6 +32,10 @@ def write_to_log(request, action, item):
 
 @receiver(user_login_failed)
 def attempted_login(sender, credentials, **kwargs):
+    """
+        Writes a failed login attempt to the log file set by LOG_PATH.
+        Format: <Timestamp> : login failed for: <Username>
+    """
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
