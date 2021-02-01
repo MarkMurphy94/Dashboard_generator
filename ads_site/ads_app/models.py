@@ -520,7 +520,9 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
     populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
-    write_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
+    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder,
+                                target_choice, global_path, target_project_name)
+    write_config(json_config)
     return dash_id
 
 
