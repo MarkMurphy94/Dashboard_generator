@@ -29,6 +29,23 @@ def write_to_log(request, action, item):
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
 
+def write_dashboard_changes_to_log(old_config, new_config):
+    """
+        Compares two configs in JSON format and writes the changes to the log file set by LOG_PATH.
+        Ignores these fields:
+        - teamName, version, lastUpdate, executive
+    """
+    changes_made = False
+    config_keys = ['url', 'dashId', 'testPlan', 'folderName', 'folderId', 'targetedProject',
+                   'global_path', 'short_name']
+
+    with open(models.LOG_PATH, 'a') as log:
+        for key in config_keys:
+            if old_config[key] != new_config[key]:
+                log.write("                    | - " + key + ": " + old_config[key] + " --> " + new_config[key] + "\n")
+                changes_made = True
+        if not changes_made:
+            log.write("                    | No changes made\n")
 
 @receiver(user_login_failed)
 def attempted_login(sender, credentials, **kwargs):
@@ -240,10 +257,9 @@ def submit_update(request):
             context[test_plan_key] = test_plan_name_or_id
 
             try:
-                config = models.get_selected_config(folder_name)
-                json_config = config[0]
-                dash_id = json_config["dashId"]
-                folder_id = json_config["folderId"]
+                old_config = models.get_selected_config(folder_name)[0]
+                dash_id = old_config["dashId"]
+                folder_id = old_config["folderId"]
                 test_plan_id = models.return_test_plan_id(test_plan_name_or_id, test_choice)
 
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
@@ -252,6 +268,7 @@ def submit_update(request):
                 models.update_dash(folder_name)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
+                write_dashboard_changes_to_log(old_config, new_config)
                 raise models.DashboardComplete(dash_id)  # Populates link with dashboard ID
             except models.DashboardComplete:
                 messages.success(request, 'The Dashboard was successfully updated')
