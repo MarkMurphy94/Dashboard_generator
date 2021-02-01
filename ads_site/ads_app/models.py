@@ -520,7 +520,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
     populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
 
-    create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
+    write_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
     return dash_id
 
 
@@ -1377,16 +1377,20 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
 
-def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, targeted_project, global_path, short_name):
+def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
+                  targeted_project, global_path, short_name, executive=False):
     """
-        Creates a JSON config file with the parameters provided, this is used
-        when performing the update function
+        Creates JSON object using string arguments unless otherwise specified:
+            - team name             - targeted project name or tag flag (bool)
+            - URL                   - global reqs iteration path
+            - dashboard ID          - targeted project name or tag
+            - test plan ID          - [calculated] config version
+            - query folder name     - [calculated] time last updated
+            - query folder ID       - [optional] executive dashboard flag (bool)
     """
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
-    file_directory = CONFIGS_PATH + folder_name + '.txt'
-
-    config_file = {
+    json_config = {
         'teamName': team_name,
         'url': url,
         'dashId': dash_id,
@@ -1398,11 +1402,19 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, ta
         'short_name': short_name,
         'version': VERSION,
         'lastUpdate': date_string,
-        'executive': True
+        'executive': executive
     }
+    return json_config
 
+
+def write_config(json_config):
+    """
+        Writes or overwrites a JSON config to a file using config["folderName] as the file name.
+        This is used when performing the update or create dashboard function
+    """
+    file_directory = CONFIGS_PATH + json_config["folderName"] + '.txt'
     with open(file_directory, 'w') as outfile:
-        json.dump(config_file, outfile)
+        json.dump(json_config, outfile)
 
 
 def find_test_plan_id_by_name(test_plan, continuation_token=''):
