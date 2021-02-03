@@ -82,7 +82,8 @@ def create_test(request):
             print(project_type)
             if project_type == 'Waterfall':
                 print("Test Plan is: " + project_type)
-                test_plan_id = models.create_full_test_plan(project, child_suites)
+                user = get_user(request)
+                test_plan_id = models.create_full_test_plan(project, child_suites, user)
                 context['test_plan'] = test_plan_id
                 write_to_log(request, action, project)
                 raise models.DashboardComplete(test_plan_id)
