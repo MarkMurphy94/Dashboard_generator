@@ -29,7 +29,7 @@ $ pip install virtualenv            # any virtual environment which allows you t
 ```
 $ git clone https://itron@dev.azure.com/itron/SoftwareProducts/_git/ADS_DASH_TOOL
 $ cd ADS_DASH_TOOL
-$ vim ads_site/settings.py          # add '<HOST_ADDRESS>' to ALLOWED_HOSTS array
+$ vim ads_site/ads_site/settings.py        # add '<HOST_ADDRESS>' to ALLOWED_HOSTS array
 $ vim ads_site/ads_app/static/token.txt    # copy your personal access token here
 ```
 - Setup your virtual environment:
@@ -66,7 +66,7 @@ $ kill -2 <pid>                             # kill process using the pid found a
 ```
 - Archive the nohup.out
 ```
-$ cp ads_site/db.sqlite3 backup.sqlite3     # back up the database in case it is overwritten
+$ cp ads_site/db.sqlite3 ~/backup.sqlite3     # back up the database in case it is overwritten
 $ ls logs/                                  # see the current log archive
 $ cp nohup.out logs/nohup.old.#             # copy logs to archive using incremented number #
 ```
@@ -76,7 +76,7 @@ $ git checkout v#.#                         # checkout the latest version
 $ virtualenv venv                           # create venv folder to hold virtualenv configs
 $ source venv/bin/activate
 (venv)$ pip install -r requirements
-(venv)$ vim ads_site/settings.py            # add '<HOST_ADDRESS>' to ALLOWED_HOSTS array if it's not already there
+(venv)$ vim ads_site/ads_site/settings.py            # add '<HOST_ADDRESS>' to ALLOWED_HOSTS array if it's not already there
 (venv)$ python manage.py migrate
 (venv)$ nohup python manage.py runserver <HOST_ADDRESS>:<PORT> &   # run server in the background. all output is written to nohup.out
 ```
