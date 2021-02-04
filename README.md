@@ -35,7 +35,8 @@ $ vim ads_site/ads_app/static/token.txt    # copy your personal access token her
 - Setup your virtual environment:
 ```
 $ virtualenv venv                   # create venv folder to hold virtualenv configs
-                                    # if using a different virtual environment tool, add the env folder to .gitignore
+                                    # NOTE: you may have to specify the python version with '-p python3.6' for example
+                                    # NOTE: if using a different virtual environment tool, add the env folder to .gitignore
 $ source venv/bin/activate          # activate your virtual environment
 (venv)$ pip install -r requirements.txt
 ```
