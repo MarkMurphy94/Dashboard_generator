@@ -11,6 +11,7 @@ CONFIGS_PATH = settings.BASE_DIR + r'/ads_app/static/Dashboard configs/'
 LOG_PATH = settings.BASE_DIR + r'/ads_app/static/logs.txt'
 TOKEN_PATH = settings.BASE_DIR + r'/ads_app/static/token.txt'
 AGILE_PATH = settings.BASE_DIR + r'/ads_app/static/agile_plans.txt'
+WATERFALL_PATH = settings.BASE_DIR + r'/ads_app/static/waterfall_plans.txt'
 with open(TOKEN_PATH, 'r') as TOKEN_FILE:
     USER = TOKEN_FILE.readline().strip()
     TOKEN = TOKEN_FILE.readline().strip()
@@ -238,7 +239,7 @@ def create_agile_test_plan(test_plan, child_suites):
     return test_plan_id
 
 
-def create_full_test_plan(test_plan, child_suites):
+def create_full_test_plan(test_plan, child_suites, user_name):
     """
         Creates a test plan based on the name given
         :return test plan ID
@@ -246,6 +247,7 @@ def create_full_test_plan(test_plan, child_suites):
     create_iteration(test_plan)  # creates iteration
     test_plan_id = create_test_plan(test_plan)
     suite_id = str(int(test_plan_id) + 1)
+    create_waterfall_config(test_plan, test_plan_id, user_name)
 
     # region Final Product
     suite_name = "Final Product Test"
@@ -331,6 +333,38 @@ def create_test_plan(test_plan):
     print(json.dumps(test_plan_response))
     print(test_plan_response["id"])
     return test_plan_response["id"]
+
+
+def create_waterfall_config(test_plan, test_plan_id, user_name):
+    """
+        Creates a JSON config file for a waterfall test plan with the parameters provided
+    """
+    now = datetime.datetime.now()
+    localtime = reference.LocalTimezone()
+    date_string = now.strftime("%m/%d/%Y %H:%M:%S, " + localtime.tzname(now))
+
+    data = []
+
+    try:
+        with open(WATERFALL_PATH, 'r') as json_file:
+            data = json.load(json_file)
+    except FileNotFoundError:
+        file = open(WATERFALL_PATH, 'w+')
+        file.close()
+    except ValueError:  # json loads fails on empty file
+        pass
+
+    config_file = {
+        'test_plan': test_plan,
+        'test_plan_id': test_plan_id,
+        'lastUpdate': date_string,
+        'createdBy': user_name
+    }
+
+    data.append(config_file)
+
+    with open(WATERFALL_PATH, 'w') as outfile:
+        json.dump(data, outfile)
 
 
 def create_suite(suite_name, test_plan_id, suite_id):
