@@ -657,7 +657,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     # Dev Bugs Query
     wiql = selected_columns + from_bugs \
            + "and [System.State] in ('New', 'Active') and " + target_clause \
-           + " and not [System.Tags] contains 'Monitor'"
+           + " and [Custom.Monitoring] = False"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
     print("Created Dev Bugs Query for: " + target_project_name)
@@ -687,7 +687,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
-           " and [System.Tags] contains 'Monitor' " \
+           " and [Custom.Monitoring] = True " \
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
@@ -738,7 +738,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     json_obj["name"] = "RTT"
     wiql = selected_columns + from_bugs \
            + "and [System.State] = 'Resolved' and " + target_clause + \
-           " and not [System.Tags] contains 'Monitor'"
+           " and [Custom.Monitoring] = False"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
     print("Created RTT Query for: " + target_project_name)
@@ -2240,7 +2240,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     # Dev Bugs Query
     wiql = selected_columns + from_bugs \
            + "and [System.State] in ('New', 'Active') and " + target_clause \
-           + " and not [System.Tags] contains 'Monitor'"
+           + " and [Custom.Monitoring] = False"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated Dev Bugs Query for: " + target_project_name)
@@ -2270,7 +2270,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
              "and " + target_clause + \
-           " and [System.Tags] contains 'Monitor' " \
+           " and [Custom.Monitoring] = True " \
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
@@ -2331,7 +2331,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     json_obj["name"] = "RTT"
     wiql = selected_columns + from_bugs \
            + "and [System.State] = 'Resolved' and " + target_clause + \
-           " and not [System.Tags] contains 'Monitor'"
+           " and [Custom.Monitoring] = False"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated RTT Query for: " + target_project_name)
