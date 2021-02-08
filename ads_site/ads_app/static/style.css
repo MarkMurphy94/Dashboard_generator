@@ -505,6 +505,7 @@ th {
 /* Formatting for table wrapper */
  #table-wrapper {
    position:relative;
+   padding-bottom: 60px;
  }
 
 /* Formatting for table scroll bar */
