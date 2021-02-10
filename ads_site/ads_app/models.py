@@ -689,7 +689,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     create_query(json_obj, query_folder)
     print("Created RTT Query for: " + target_project_name)
 
-    if global_reqs_path != "N/A":
+    if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
         wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
@@ -2259,7 +2259,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     print("Updated RTT Query for: " + target_project_name)
 
     if ("SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder)) \
-            and global_reqs_path != "N/A":
+            and (global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA"):
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
         wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
@@ -2289,7 +2289,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
         update_query(json_obj["wiql"], query_folder, json_obj["name"])
         print("Updated SQA Test Features without test cases Query for: "
               + target_project_name)
-    elif global_reqs_path != "N/A":
+    elif global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
         wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
