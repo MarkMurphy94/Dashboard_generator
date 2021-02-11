@@ -77,14 +77,14 @@
         }
     </script>
 
-<h1>Update Agile Test Plan</h1>
-<h4>Select the Test Plan row wish to update and click the Add Sprint button</h4>
+<h1>Agile Test Plans</h1>
+<h4>Select the Test Plan row you wish to update and click the Add Sprint button</h4>
 <p>
     <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
     <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
 </p>
 <div id="table-wrapper">
-    <div id="table-scroll">
+    <div id="agile-table-scroll">
         <table id="table" class="table table-bordered table-striped table-hover">
             <colgroup>
                 <col style="width: 32%">
@@ -103,13 +103,44 @@
             </tr>
             </thead>
             <tbody id="main-table-body">
-            {% for config in json %}
+            {% for config in agile %}
                 <tr>
                     <td>{{ config.test_plan }}</td>
                     <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_testPlans/execute?planId={{ config.test_plan_id }}">&#x1f517</a></td>
                     <td>{{ config.lastUpdate }}</td>
                     <td>{{ config.current_sprint }}</td>
                     <td><button class="sprint_button" id="sprint_button" value="{{ config.sprints_suite }}">Add Sprint</button></td>
+                </tr>
+            {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h1>Waterfall Test Plans</h1>
+<div id="table-wrapper">
+    <div id="table-scroll">
+        <table id="table" class="table table-bordered table-striped table-hover">
+            <colgroup>
+                <col style="width: 32%">
+                <col style="width: 10%">
+                <col style="width: 20%">
+                <col style="width: 18%">
+                <col style="width: 20%">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>Project</th>
+                <th class="url_label">URL</th>
+                <th>Last Updated</th>
+            </tr>
+            </thead>
+            <tbody id="main-table-body">
+            {% for config in waterfall %}
+                <tr>
+                    <td>{{ config.test_plan }}</td>
+                    <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_testPlans/execute?planId={{ config.test_plan_id }}">&#x1f517</a></td>
+                    <td>{{ config.lastUpdate }}</td>
                 </tr>
             {%endfor%}
             </tbody>

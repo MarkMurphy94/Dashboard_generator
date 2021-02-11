@@ -516,4 +516,15 @@ th {
   margin-top:20px;
 }
 
+/* Formatting for table scroll bar */
+#agile-table-scroll {
+  height: 30%;
+  min-height: 420px;
+  width: 80%;
+  overflow:auto;
+  margin-top:20px;
+}
+
+
+
 

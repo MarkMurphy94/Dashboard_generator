@@ -2466,6 +2466,20 @@ def get_agile_config():
     return config_data
 
 
+def get_waterfall_config():
+    config_data = []
+
+    try:
+        with open(WATERFALL_PATH, 'r') as json_file:
+            config_data = json.load(json_file)
+    except FileNotFoundError:
+        file = open(WATERFALL_PATH, 'w+')
+        file.close()
+    except ValueError:  # json loads fails on empty file
+        pass
+    return config_data
+
+
 def add_sprint_suite(test_plan_id, suite_id, current_sprint, child_suites):
     """
         Creates the second tier child suites for Customer Solutions

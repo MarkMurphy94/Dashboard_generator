@@ -47,8 +47,9 @@ def test_plan(request):
 
 @login_required
 def agile_update(request):
-    config_data = models.get_agile_config()
-    return render(request, 'ads_app/agile_update.html', {'json': config_data})
+    agile_config_data = models.get_agile_config()
+    waterfall_config_data = models.get_waterfall_config()
+    return render(request, 'ads_app/agile_update.html', {'agile': agile_config_data, 'waterfall': waterfall_config_data})
 
 
 def checkbox(request, selection):
