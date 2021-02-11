@@ -905,7 +905,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         # endregion
 
     if ("SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder)) \
-            and global_reqs_path != "N/A":
+            and (global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA"):
         # region SQA Test Features by State
         name = "System Test Features by State (GlobalReqs)"
         query_id = return_query_id("SQA Test Features", query_folder)
