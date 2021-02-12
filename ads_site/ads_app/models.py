@@ -518,7 +518,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
-    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path)
 
     create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
     return dash_id
@@ -689,39 +689,40 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     create_query(json_obj, query_folder)
     print("Created RTT Query for: " + target_project_name)
 
-    # SQA Test Features Query
-    json_obj["name"] = "SQA Test Features"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItems " \
-           "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-           "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-           "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                               "order by [System.Id] "
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created SQA Test Features Query for: " + target_project_name)
+    if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
+        # SQA Test Features Query
+        json_obj["name"] = "SQA Test Features"
+        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+               "[System.AssignedTo], [System.State], [System.Tags] " \
+               "from WorkItems " \
+               "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
+               "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
+               "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
+                                                   "order by [System.Id] "
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created SQA Test Features Query for: " + target_project_name)
 
-    # SQA Test Features without test cases
-    json_obj["name"] = "SQA Test Features without test cases"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItemLinks " \
-           "where (Source.[System.WorkItemType] = 'Feature' " \
-           "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-           "and Source.[System.IterationPath] under " \
-           + repr(global_reqs_path) + ") " \
-           "and (Target.[System.WorkItemType] = 'Test Case') " \
-           "and Source.[System.State] <> 'Removed' " \
-           "order by [System.Id] mode (DoesNotContain)"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created SQA Test Features without test cases Query for: "
-          + target_project_name)
+        # SQA Test Features without test cases
+        json_obj["name"] = "SQA Test Features without test cases"
+        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+               "[System.AssignedTo], [System.State], [System.Tags] " \
+               "from WorkItemLinks " \
+               "where (Source.[System.WorkItemType] = 'Feature' " \
+               "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+               "and Source.[System.IterationPath] under " \
+               + repr(global_reqs_path) + ") " \
+               "and (Target.[System.WorkItemType] = 'Test Case') " \
+               "and Source.[System.State] <> 'Removed' " \
+               "order by [System.Id] mode (DoesNotContain)"
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created SQA Test Features without test cases Query for: "
+              + target_project_name)
 
 
 def populate_dash(output_team, url, test_plan, program_name, query_folder,
-                  overview_id):
+                  overview_id, global_reqs_path):
     """
         Populates a given dashboard with widgets based on the queries
         in the query folder provided, and the test suites found in the given
@@ -903,31 +904,41 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         starting_column += 2
         # endregion
 
-    # region SQA Test Features by State
-    name = "System Test Features by State (GlobalReqs)"
-    query_id = return_query_id("SQA Test Features", query_folder)
-    group = "System.State"
-    chart_type = "PieChart"
-    property_ = "value"
-    direction = "descending"
-    scope = "WorkitemTracking.Queries"
+    if ("SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder)) \
+            and (global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA"):
+        # region SQA Test Features by State
+        name = "System Test Features by State (GlobalReqs)"
+        query_id = return_query_id("SQA Test Features", query_folder)
+        group = "System.State"
+        chart_type = "PieChart"
+        property_ = "value"
+        direction = "descending"
+        scope = "WorkitemTracking.Queries"
 
-    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type,
-                                group=group, _property=property_,
-                                direction=direction, scope=scope)
-    create_widget(output_team, overview_id, sys_features)
-    starting_column += 2
-    # endregion
+        sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type,
+                                    group=group, _property=property_,
+                                    direction=direction, scope=scope)
+        create_widget(output_team, overview_id, sys_features)
+        starting_column += 2
+        # endregion
 
-    # region SQA Test Features without test cases
-    name = "SQA Test Features without test cases"
-    query_title = "SQA Test Features without test cases"
-    query_id = return_query_id(query_title, query_folder)
+        # region SQA Test Features without test cases
+        name = "SQA Test Features without test cases"
+        query_title = "SQA Test Features without test cases"
+        query_id = return_query_id(query_title, query_folder)
 
-    all_features = return_features_table(starting_column, starting_row, name, query_id)
-    create_widget(output_team, overview_id, all_features)
-    starting_column += 4
-    # endregion
+        all_features = return_features_table(starting_column, starting_row, name, query_id)
+        create_widget(output_team, overview_id, all_features)
+        starting_column += 4
+        # endregion
+    else:
+        no_global_reqs = "No Global Reqs iteration path provided"
+        custom_markdown = return_custom_markdown(starting_column, 2, starting_row, no_global_reqs, 2)
+        create_widget(output_team, overview_id, custom_markdown)
+        starting_column += 2
+        custom_markdown = return_custom_markdown(starting_column, 4, starting_row, no_global_reqs, 2)
+        create_widget(output_team, overview_id, custom_markdown)
+        starting_column += 4
 
     # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
@@ -1472,6 +1483,22 @@ def return_markdown(column, row, text, height=4):
     main_markdown["position"]["row"] = row
 
     return main_markdown
+
+
+def return_custom_markdown(column, width, row, text, height):
+    """
+        Returns a non-standard markdown with the given parameters
+
+        :return markdown object
+    """
+    custom_markdown = return_widget_obj("Markdown")
+    custom_markdown["settings"] = text
+    custom_markdown["size"]["columnSpan"] = width
+    custom_markdown["size"]["rowSpan"] = height
+    custom_markdown["position"]["column"] = column
+    custom_markdown["position"]["row"] = row
+
+    return custom_markdown
 
 
 def create_widget(output_team, overview_id, dash_board_obj):
@@ -2231,35 +2258,67 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated RTT Query for: " + target_project_name)
 
-    # SQA Test Features Query
-    json_obj["name"] = "SQA Test Features"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItems " \
-           "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-           "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-           "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                               "order by [System.Id] "
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated SQA Test Features Query for: " + target_project_name)
+    if ("SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder)) \
+            and (global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA"):
+        # SQA Test Features Query
+        json_obj["name"] = "SQA Test Features"
+        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+               "[System.AssignedTo], [System.State], [System.Tags] " \
+               "from WorkItems " \
+               "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
+               "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
+               "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
+                                                   "order by [System.Id] "
+        json_obj["wiql"] = {"wiql": wiql}
+        update_query(json_obj["wiql"], query_folder, json_obj["name"])
+        print("Updated SQA Test Features Query for: " + target_project_name)
 
-    # SQA Test Features without test cases
-    json_obj["name"] = "SQA Test Features without test cases"
-    wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItemLinks " \
-           "where (Source.[System.WorkItemType] = 'Feature' " \
-           "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-           "and Source.[System.IterationPath] under " \
-           + repr(global_reqs_path) + ") " \
-                                      "and (Target.[System.WorkItemType] = 'Test Case') " \
-                                      "and Source.[System.State] <> 'Removed' " \
-                                      "order by [System.Id] mode (DoesNotContain)"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated SQA Test Features without test cases Query for: "
-          + target_project_name)
+        # SQA Test Features without test cases
+        json_obj["name"] = "SQA Test Features without test cases"
+        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+               "[System.AssignedTo], [System.State], [System.Tags] " \
+               "from WorkItemLinks " \
+               "where (Source.[System.WorkItemType] = 'Feature' " \
+               "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+               "and Source.[System.IterationPath] under " \
+               + repr(global_reqs_path) + ") " \
+                                          "and (Target.[System.WorkItemType] = 'Test Case') " \
+                                          "and Source.[System.State] <> 'Removed' " \
+                                          "order by [System.Id] mode (DoesNotContain)"
+        json_obj["wiql"] = {"wiql": wiql}
+        update_query(json_obj["wiql"], query_folder, json_obj["name"])
+        print("Updated SQA Test Features without test cases Query for: "
+              + target_project_name)
+    elif global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
+        # SQA Test Features Query
+        json_obj["name"] = "SQA Test Features"
+        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+               "[System.AssignedTo], [System.State], [System.Tags] " \
+               "from WorkItems " \
+               "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
+               "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
+               "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
+                                                   "order by [System.Id] "
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created SQA Test Features Query for: " + target_project_name)
+
+        # SQA Test Features without test cases
+        json_obj["name"] = "SQA Test Features without test cases"
+        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
+               "[System.AssignedTo], [System.State], [System.Tags] " \
+               "from WorkItemLinks " \
+               "where (Source.[System.WorkItemType] = 'Feature' " \
+               "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+               "and Source.[System.IterationPath] under " \
+               + repr(global_reqs_path) + ") " \
+               "and (Target.[System.WorkItemType] = 'Test Case') " \
+               "and Source.[System.State] <> 'Removed' " \
+               "order by [System.Id] mode (DoesNotContain)"
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created SQA Test Features without test cases Query for: "
+              + target_project_name)
 
 
 def return_legacy_name(query_name):
@@ -2331,7 +2390,7 @@ def update_dash(file):
 
     update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name)
     clear_dash(team_name, dash_id)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
 
     print("Dashboard Updated")
 
