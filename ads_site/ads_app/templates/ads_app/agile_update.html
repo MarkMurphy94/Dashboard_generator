@@ -57,31 +57,19 @@
             $("a#agile_update").addClass('active');
         });
 
-        function filter_agile_text() {
+        function filter_text(config) {
             // Filters the table rows as the user types
             var input, filter, table, tr, td, i;
-            input = document.getElementById("id_Agile_Name");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("main-agile-table-body");
-            tr = table.getElementsByTagName("tr");
-            for (item in tr) {
-                // Hides the row initially.
-                tr[item].style.display = "none";
-                cell = tr[item].getElementsByTagName("td")[0];
-                if (cell) {
-                    if (cell.innerHTML.toUpperCase().includes(filter)){
-                        tr[item].style.display = "";
-                    }
-                }
+            if (config == "agile"){
+                input = document.getElementById("id_Agile_Name");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("main-agile-table-body");
             }
-        }
-
-        function filter_waterfall_text() {
-            // Filters the table rows as the user types
-            var input, filter, table, tr, td, i;
-            input = document.getElementById("id_Waterfall_Name");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("main-waterfall-table-body");
+            else if (config == "waterfall"){
+                input = document.getElementById("id_Waterfall_Name");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("main-waterfall-table-body");
+            }
             tr = table.getElementsByTagName("tr");
             for (item in tr) {
                 // Hides the row initially.
@@ -101,7 +89,7 @@
 <h4>Select the Test Plan row you wish to update and click the Add Sprint button</h4>
 <p>
     <label for="id_Agile_Name">Search for the dashboard you wish to update:</label>
-    <input type="text" name="Agile_Name" required="" onkeyup="filter_agile_text()" id="id_Agile_Name" placeholder="Begin typing a name..." maxlength="250">
+    <input type="text" name="Agile_Name" required="" onkeyup="filter_text('agile')" id="id_Agile_Name" placeholder="Begin typing a name..." maxlength="250">
 </p>
 <div id="table-wrapper">
     <div id="agile-table-scroll">
@@ -140,7 +128,7 @@
 <h1>Waterfall Test Plans</h1>
 <p>
     <label for="id_Waterfall_Name">Search for the dashboard you wish to update:</label>
-    <input type="text" name="Waterfall_Name" required="" onkeyup="filter_waterfall_text()" id="id_Waterfall_Name" placeholder="Begin typing a name..." maxlength="250">
+    <input type="text" name="Waterfall_Name" required="" onkeyup="filter_text('waterfall')" id="id_Waterfall_Name" placeholder="Begin typing a name..." maxlength="250">
 </p>
 <div id="table-wrapper">
     <div id="agile-table-scroll">
