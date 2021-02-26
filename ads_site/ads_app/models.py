@@ -2467,6 +2467,10 @@ def update_dash(file):
 
 # region Update Agile Test Plan
 def get_agile_config():
+    """
+        Returns a json object of all agile test plan configs
+        :return: config_data
+    """
     config_data = []
 
     try:
@@ -2474,6 +2478,24 @@ def get_agile_config():
             config_data = json.load(json_file)
     except FileNotFoundError:
         file = open(AGILE_PATH, 'w+')
+        file.close()
+    except ValueError:  # json loads fails on empty file
+        pass
+    return config_data
+
+
+def get_waterfall_config():
+    """
+        Returns a json object of all waterfall test plan configs
+        :return: config_data
+    """
+    config_data = []
+
+    try:
+        with open(WATERFALL_PATH, 'r') as json_file:
+            config_data = json.load(json_file)
+    except FileNotFoundError:
+        file = open(WATERFALL_PATH, 'w+')
         file.close()
     except ValueError:  # json loads fails on empty file
         pass

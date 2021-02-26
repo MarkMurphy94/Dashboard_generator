@@ -57,12 +57,19 @@
             $("a#agile_update").addClass('active');
         });
 
-        function filter_text() {
+        function filter_text(config) {
             // Filters the table rows as the user types
             var input, filter, table, tr, td, i;
-            input = document.getElementById("id_Dash_Name");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("main-table-body");
+            if (config == "agile"){
+                input = document.getElementById("id_Agile_Name");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("main-agile-table-body");
+            }
+            else if (config == "waterfall"){
+                input = document.getElementById("id_Waterfall_Name");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("main-waterfall-table-body");
+            }
             tr = table.getElementsByTagName("tr");
             for (item in tr) {
                 // Hides the row initially.
@@ -75,16 +82,17 @@
                 }
             }
         }
+
     </script>
 
-<h1>Update Agile Test Plan</h1>
-<h4>Select the Test Plan row wish to update and click the Add Sprint button</h4>
+<h1>Agile Test Plans</h1>
+<h4>Select the Test Plan row you wish to update and click the Add Sprint button</h4>
 <p>
-    <label for="id_Dash_Name">Search for the dashboard you wish to update:</label>
-    <input type="text" name="Dash_Name" required="" onkeyup="filter_text()" id="id_Dash_Name" placeholder="Begin typing a name..." maxlength="250">
+    <label for="id_Agile_Name">Search for an agile test plan:</label>
+    <input type="text" name="Agile_Name" required="" onkeyup="filter_text('agile')" id="id_Agile_Name" placeholder="Begin typing a name..." maxlength="250">
 </p>
 <div id="table-wrapper">
-    <div id="table-scroll">
+    <div id="test-plan-table-scroll">
         <table id="table" class="table table-bordered table-striped table-hover">
             <colgroup>
                 <col style="width: 32%">
@@ -102,8 +110,8 @@
                 <th>Update Sprint</th>
             </tr>
             </thead>
-            <tbody id="main-table-body">
-            {% for config in json %}
+            <tbody id="main-agile-table-body">
+            {% for config in agile %}
                 <tr>
                     <td>{{ config.test_plan }}</td>
                     <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_testPlans/execute?planId={{ config.test_plan_id }}">&#x1f517</a></td>
@@ -116,6 +124,43 @@
         </table>
     </div>
 </div>
+
+<h1>Waterfall Test Plans</h1>
+<p>
+    <label for="id_Waterfall_Name">Search for a waterfall test plan:</label>
+    <input type="text" name="Waterfall_Name" required="" onkeyup="filter_text('waterfall')" id="id_Waterfall_Name" placeholder="Begin typing a name..." maxlength="250">
+</p>
+<div id="table-wrapper">
+    <div id="test-plan-table-scroll">
+        <table id="table" class="table table-bordered table-striped table-hover">
+            <colgroup>
+                <col style="width: 32%">
+                <col style="width: 10%">
+                <col style="width: 20%">
+                <col style="width: 18%">
+                <col style="width: 20%">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>Project</th>
+                <th class="url_label">URL</th>
+                <th>Last Updated</th>
+            </tr>
+            </thead>
+            <tbody id="main-waterfall-table-body">
+            {% for config in waterfall %}
+                <tr>
+                    <td>{{ config.test_plan }}</td>
+                    <td class="link_symbol"><a target="_blank" rel="noopener noreferrer" href="https://dev.azure.com/itron/RnD/_testPlans/execute?planId={{ config.test_plan_id }}">&#x1f517</a></td>
+                    <td>{{ config.lastUpdate }}</td>
+                </tr>
+            {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+<br>
+<br>
 <div id="Error" hidden class="validation-summary-errors">
     <p>Please select a Dashboard</p>
 </div>
