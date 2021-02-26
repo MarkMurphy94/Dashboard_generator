@@ -2453,6 +2453,10 @@ def update_dash(file):
 
 # region Update Agile Test Plan
 def get_agile_config():
+    """
+        Returns a json object of all agile test plan configs
+        :return: config_data
+    """
     config_data = []
 
     try:
@@ -2467,6 +2471,10 @@ def get_agile_config():
 
 
 def get_waterfall_config():
+    """
+        Returns a json object of all waterfall test plan configs
+        :return: config_data
+    """
     config_data = []
 
     try:
