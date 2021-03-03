@@ -49,14 +49,14 @@
     <div class="main-left">
         <h1>Create Test Plan</h1>
         <p>Please Rename or re-organize the generated Test Plan as you see fit.</p>
-        <p>Do not include these characters in your test plan name: /\$?*:"&<#%+</p>
+        <p>Do not include these characters in your test plan name: <strong>^/\<>*?&"|:</strong></p>
         <form action="create_test" method="POST" id="create_test">
             {% csrf_token %}
             <select id="project_type" name="project_type">
                 <option>Waterfall</option>
                 <option>Agile</option>
             </select>
-            <input list="project_list" name="project_list" required>
+            <input list="project_list" name="project_list" maxlength="255" pattern='[^/\\<>*?&"|:]' title='Cannot include: ^/\\<>*?&"|:' required>
             <datalist id="project_list">
                 {% for item in pmo_list %}
                 <option>{{ item }}</option>
