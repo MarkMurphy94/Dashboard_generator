@@ -56,7 +56,7 @@
                 <option>Waterfall</option>
                 <option>Agile</option>
             </select>
-            <input list="project_list" name="project_list" maxlength="255" pattern='[^/\\<>*?&"|:]{1,255}' title='Cannot include: ^/\<>*?&"|:' required>
+            <input list="project_list" name="project_list" maxlength="255" pattern='[^/\\<>*?&"|:]{1,255}' title='Max 255 characters, cannot include: ^/\<>*?&"|:' required>
             <datalist id="project_list">
                 {% for item in pmo_list %}
                 <option>{{ item }}</option>
