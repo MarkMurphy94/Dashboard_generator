@@ -49,7 +49,7 @@
     <div class="main-left">
         <h1>Create Test Plan</h1>
         <p>Please Rename or re-organize the generated Test Plan as you see fit.</p>
-        <p>Do not include these characters in your test plan name: <strong>^/\<>*?&"|:</strong></p>
+        <p>Do not include these characters in your test plan name: <strong>/\<>*?&"|:</strong></p>
         <form action="create_test" method="POST" id="create_test">
             {% csrf_token %}
             <select id="project_type" name="project_type">

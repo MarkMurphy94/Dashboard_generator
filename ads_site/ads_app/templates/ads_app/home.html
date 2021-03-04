@@ -102,9 +102,9 @@
                 <td></td>
                 <td></td>
                 {% if global_path %}
-                    <td><input type="text" name="global_path" value="{{ global_path }}" required="" id="global_path" pattern="[^$?:#%|+]" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
+                    <td><input type="text" name="global_path" value="{{ global_path }}" required="" id="global_path" pattern="[^$?:#%|+]{1,255}" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
                 {% else %}
-                    <td><input type="text" name="global_path" required="" id="global_path" pattern="[^$?:#%|+]" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
+                    <td><input type="text" name="global_path" required="" id="global_path" pattern="[^$?:#%|+]{1,255}" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
                 {% endif %}
             </tr>
             <tr>
