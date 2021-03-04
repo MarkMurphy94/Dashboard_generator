@@ -79,9 +79,9 @@
                 <td></td>
                 <td></td>
                 {% if folder_name %}
-                    <td><input type="text" name="folder_name" value="{{ folder_name }}" pattern='[^/\\<>*?&"|:]{1,32}' title='Max 32 characters, cannot not include: /\\<>*?&"|:' required="" id="folder_name" maxlength="32"></td>
+                    <td><input type="text" name="folder_name" value="{{ folder_name }}" pattern='[^/\\<>*?&"|:]{1,32}' title='Max 32 characters, cannot not include: /\<>*?&"|:' required="" id="folder_name" maxlength="32"></td>
                 {% else %}
-                    <td><input type="text" name="folder_name" pattern='[^/\\<>*?&"|:]{1,32}' title='Max 32 characters, cannot not include: /\\<>*?&"|:' required="" id="folder_name" maxlength="32"></td>
+                    <td><input type="text" name="folder_name" pattern='[^/\\<>*?&"|:]{1,32}' title='Max 32 characters, cannot not include: /\<>*?&"|:' required="" id="folder_name" maxlength="32"></td>
                 {% endif %}
             </tr>
             <tr>
