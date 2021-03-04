@@ -301,7 +301,7 @@ def create_iteration(test_plan):
         raise DashAlreadyExists("""
                                 Failed to create iteration.
                                 Do not include these characters in your test plan name: 
-                                \ / $ ? * : " & < # % +
+                                $ ? : # % | +
                                 """)
 
 
