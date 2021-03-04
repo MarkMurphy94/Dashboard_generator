@@ -75,7 +75,10 @@
         {% csrf_token %}
         <table class="form-table">
             <tr>
-                <td><label for="folder_name">Enter the name for the new Project: *</label></td>
+                <td>
+                    <label for="folder_name">Enter the name for the new Project: *<br/>
+                    <small>(Max 32 characters, cannot not include: <strong>/\<>*?&"|:</strong>)</small></label>
+                </td>
                 <td></td>
                 <td></td>
                 {% if folder_name %}
