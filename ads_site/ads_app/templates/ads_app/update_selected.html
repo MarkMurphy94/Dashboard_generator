@@ -109,9 +109,9 @@
                 <td></td>
                 {% for item in json %}
                 {% if item.global_path %}
-                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" maxlength="250"></td>
+                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" pattern="[^$?:#%|+]" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
                 {% else %}
-                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" maxlength="250"></td>
+                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" pattern="[^$?:#%|+]" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
                 {% endif %}
                 {% endfor %}
             </tr>
