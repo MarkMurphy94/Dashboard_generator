@@ -1,4 +1,6 @@
-# ADS Dashboard Tool
+[[_TOC_]]
+
+# ADS Dashboard Generator Tool
 This webapp is designed to create standardized test plans and dashboards for GTO projects.
 
 ## Before you deploy...
