@@ -80,7 +80,10 @@
         {% csrf_token %}
         <table class="form-table">
             <tr>
-                <td><label for="folder_name">Project dashboard name: </label></td>
+                <td>
+                    <label for="folder_name">Project dashboard name: <br/>
+                    <small>(Max 32 characters, cannot not include: <strong>/\<>*?&"|:</strong>)</small></label>
+                </td>
                 <td></td>
                 <td></td>
                 {% for item in json %}
@@ -109,9 +112,9 @@
                 <td></td>
                 {% for item in json %}
                 {% if item.global_path %}
-                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" maxlength="250"></td>
+                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" pattern="[^$?:#%|+]{1,255}" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
                 {% else %}
-                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" maxlength="250"></td>
+                    <td><input type="text" name="global_path" value="{{ item.global_path }}" required="" id="global_path" pattern="[^$?:#%|+]{1,255}" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
                 {% endif %}
                 {% endfor %}
             </tr>

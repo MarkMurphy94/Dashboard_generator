@@ -1,6 +1,7 @@
 /ads_site/db.sqlite3
 /ads_site/ads_app/static/Dashboard configs/
 /ads_site/ads_app/static/agile_plans.txt
+ads_site/ads_app/static/waterfall_plans.txt
 /ads_site/ads_app/static/token.txt
 /ads_site/.idea/modules.xml
 /ads_site/.idea/misc.xml

@@ -505,6 +505,7 @@ th {
 /* Formatting for table wrapper */
  #table-wrapper {
    position:relative;
+   padding-bottom: 60px;
  }
 
 /* Formatting for table scroll bar */
@@ -515,5 +516,16 @@ th {
   overflow:auto;
   margin-top:20px;
 }
+
+/* Formatting for test plan table scroll bar */
+#test-plan-table-scroll {
+  height: 30%;
+  min-height: 420px;
+  width: 80%;
+  overflow:auto;
+  margin-top:20px;
+}
+
+
 
 

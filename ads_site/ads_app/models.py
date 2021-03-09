@@ -11,6 +11,7 @@ CONFIGS_PATH = settings.BASE_DIR + r'/ads_app/static/Dashboard configs/'
 LOG_PATH = settings.BASE_DIR + r'/ads_app/static/logs.txt'
 TOKEN_PATH = settings.BASE_DIR + r'/ads_app/static/token.txt'
 AGILE_PATH = settings.BASE_DIR + r'/ads_app/static/agile_plans.txt'
+WATERFALL_PATH = settings.BASE_DIR + r'/ads_app/static/waterfall_plans.txt'
 with open(TOKEN_PATH, 'r') as TOKEN_FILE:
     USER = TOKEN_FILE.readline().strip()
     TOKEN = TOKEN_FILE.readline().strip()
@@ -238,7 +239,7 @@ def create_agile_test_plan(test_plan, child_suites):
     return test_plan_id
 
 
-def create_full_test_plan(test_plan, child_suites):
+def create_full_test_plan(test_plan, child_suites, user_name):
     """
         Creates a test plan based on the name given
         :return test plan ID
@@ -246,6 +247,7 @@ def create_full_test_plan(test_plan, child_suites):
     create_iteration(test_plan)  # creates iteration
     test_plan_id = create_test_plan(test_plan)
     suite_id = str(int(test_plan_id) + 1)
+    create_waterfall_config(test_plan, test_plan_id, user_name)
 
     # region Final Product
     suite_name = "Final Product Test"
@@ -299,7 +301,7 @@ def create_iteration(test_plan):
         raise DashAlreadyExists("""
                                 Failed to create iteration.
                                 Do not include these characters in your test plan name: 
-                                \ / $ ? * : " & < # % +
+                                $ ? : # % | +
                                 """)
 
 
@@ -331,6 +333,38 @@ def create_test_plan(test_plan):
     print(json.dumps(test_plan_response))
     print(test_plan_response["id"])
     return test_plan_response["id"]
+
+
+def create_waterfall_config(test_plan, test_plan_id, user_name):
+    """
+        Creates a JSON config file for a waterfall test plan with the parameters provided
+    """
+    now = datetime.datetime.now()
+    localtime = reference.LocalTimezone()
+    date_string = now.strftime("%m/%d/%Y %H:%M:%S, " + localtime.tzname(now))
+
+    data = []
+
+    try:
+        with open(WATERFALL_PATH, 'r') as json_file:
+            data = json.load(json_file)
+    except FileNotFoundError:
+        file = open(WATERFALL_PATH, 'w+')
+        file.close()
+    except ValueError:  # json loads fails on empty file
+        pass
+
+    config_file = {
+        'test_plan': test_plan,
+        'test_plan_id': test_plan_id,
+        'lastUpdate': date_string,
+        'createdBy': user_name
+    }
+
+    data.append(config_file)
+
+    with open(WATERFALL_PATH, 'w') as outfile:
+        json.dump(data, outfile)
 
 
 def create_suite(suite_name, test_plan_id, suite_id):
@@ -520,7 +554,9 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
     populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path)
 
-    create_config(team_name, url, dash_id, test_plan, folder, query_folder, target_choice, global_path, target_project_name)
+    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder,
+                                target_choice, global_path, target_project_name)
+    write_config(json_config)
     return dash_id
 
 
@@ -611,8 +647,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
                        " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
-                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags] "
-    from_bugs = "from WorkItems where [System.WorkItemType] = 'Bug' "
+                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags]"
+    from_bugs = " from WorkItems where [System.WorkItemType] = 'Bug' "
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
@@ -623,14 +659,14 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     # Dev Bugs Query
     wiql = selected_columns + from_bugs \
            + "and [System.State] in ('New', 'Active') and " + target_clause \
-           + " and not [System.Tags] contains 'Monitor'"
+           + " and [Custom.Monitoring] = False"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
     print("Created Dev Bugs Query for: " + target_project_name)
 
     # All closed this week Query
     json_obj["name"] = "All closed this week"
-    wiql = selected_columns + from_bugs \
+    wiql = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
            + "and " + target_clause \
            + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
@@ -653,11 +689,31 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
            "and " + target_clause + \
-           " and [System.Tags] contains 'Monitor' " \
+           " and [Custom.Monitoring] = True " \
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
     print("Created Monitored Query for: " + target_project_name)
+
+    # New Issues last 24 hours Query
+    json_obj["name"] = "New Issues last 24 hours"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.CreatedDate] >= @today - 1"
+    json_obj["wiql"] = wiql
+    create_query(json_obj, query_folder)
+    print("Created New Issues last 24 hours Query for: " + target_project_name)
+
+    # Cannot Reproduce Query
+    json_obj["name"] = "Cannot Reproduce"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.reason] = 'Cannot Reproduce' "
+    json_obj["wiql"] = wiql
+    create_query(json_obj, query_folder)
+    print("Created Cannot Reproduce Query for: " + target_project_name)
 
     # All Bugs Query
     json_obj["name"] = "All Bugs"
@@ -684,7 +740,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     json_obj["name"] = "RTT"
     wiql = selected_columns + from_bugs \
            + "and [System.State] = 'Resolved' and " + target_clause + \
-           " and not [System.Tags] contains 'Monitor'"
+           " and [Custom.Monitoring] = False"
     json_obj["wiql"] = wiql
     create_query(json_obj, query_folder)
     print("Created RTT Query for: " + target_project_name)
@@ -750,7 +806,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     create_widget(output_team, overview_id, main_markdown)
     # endregion
 
-    # region 4 Query Tile
+    # region 6 Query Tile
     # Creating All Bugs widget
     starting_column += 1
     name = "All Bugs"
@@ -771,8 +827,18 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     dev_bugs = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, dev_bugs)
 
+    # Creating New Issues last 24 hours widget
+    starting_column += 1
+    name = "New Issues"
+    color = "#fbbc3d"
+    query_contains = "New Issues last 24 hours"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    new_issues_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, new_issues_tile)
+
     # Creating Monitored widget
-    starting_column -= 1
+    starting_column -= 2
     starting_row += 1
     name = "Monitored"
     color = "#cccccc"
@@ -791,6 +857,16 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id(query_contains, query_folder)
     rtt_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
     create_widget(output_team, overview_id, rtt_tile)
+
+    # Creating Cannot Reproduce widget
+    starting_column += 1
+    name = "Cannot Reproduce"
+    color = "#fbfd52"
+    query_contains = "Cannot Reproduce"
+    query_name = return_query_name(query_contains, query_folder)
+    query_id = return_query_id(query_contains, query_folder)
+    cannot_reproduce_tile = return_query_tile(starting_column, starting_row, name, query_name, query_id, color)
+    create_widget(output_team, overview_id, cannot_reproduce_tile)
     # endregion
 
     # region Bug Trend
@@ -872,7 +948,8 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     starting_column += 2
 
     while starting_column <= MAX_COLUMN:
-        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row))
+        remainder = min(MAX_COLUMN - starting_column + 2, 10)  # returns the minimum value in the given range
+        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
 
@@ -942,7 +1019,8 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
 
     # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
-        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row))
+        remainder = min(MAX_COLUMN - starting_column + 2, 10)
+        create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
 
@@ -970,6 +1048,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
 
             row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
             create_widget(output_team, overview_id, row_markdown)
+            starting_column += 1
             count += 1
             # endregion
 
@@ -1016,11 +1095,12 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            while count <= MAX_WIDGETS:
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
-                count += 1
+            # region Fill In with Blank Widgets
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
+            # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
@@ -1104,10 +1184,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
             # endregion
 
@@ -1194,10 +1273,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
             # endregion
 
@@ -1283,11 +1361,11 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
+
             # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
@@ -1376,10 +1454,9 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 # endregion
 
             # region Fill In with Blank Widgets
-            while count <= MAX_WIDGETS:
-                create_widget(output_team, overview_id,
-                              return_blank_square(starting_column, starting_row))
-                count += 1
+            while starting_column <= MAX_COLUMN:
+                remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
                 starting_column += 2
             # endregion
 
@@ -1387,16 +1464,20 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
 
-def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, targeted_project, global_path, short_name):
+def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
+                  targeted_project, global_path, short_name, executive=False):
     """
-        Creates a JSON config file with the parameters provided, this is used
-        when performing the update function
+        Creates JSON object using string arguments unless otherwise specified:
+            - team name             - targeted project name or tag flag (bool)
+            - URL                   - global reqs iteration path
+            - dashboard ID          - targeted project name or tag
+            - test plan ID          - [calculated] config version
+            - query folder name     - [calculated] time last updated
+            - query folder ID       - [optional] executive dashboard flag (bool)
     """
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
-    file_directory = CONFIGS_PATH + folder_name + '.txt'
-
-    config_file = {
+    json_config = {
         'teamName': team_name,
         'url': url,
         'dashId': dash_id,
@@ -1408,11 +1489,19 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, ta
         'short_name': short_name,
         'version': VERSION,
         'lastUpdate': date_string,
-        'executive': True
+        'executive': executive
     }
+    return json_config
 
+
+def write_config(json_config):
+    """
+        Writes or overwrites a JSON config to a file using config["folderName] as the file name.
+        This is used when performing the update or create dashboard function
+    """
+    file_directory = CONFIGS_PATH + json_config["folderName"] + '.txt'
     with open(file_directory, 'w') as outfile:
-        json.dump(config_file, outfile)
+        json.dump(json_config, outfile)
 
 
 def find_test_plan_id_by_name(test_plan, continuation_token=''):
@@ -1636,7 +1725,7 @@ def return_suite_child_id(suite_name, test_plan, suite_id):
     return NOT_FOUND
 
 
-def return_blank_square(column, row, name=" "):
+def return_blank_square(column, row, remainder, name=" "):
     """
         Returns a json template for each widget type
 
@@ -1646,7 +1735,7 @@ def return_blank_square(column, row, name=" "):
     """
     blank_square = return_widget_obj("Markdown")
     blank_square["settings"] = name
-    blank_square["size"]["columnSpan"] = 2
+    blank_square["size"]["columnSpan"] = remainder
     blank_square["size"]["rowSpan"] = 2
     blank_square["position"]["column"] = column
     blank_square["position"]["row"] = row
@@ -2180,8 +2269,8 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
                        " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
-                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags] "
-    from_bugs = "from WorkItems where [System.WorkItemType] = 'Bug' "
+                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags]"
+    from_bugs = " from WorkItems where [System.WorkItemType] = 'Bug' "
 
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
@@ -2192,14 +2281,14 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     # Dev Bugs Query
     wiql = selected_columns + from_bugs \
            + "and [System.State] in ('New', 'Active') and " + target_clause \
-           + " and not [System.Tags] contains 'Monitor'"
+           + " and [Custom.Monitoring] = False"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated Dev Bugs Query for: " + target_project_name)
 
     # All closed this week Query
     json_obj["name"] = "All closed this week"
-    wiql = selected_columns + from_bugs \
+    wiql = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
            + "and " + target_clause \
            + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
              "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
@@ -2222,11 +2311,41 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     wiql = selected_columns + from_bugs \
            + "and not [System.State] contains 'Closed' " \
              "and " + target_clause + \
-           " and [System.Tags] contains 'Monitor' " \
+           " and [Custom.Monitoring] = True " \
            "order by [System.CreatedDate] desc"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated All Monitored Query for: " + target_project_name)
+
+    # New Issues last 24 hours Query
+    json_obj["name"] = "New Issues last 24 hours"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.CreatedDate] >= @today - 1"
+    if json_obj["name"] not in return_query_folder_children(query_folder):  # New query, will create if not in folder
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created New Issues last 24 hours Query for: " + target_project_name)
+    else:
+        json_obj["wiql"] = {"wiql": wiql}
+        update_query(json_obj["wiql"], query_folder, json_obj["name"])
+        print("Updated New Issues last 24 hours Query for: " + target_project_name)
+
+    # Cannot Reproduce Query
+    json_obj["name"] = "Cannot Reproduce"
+    wiql = selected_columns + from_bugs \
+           + "and [System.State] <> 'Closed' " \
+           "and " + target_clause + \
+           " and [System.Reason] = 'Cannot reproduce' "
+    if json_obj["name"] not in return_query_folder_children(query_folder):  # New query, will create if not in folder
+        json_obj["wiql"] = wiql
+        create_query(json_obj, query_folder)
+        print("Created Cannot Reproduce Query for: " + target_project_name)
+    else:
+        json_obj["wiql"] = {"wiql": wiql}
+        update_query(json_obj["wiql"], query_folder, json_obj["name"])
+        print("Updated Cannot Reproduce Query for: " + target_project_name)
 
     # All Bugs Query
     json_obj["name"] = "All Bugs"
@@ -2253,7 +2372,7 @@ def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, 
     json_obj["name"] = "RTT"
     wiql = selected_columns + from_bugs \
            + "and [System.State] = 'Resolved' and " + target_clause + \
-           " and not [System.Tags] contains 'Monitor'"
+           " and [Custom.Monitoring] = False"
     json_obj["wiql"] = {"wiql": wiql}
     update_query(json_obj["wiql"], query_folder, json_obj["name"])
     print("Updated RTT Query for: " + target_project_name)
@@ -2364,8 +2483,8 @@ def update_query(json_obj, query_folder, query_name):
                               auth=HTTPBasicAuth(USER, TOKEN), json=json_obj,
                               params=version)
     if wiql_response.status_code != 200:
-        print(wiql_response.status_code)
-        raise QueryUpdateError("Error updating query")
+        print(wiql_response.status_code, wiql_response.reason)
+        raise QueryUpdateError("Error updating query: " + str(wiql_response.reason))
     print("-----------------------------")
 
 
@@ -2407,6 +2526,10 @@ def update_dash(file):
 
 # region Update Agile Test Plan
 def get_agile_config():
+    """
+        Returns a json object of all agile test plan configs
+        :return: config_data
+    """
     config_data = []
 
     try:
@@ -2414,6 +2537,24 @@ def get_agile_config():
             config_data = json.load(json_file)
     except FileNotFoundError:
         file = open(AGILE_PATH, 'w+')
+        file.close()
+    except ValueError:  # json loads fails on empty file
+        pass
+    return config_data
+
+
+def get_waterfall_config():
+    """
+        Returns a json object of all waterfall test plan configs
+        :return: config_data
+    """
+    config_data = []
+
+    try:
+        with open(WATERFALL_PATH, 'r') as json_file:
+            config_data = json.load(json_file)
+    except FileNotFoundError:
+        file = open(WATERFALL_PATH, 'w+')
         file.close()
     except ValueError:  # json loads fails on empty file
         pass
