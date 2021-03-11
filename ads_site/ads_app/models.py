@@ -263,9 +263,15 @@ def create_full_test_plan(test_plan, child_suites, user_name):
     # endregion
 
     # region Customer Solution
-    suite_name = "Customer Solution Test"
-    customer_suite = create_suite(suite_name, test_plan_id, suite_id)
-    create_customer_suite_runs(test_plan_id, customer_suite, child_suites)
+    # Don't create Customer Solution Test suite if no child suites are checked
+    any_customer_suites_checked = False
+    for x in range(len(CUSTOMER_SUITES)):
+        if child_suites[CUSTOMER_KEYS[x]]:
+            any_customer_suites_checked = True
+    if any_customer_suites_checked:
+        suite_name = "Customer Solution Test"
+        customer_suite = create_suite(suite_name, test_plan_id, suite_id)
+        create_customer_suite_runs(test_plan_id, customer_suite, child_suites)
     # endregion
 
     # region System Test
