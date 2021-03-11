@@ -1295,86 +1295,87 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     if customer_solution != NOT_FOUND:
         suite_list = return_suite_child_list(test_plan, customer_solution)
         # Creates a row of Customer widgets per Run found in Customer Solution tree
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
 
-            # region Customer Solution Markdown
-            row_text = "#Customer Solution \n ###" + suite_name + " \n#------->"
+                # region Customer Solution Markdown
+                row_text = "#Customer Solution \n ###" + suite_name + " \n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region Customer Solution - Test Case Readiness
-            name = "Customer Solution - Test Case Readiness"
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region Customer Solution - Test Case Readiness
+                name = "Customer Solution - Test Case Readiness"
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Overall - Customer Solution
-            name = "Overall - Customer Solution"
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan, group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
-            for child in child_list:
-                if child_count >= 5:
-                    break
-                else:
-                    # region optional widgets
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Run - New Features
-                        name = "New Features - Customer Solution"
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Run  - Manual Regression
-                        name = "Manual Regression - Customer Solution"
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Run - Automated Regression
-                        name = "Automated Regression - Customer Solution"
-                    else:
-                        name = child['name']
-                child_count += 1
-
+                # region Overall - Customer Solution
+                name = "Overall - Customer Solution"
                 group = "Outcome"
                 test_results = True
-                test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
-                                                   group=group,
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan, group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
                 starting_column += 2
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
+                child_list = return_suite_child_full(test_plan, suite_id)
+                child_count = 0
+                for child in child_list:
+                    if child_count >= 5:
+                        break
+                    else:
+                        # region optional widgets
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Run - New Features
+                            name = "New Features - Customer Solution"
 
-            # endregion
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Run  - Manual Regression
+                            name = "Manual Regression - Customer Solution"
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Run - Automated Regression
+                            name = "Automated Regression - Customer Solution"
+                        else:
+                            name = child['name']
+                    child_count += 1
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
     # region First Article/Final Product
@@ -1829,11 +1830,12 @@ def return_suite_child_list(test_plan, suite_id):
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     query_response = response.json()
 
-    for child in query_response['children']:
-        if any(trigger in child['name'] for trigger in trigger_list):
-            child_list.append(child)
+    if 'children' in query_response:
+        for child in query_response['children']:
+            if any(trigger in child['name'] for trigger in trigger_list):
+                child_list.append(child)
+        child_list = sorted(child_list, key=lambda name: child['name'])
 
-    child_list = sorted(child_list, key=lambda name: child['name'])
     return child_list
 
 
