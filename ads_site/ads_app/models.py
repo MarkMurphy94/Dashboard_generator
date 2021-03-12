@@ -1819,6 +1819,8 @@ def return_suite_child_list(test_plan, suite_id):
         Returns the given suite's children suites in a list if they contain
         one of the row trigger phrases ('Alpha', 'Beta', 'Run')
 
+        Returns an empty list if there are no children
+
         :return list of child suites
     """
     child_list = []
@@ -1833,6 +1835,7 @@ def return_suite_child_list(test_plan, suite_id):
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     query_response = response.json()
 
+    # Check the query_response for the 'children' attribute before iterating
     if 'children' in query_response:
         for child in query_response['children']:
             if any(trigger in child['name'] for trigger in trigger_list):
