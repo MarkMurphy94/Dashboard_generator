@@ -1121,82 +1121,83 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         suite_list = return_suite_child_list(test_plan, early_system)
 
         # Creates a Early System Test row per Alpha found in Test Plan tree
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
-            # region Alpha Markdown
-            row_text = "#Early \n #System Test \n ###" + suite_name + "\n#------->"
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
+                # region Alpha Markdown
+                row_text = "#Early \n #System Test \n ###" + suite_name + "\n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region Test Case Readiness - Alpha
-            name = "Test Case Readiness " + suite_name
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region Test Case Readiness - Alpha
+                name = "Test Case Readiness " + suite_name
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Alpha Overall
-            name = suite_name + " - Overall"
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan, group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            # create widgets for children suites if found
-            child_list = return_suite_child_full(test_plan, suite_id)
-            for child in child_list:
-                if starting_column > MAX_COLUMN:
-                    break
-                else:
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Alpha - New Features
-                        name = suite_name + " - New Features"
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Alpha  - Manual Regression
-                        name = suite_name + "- Manual Regression"
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Alpha - Automated Regression
-                        name = suite_name + "- Automated Regression"
-                    else:
-                        name = child['name']
-
+                # region Alpha Overall
+                name = suite_name + " - Overall"
                 group = "Outcome"
                 test_results = True
-                test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
-                                                   group=group,
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan, group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
                 starting_column += 2
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
-            # endregion
+                # create widgets for children suites if found
+                child_list = return_suite_child_full(test_plan, suite_id)
+                for child in child_list:
+                    if starting_column > MAX_COLUMN:
+                        break
+                    else:
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Alpha - New Features
+                            name = suite_name + " - New Features"
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Alpha  - Manual Regression
+                            name = suite_name + "- Manual Regression"
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Alpha - Automated Regression
+                            name = suite_name + "- Automated Regression"
+                        else:
+                            name = child['name']
+
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
     # region System Test
@@ -1206,71 +1207,37 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         suite_list = return_suite_child_list(test_plan, system_suite_id)
 
         # Creates row of System Test widgets for each Run found in System Test
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
 
-            # region System Test Markdown
-            row_text = "#System Test \n ###" + suite_name + "\n#------->"
+                # region System Test Markdown
+                row_text = "#System Test \n ###" + suite_name + "\n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region System Test - Test Case Readiness
-            name = "System Test - Test Case Readiness"
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region System Test - Test Case Readiness
+                name = "System Test - Test Case Readiness"
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Overall - System Test
-            name = "Overall - System Test"
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row,
-                                               name, suite_id, test_plan,
-                                               group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
-            for child in child_list:
-                if child_count >= 5:
-                    break
-                else:
-                    # region optional widgets
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Run - New Features
-                        name = "New Feature - System Test"
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Run  - Manual Regression
-                        name = "Manual Regression - System Test"
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Run - Automated Regression
-                        name = "Automated Regression - System Test"
-                    else:
-                        name = child['name']
-                child_count += 1
-
+                # region Overall - System Test
+                name = "Overall - System Test"
                 group = "Outcome"
                 test_results = True
                 test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
+                                                   name, suite_id, test_plan,
                                                    group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
@@ -1278,14 +1245,49 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
-            # endregion
+                child_list = return_suite_child_full(test_plan, suite_id)
+                child_count = 0
+                for child in child_list:
+                    if child_count >= 5:
+                        break
+                    else:
+                        # region optional widgets
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Run - New Features
+                            name = "New Feature - System Test"
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Run  - Manual Regression
+                            name = "Manual Regression - System Test"
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Run - Automated Regression
+                            name = "Automated Regression - System Test"
+                        else:
+                            name = child['name']
+                    child_count += 1
+
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
     # region Customer Solution
@@ -1389,85 +1391,86 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     if product_suite != NOT_FOUND:
         suite_list = return_suite_child_list(test_plan, product_suite)
         # Creates a row of product suite widgets per Run found in product suite tree
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
 
-            # region First Article/Final Product Markdown
-            row_text = "#" + suite_title + " Test\n ###" + suite_name + " \n#------->"
+                # region First Article/Final Product Markdown
+                row_text = "#" + suite_title + " Test\n ###" + suite_name + " \n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region First Article/Final Product - Test Case Readiness
-            name = suite_name + " - Test Case Readiness"
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region First Article/Final Product - Test Case Readiness
+                name = suite_name + " - Test Case Readiness"
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Overall - First Article/Final Product
-            name = "Overall " + suite_name
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan, group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
-            for child in child_list:
-                if child_count >= 5:
-                    break
-                else:
-                    # region optional widgets
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Run - New Features
-                        name = "New Features " + suite_name
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Run  - Manual Regression
-                        name = "Manual Regression - " + suite_name
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Run - Automated Regression
-                        name = "Automated Regression - " + suite_name
-                    else:
-                        name = child['name']
-                    child_count += 1
-
+                # region Overall - First Article/Final Product
+                name = "Overall " + suite_name
                 group = "Outcome"
                 test_results = True
-                test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
-                                                   group=group,
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan, group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
                 starting_column += 2
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
-            # endregion
+                child_list = return_suite_child_full(test_plan, suite_id)
+                child_count = 0
+                for child in child_list:
+                    if child_count >= 5:
+                        break
+                    else:
+                        # region optional widgets
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Run - New Features
+                            name = "New Features " + suite_name
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Run  - Manual Regression
+                            name = "Manual Regression - " + suite_name
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Run - Automated Regression
+                            name = "Automated Regression - " + suite_name
+                        else:
+                            name = child['name']
+                        child_count += 1
+
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
 
