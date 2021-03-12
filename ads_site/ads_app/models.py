@@ -1838,7 +1838,7 @@ def return_suite_child_list(test_plan, suite_id):
     # Check the query_response for the 'children' attribute before iterating
     if 'children' in query_response:
         for child in query_response['children']:
-            if any(trigger in child['name'] for trigger in trigger_list):
+            if any(trigger.upper() in child['name'].upper() for trigger in trigger_list):
                 child_list.append(child)
         child_list = sorted(child_list, key=lambda name: child['name'])
 
