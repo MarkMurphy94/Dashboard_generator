@@ -642,6 +642,13 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     """
         Populates the given folder with the standard queries
     """
+    # region WIQL constants
+    # Target clause is dependent on User's GUI choice
+    if str(target_choice) == '0':
+        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
+    else:
+        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
+
     json_obj = {"name": "Dev Bugs"}
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
@@ -649,129 +656,127 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                        " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
                        " [System.IterationPath], [Custom.TargetedProject], [System.Tags]"
     from_bugs = " from WorkItems where [System.WorkItemType] = 'Bug' "
+    # endregion
 
-    # Target clause is dependent on User's GUI choice
-    if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
-    else:
-        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
+    # region WIQL statements
+    wiql_dev_bugs = selected_columns + from_bugs \
+                    + "and [System.State] in ('New', 'Active') and " + target_clause \
+                    + " and [Custom.Monitoring] = False"
+    wiql_all_closed_this_week = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
+                                + "and " + target_clause \
+                                + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
+                                  "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
+    wiql_all_created_this_week = selected_columns + from_bugs \
+                                 + "and " + target_clause \
+                                 + " and [System.CreatedDate] > @today - 7 " \
+                                   "order by [System.CreatedDate] desc"
+    wiql_monitored = selected_columns + from_bugs \
+                     + "and not [System.State] contains 'Closed' " \
+                       "and " + target_clause + \
+                     " and [Custom.Monitoring] = True " \
+                     "order by [System.CreatedDate] desc"
+    wiql_new_issues_last_24_hours = selected_columns + from_bugs \
+                                    + "and [System.State] <> 'Closed' " \
+                                      "and " + target_clause + \
+                                    " and [System.CreatedDate] >= @today - 1"
+    wiql_cannot_reproduce = selected_columns + from_bugs \
+                            + "and [System.State] <> 'Closed' " \
+                              "and " + target_clause + \
+                            " and [System.reason] = 'Cannot Reproduce' "
+    wiql_all_bugs = selected_columns + from_bugs \
+                    + "and not [System.State] contains 'Closed' " \
+                      "and " + target_clause + \
+                    " order by [System.CreatedDate] desc"
+    wiql_all_resolved_this_week = selected_columns + from_bugs \
+                                  + "and " + target_clause + \
+                                  " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
+                                  "and [System.State] = 'Resolved' " \
+                                  "order by [System.CreatedDate] desc"
+    wiql_rtt = selected_columns + from_bugs \
+               + "and [System.State] = 'Resolved' and " + target_clause + \
+               " and [Custom.Monitoring] = False"
+    wiql_sqa_test_features = "select [System.Id], [System.WorkItemType], [System.Title], " \
+           "[System.AssignedTo], [System.State], [System.Tags] " \
+           "from WorkItems " \
+           "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
+           "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
+           "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
+                                               "order by [System.Id] "
+    wiql_sqa_test_features_without_test_cases = "select [System.Id], [System.WorkItemType], [System.Title], " \
+           "[System.AssignedTo], [System.State], [System.Tags] " \
+           "from WorkItemLinks " \
+           "where (Source.[System.WorkItemType] = 'Feature' " \
+           "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+           "and Source.[System.IterationPath] under " \
+           + repr(global_reqs_path) + ") " \
+                                      "and (Target.[System.WorkItemType] = 'Test Case') " \
+                                      "and Source.[System.State] <> 'Removed' " \
+                                      "order by [System.Id] mode (DoesNotContain)"
+    # endregion
 
     # Dev Bugs Query
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] in ('New', 'Active') and " + target_clause \
-           + " and [Custom.Monitoring] = False"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_dev_bugs
     create_query(json_obj, query_folder)
     print("Created Dev Bugs Query for: " + target_project_name)
 
     # All closed this week Query
     json_obj["name"] = "All closed this week"
-    wiql = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
-           + "and " + target_clause \
-           + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
-             "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_all_closed_this_week
     create_query(json_obj, query_folder)
     print("Created All closed this week Query for: " + target_project_name)
 
     # All created this week Query
     json_obj["name"] = "All created this week"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause \
-           + " and [System.CreatedDate] > @today - 7 " \
-             "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_all_created_this_week
     create_query(json_obj, query_folder)
     print("Created All created this week Query for: " + target_project_name)
 
     # Monitored Query
     json_obj["name"] = "Monitored"
-    wiql = selected_columns + from_bugs \
-           + "and not [System.State] contains 'Closed' " \
-           "and " + target_clause + \
-           " and [Custom.Monitoring] = True " \
-           "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_monitored
     create_query(json_obj, query_folder)
     print("Created Monitored Query for: " + target_project_name)
 
     # New Issues last 24 hours Query
     json_obj["name"] = "New Issues last 24 hours"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] <> 'Closed' " \
-           "and " + target_clause + \
-           " and [System.CreatedDate] >= @today - 1"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_new_issues_last_24_hours
     create_query(json_obj, query_folder)
     print("Created New Issues last 24 hours Query for: " + target_project_name)
 
     # Cannot Reproduce Query
     json_obj["name"] = "Cannot Reproduce"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] <> 'Closed' " \
-           "and " + target_clause + \
-           " and [System.reason] = 'Cannot Reproduce' "
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_cannot_reproduce
     create_query(json_obj, query_folder)
     print("Created Cannot Reproduce Query for: " + target_project_name)
 
     # All Bugs Query
     json_obj["name"] = "All Bugs"
-    wiql = selected_columns + from_bugs \
-           + "and not [System.State] contains 'Closed' " \
-           "and " + target_clause + \
-           " order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_all_bugs
     create_query(json_obj, query_folder)
     print("Created All Bugs Query for: " + target_project_name)
 
     # All Resolved this week Query
     json_obj["name"] = "All resolved this week"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause + \
-           " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
-           "and [System.State] = 'Resolved' " \
-           "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_all_resolved_this_week
     create_query(json_obj, query_folder)
     print("Created All Resolved This Week Query for: " + target_project_name)
 
     # RTT Query
     json_obj["name"] = "RTT"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] = 'Resolved' and " + target_clause + \
-           " and [Custom.Monitoring] = False"
-    json_obj["wiql"] = wiql
+    json_obj["wiql"] = wiql_rtt
     create_query(json_obj, query_folder)
     print("Created RTT Query for: " + target_project_name)
 
     if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItems " \
-               "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-               "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-               "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                                   "order by [System.Id] "
-        json_obj["wiql"] = wiql
+        json_obj["wiql"] = wiql_sqa_test_features
         create_query(json_obj, query_folder)
         print("Created SQA Test Features Query for: " + target_project_name)
 
         # SQA Test Features without test cases
         json_obj["name"] = "SQA Test Features without test cases"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItemLinks " \
-               "where (Source.[System.WorkItemType] = 'Feature' " \
-               "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-               "and Source.[System.IterationPath] under " \
-               + repr(global_reqs_path) + ") " \
-               "and (Target.[System.WorkItemType] = 'Test Case') " \
-               "and Source.[System.State] <> 'Removed' " \
-               "order by [System.Id] mode (DoesNotContain)"
-        json_obj["wiql"] = wiql
+        json_obj["wiql"] = wiql_sqa_test_features_without_test_cases
         create_query(json_obj, query_folder)
         print("Created SQA Test Features without test cases Query for: "
               + target_project_name)
