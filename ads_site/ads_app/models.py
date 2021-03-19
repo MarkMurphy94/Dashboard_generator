@@ -758,7 +758,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     # SQA queries are dependent on global_reqs_path instead of first_time
     if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
         sqa_query_objects = [{"name": "SQA Test Features", "wiql": wiql_sqa_test_features},
-                             {"name": "SQA Test Features", "wiql": wiql_sqa_test_features}]
+                             {"name": "SQA Test Features without test cases", "wiql": wiql_sqa_test_features_without_test_cases}]
         for json_obj in sqa_query_objects:
             if json_obj["name"] not in query_folder_children:
                 create_query(json_obj, query_folder)
