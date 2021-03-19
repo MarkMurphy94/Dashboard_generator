@@ -647,7 +647,12 @@ def create_query_folder(folder):
 
 def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=True):
     """
-        Populates the given folder with the standard queries
+        Populates the given folder with the standard queries.
+
+        If first_time is set to False:
+         - Checks if standard queries exist
+         - Creates missing standard queries
+         - Updates existing standard queries
     """
 
     # region WIQL constants
@@ -724,11 +729,6 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     # endregion
 
     # region Populate Standard Query Objects
-
-    # hint at type for query_objects
-    query_objects = [{"a": "a", "b": "b"}, {"a": "a", "b": {"b": "b"}}]
-    query_objects.clear()
-
     query_objects = [{"name": "Dev Bugs", "wiql": wiql_dev_bugs},
                      {"name": "All closed this week", "wiql": wiql_all_closed_this_week},
                      {"name": "All created this week", "wiql": wiql_all_created_this_week},
