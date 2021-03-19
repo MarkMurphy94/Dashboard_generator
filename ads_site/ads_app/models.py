@@ -2257,43 +2257,15 @@ def return_query_folder_children(folder):
     return queries
 
 
-def return_legacy_name(query_name):
-    """
-        Return the legacy name corresponding to the current widget
-
-    """
-    legacy = {
-        "All Bugs": "All NOT Closed",
-        "Dev Bugs": "New Bugs",
-        "Monitored": "All Monitored",
-        "All closed this week": "All closed this week",
-        "All created this week": "All created this week",
-        "All resolved this week": "All resolved this week"
-    }
-    return legacy.get(query_name, "LEGACY NAME NOT FOUND")
-
-
 def update_query(json_obj, query_folder, query_name):
     """
         Submits the query json object to ADS
 
-        If the dashboard uses the old query names, translate the query name to find the correct ID,
-        then submit the new query name to ADS.
+        This function should only be called if the query exists.
 
     """
     version = {'api-version': '6.0'}
-    print("-----------------------------")
-    if query_name not in return_query_folder_children(query_folder):  # for compatibility with legacy dashboards
-        query_id = return_query_id(return_legacy_name(query_name), query_folder)    # find the correct query id
-        rename_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
-                                   + query_id + '?',
-                                   auth=HTTPBasicAuth(USER, TOKEN), json={"name": query_name},
-                                   params=version)
-        if rename_response.status_code != 200:
-            print(rename_response.status_code)
-            raise QueryUpdateError("Error renaming query")
-    else:
-        query_id = return_query_id(query_name, query_folder)
+    query_id = return_query_id(query_name, query_folder)
 
     wiql_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
                               + query_id + '?',
