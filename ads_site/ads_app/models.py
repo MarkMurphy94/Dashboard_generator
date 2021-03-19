@@ -298,6 +298,7 @@ def create_iteration(test_plan):
     dash_response = response.json()
     print(response.status_code)
     if response.status_code == 400:
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("""
                                 Failed to create iteration.
                                 Do not include these characters in your test plan name: 
@@ -327,6 +328,7 @@ def create_test_plan(test_plan):
 
     # indicates that a test plan with test_plan name already exists
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("Test Plan with name " + test_plan
                                 + " already exists")
 
@@ -385,9 +387,11 @@ def create_suite(suite_name, test_plan_id, suite_id):
     suite_response = response.json()
 
     if response.status_code == 404:  # indicates that the test plan was not found
+        print(json.dumps(response.json()))
         raise TestPlanError(
             "Test Plan with Id " + str(test_plan_id) + " not found or no longer exists")
     if response.status_code != 200:  # indicates that a test plan with suite name already exists
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("Test Plan with name " + suite_name
                                 + " already exists")
 
@@ -574,6 +578,7 @@ def check_folder_exists(folder):
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     # indicates that query folder with folderName already exists
     if response.status_code == 200:
+        print(json.dumps(response.json()))
         raise FolderAlreadyExists("Query Folder with name " + folder + " already exists")
 
 
@@ -604,13 +609,14 @@ def create_dash(team_name, dash_name):
                              '/_apis/dashboard/dashboards?',
                              auth=HTTPBasicAuth(USER, TOKEN),
                              json=dash_board, params=version)
-    dash_response = response.json()
 
     # indicates that a dashboard with dashName already exists
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("Dashboard with name " + dash_name
                                 + " already exists")
 
+    dash_response = response.json()
     print(json.dumps(dash_response))
     print(dash_response["id"])
     return dash_response["id"]
@@ -632,6 +638,7 @@ def create_query_folder(folder):
 
     # indicates that query folder with folderName already exists
     if response.status_code != 201:
+        print(json.dumps(response.json()))
         raise FolderAlreadyExists('Query Folder with name "' + folder + '" already exists')
 
     query_response = response.json()
@@ -1531,6 +1538,7 @@ def find_test_plan_id_by_name(test_plan, continuation_token=''):
         if test_plan in child["name"]:
             return str(child["id"])
     if continue_key not in response.headers._store:
+        print(json.dumps(response.json()))
         raise TestPlanError("Test Plan: " + test_plan + " not Found in Azure")
     return find_test_plan_id_by_name(test_plan, response.headers._store[continue_key][1])
 
@@ -1547,6 +1555,7 @@ def check_test_plan_id(test_plan):
                             + str(test_plan) + '?',
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise ApiTestIDNotFound("Test Plan ID was not Found in Azure DevOps")
 
 
@@ -2238,6 +2247,7 @@ def clear_dash(team_name, dashboard_id):
                             + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=version)
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise DashDoesNotExists("Dashboard with the selected name does not exist")
 
     dash_response = response.json()
@@ -2256,6 +2266,7 @@ def return_query_folder_children(folder):
                             + folder + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=payload)
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise QueryFolderNotFound
     query_response = response.json()
     queries = []
@@ -2687,6 +2698,7 @@ def add_test_plan_summary(dash_name, test_plan, is_agile_plan, row):
                                 + test_plan + '/suites?',
                                 auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
         if response.status_code != 200:
+            print(json.dumps(response.json()))
             raise TestPlanNotFound
 
         # test plan tree contains array "value"
@@ -2768,6 +2780,7 @@ def dashboard_exists(output_team, overview_id):
     print("Object Returned:" + str(response.status_code))
 
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         return False
 
     return True
