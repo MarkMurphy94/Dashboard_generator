@@ -645,10 +645,11 @@ def create_query_folder(folder):
     return query_response['id']
 
 
-def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
+def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=True):
     """
         Populates the given folder with the standard queries
     """
+
     # region WIQL constants
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
@@ -656,7 +657,6 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     else:
         target_clause = "[System.Tags] contains '{}'".format(target_project_name)
 
-    json_obj = {"name": "Dev Bugs"}
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
@@ -721,60 +721,39 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                                       "order by [System.Id] mode (DoesNotContain)"
     # endregion
 
-    # Dev Bugs Query
-    json_obj["wiql"] = wiql_dev_bugs
-    create_query(json_obj, query_folder)
-    print("Created Dev Bugs Query for: " + target_project_name)
+    # region Populate  Standard Query Objects
 
-    # All closed this week Query
-    json_obj["name"] = "All closed this week"
-    json_obj["wiql"] = wiql_all_closed_this_week
-    create_query(json_obj, query_folder)
-    print("Created All closed this week Query for: " + target_project_name)
+    # hint at type for query_objects
+    query_objects = [{"a": "a", "b": "b"}, {"a": "a", "b": {"b": "b"}}]
+    query_objects.clear()
 
-    # All created this week Query
-    json_obj["name"] = "All created this week"
-    json_obj["wiql"] = wiql_all_created_this_week
-    create_query(json_obj, query_folder)
-    print("Created All created this week Query for: " + target_project_name)
+    query_objects = [{"name": "Dev Bugs", "wiql": wiql_dev_bugs},
+                     {"name": "All closed this week", "wiql": wiql_all_closed_this_week},
+                     {"name": "All created this week", "wiql": wiql_all_created_this_week},
+                     {"name": "Monitored", "wiql": wiql_monitored},
+                     {"name": "New Issues last 24 hours", "wiql": wiql_new_issues_last_24_hours},
+                     {"name": "Cannot Reproduce", "wiql": wiql_cannot_reproduce},
+                     {"name": "All Bugs", "wiql": wiql_all_bugs},
+                     {"name": "All resolved this week", "wiql": wiql_all_resolved_this_week},
+                     {"name": "RTT", "wiql": wiql_rtt}]
+    # endregion
 
-    # Monitored Query
-    json_obj["name"] = "Monitored"
-    json_obj["wiql"] = wiql_monitored
-    create_query(json_obj, query_folder)
-    print("Created Monitored Query for: " + target_project_name)
-
-    # New Issues last 24 hours Query
-    json_obj["name"] = "New Issues last 24 hours"
-    json_obj["wiql"] = wiql_new_issues_last_24_hours
-    create_query(json_obj, query_folder)
-    print("Created New Issues last 24 hours Query for: " + target_project_name)
-
-    # Cannot Reproduce Query
-    json_obj["name"] = "Cannot Reproduce"
-    json_obj["wiql"] = wiql_cannot_reproduce
-    create_query(json_obj, query_folder)
-    print("Created Cannot Reproduce Query for: " + target_project_name)
-
-    # All Bugs Query
-    json_obj["name"] = "All Bugs"
-    json_obj["wiql"] = wiql_all_bugs
-    create_query(json_obj, query_folder)
-    print("Created All Bugs Query for: " + target_project_name)
-
-    # All Resolved this week Query
-    json_obj["name"] = "All resolved this week"
-    json_obj["wiql"] = wiql_all_resolved_this_week
-    create_query(json_obj, query_folder)
-    print("Created All Resolved This Week Query for: " + target_project_name)
-
-    # RTT Query
-    json_obj["name"] = "RTT"
-    json_obj["wiql"] = wiql_rtt
-    create_query(json_obj, query_folder)
-    print("Created RTT Query for: " + target_project_name)
+    if not first_time:
+        query_folder_children = return_query_folder_children(query_folder)
+    else:
+        query_folder_children = []
+    for json_obj in query_objects:
+        if first_time or (json_obj["name"] not in query_folder_children):
+            create_query(json_obj, query_folder)
+            print("Created " + json_obj["name"] + " Query for: " + target_project_name)
+        else:
+            temp_wiql = json_obj["wiql"]
+            json_obj["wiql"] = {"wiql": temp_wiql}
+            update_query(json_obj["wiql"], query_folder, json_obj["name"])
+            print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
 
     if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
+        json_obj = {}
         # SQA Test Features Query
         json_obj["name"] = "SQA Test Features"
         json_obj["wiql"] = wiql_sqa_test_features
