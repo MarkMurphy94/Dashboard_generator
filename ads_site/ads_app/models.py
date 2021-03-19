@@ -702,6 +702,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     wiql_rtt = selected_columns + from_bugs \
                + "and [System.State] = 'Resolved' and " + target_clause + \
                " and [Custom.Monitoring] = False"
+
+    # SQA Features statements
     wiql_sqa_test_features = "select [System.Id], [System.WorkItemType], [System.Title], " \
            "[System.AssignedTo], [System.State], [System.Tags] " \
            "from WorkItems " \
@@ -721,7 +723,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                                       "order by [System.Id] mode (DoesNotContain)"
     # endregion
 
-    # region Populate  Standard Query Objects
+    # region Populate Standard Query Objects
 
     # hint at type for query_objects
     query_objects = [{"a": "a", "b": "b"}, {"a": "a", "b": {"b": "b"}}]
@@ -742,6 +744,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
         query_folder_children = return_query_folder_children(query_folder)
     else:
         query_folder_children = []
+
     for json_obj in query_objects:
         if first_time or (json_obj["name"] not in query_folder_children):
             create_query(json_obj, query_folder)
@@ -752,20 +755,19 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
             update_query(json_obj["wiql"], query_folder, json_obj["name"])
             print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
 
+    # SQA queries are dependent on global_reqs_path instead of first_time
     if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
-        json_obj = {}
-        # SQA Test Features Query
-        json_obj["name"] = "SQA Test Features"
-        json_obj["wiql"] = wiql_sqa_test_features
-        create_query(json_obj, query_folder)
-        print("Created SQA Test Features Query for: " + target_project_name)
-
-        # SQA Test Features without test cases
-        json_obj["name"] = "SQA Test Features without test cases"
-        json_obj["wiql"] = wiql_sqa_test_features_without_test_cases
-        create_query(json_obj, query_folder)
-        print("Created SQA Test Features without test cases Query for: "
-              + target_project_name)
+        sqa_query_objects = [{"name": "SQA Test Features", "wiql": wiql_sqa_test_features},
+                             {"name": "SQA Test Features", "wiql": wiql_sqa_test_features}]
+        for json_obj in sqa_query_objects:
+            if json_obj["name"] not in query_folder_children:
+                create_query(json_obj, query_folder)
+                print("Created " + json_obj["name"] + " Query for: " + target_project_name)
+            else:
+                temp_wiql = json_obj["wiql"]
+                json_obj["wiql"] = {"wiql": temp_wiql}
+                update_query(json_obj["wiql"], query_folder, json_obj["name"])
+                print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
 
 
 def populate_dash(output_team, url, test_plan, program_name, query_folder,
