@@ -61,6 +61,10 @@ standardRNDWitColorArray = [
         "backgroundColor": "#e60017"
     },
     {
+        "value": "Production",
+        "backgroundColor": "#e60017"
+    },
+    {
         "value": "4 - Low",
         "backgroundColor": "#339947"
     },
@@ -1014,6 +1018,20 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
         custom_markdown = return_custom_markdown(starting_column, 4, starting_row, no_global_reqs, 2)
         create_widget(output_team, overview_id, custom_markdown)
         starting_column += 4
+
+    # region Reported In
+    name = "Reported In"
+    query_id = return_query_id("Lifetime Bugs", query_folder)
+    chart_type = "ColumnChart"
+    group = "Custom.ReportedIn"
+    _property = "value"
+    direction = "descending"
+
+    reported_in = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                               _property=_property, direction=direction)
+    create_widget(output_team, overview_id, reported_in)
+    starting_column += 2
+    # endregion
 
     # region Failed Test by Area Path
     name = "Failed Test by Area Path"
