@@ -713,6 +713,10 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     wiql_rtt = selected_columns + from_bugs \
                + "and [System.State] = 'Resolved' and " + target_clause + \
                " and [Custom.Monitoring] = False"
+    wiql_failed_test = selected_columns + from_bugs + \
+                       "and " + target_clause + \
+                       " and (ever [System.Reason] = 'Test Failed' " \
+                       "or ever [System.Reason] = 'Not fixed')"
 
     # SQA Features statements
     wiql_sqa_test_features = "select [System.Id], [System.WorkItemType], [System.Title], " \
@@ -743,7 +747,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                      {"name": "Cannot Reproduce", "wiql": wiql_cannot_reproduce},
                      {"name": "All Bugs", "wiql": wiql_all_bugs},
                      {"name": "All resolved this week", "wiql": wiql_all_resolved_this_week},
-                     {"name": "RTT", "wiql": wiql_rtt}]
+                     {"name": "RTT", "wiql": wiql_rtt},
+                     {"name": "Failed Test", "wiql": wiql_failed_test}]
     # endregion
 
     if not first_time:
