@@ -716,7 +716,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                "and [System.State] = 'Resolved' " \
                "and " + target_clause + \
                "and [Custom.Monitoring] = False"
-    wiql_failed_test = selected_columns + from_bugs + \
+    wiql_failed_test = selected_columns + ", [System.AreaLevel2]" + from_bugs + \
                        "and " + target_clause + \
                        "and (ever [System.Reason] = 'Test Failed' " \
                        "or ever [System.Reason] = 'Not fixed')"
