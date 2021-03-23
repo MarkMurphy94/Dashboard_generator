@@ -234,6 +234,7 @@ def submit_update(request):
 
     team_name = "GTO"
     action = "updated the dashboard"
+    ignore_first_row = checkbox(request, "ignore_first_row")
 
     if request.method == 'POST':  # if the request from the HTML is a post
         form = CreateDash(request.POST)
@@ -267,7 +268,7 @@ def submit_update(request):
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
                                                   target_choice, global_path, target_project_name, old_config["executive"])
                 models.write_config(new_config)
-                models.update_dash(folder_name)
+                models.update_dash(folder_name, ignore_first_row)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
                 write_dashboard_changes_to_log(old_config, new_config)

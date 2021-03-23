@@ -2232,7 +2232,7 @@ def delete_widget(team_name, widget_id, dashboard_id):
     print(json.dumps(js))
 
 
-def clear_dash(team_name, dashboard_id):
+def clear_dash(team_name, dashboard_id, ignore_first_row):
     """
         Clears all widgets from a dashboard
     """
@@ -2246,9 +2246,15 @@ def clear_dash(team_name, dashboard_id):
         raise DashDoesNotExists("Dashboard with the selected name does not exist")
 
     dash_response = response.json()
-    for widgets in dash_response["widgets"]:
-        print(widgets["id"])
-        delete_widget(team_name, widgets["id"], dashboard_id)
+    for widget in dash_response["widgets"]:
+        if ignore_first_row:
+            print("Ignoring first 2 widget rows")
+            if widget["position"]["row"] not in [1, 2, 3]:
+                print(widget["id"])
+                delete_widget(team_name, widget["id"], dashboard_id)
+        else:
+            print(widget["id"])
+            delete_widget(team_name, widget["id"], dashboard_id)
     print("Dashboard cleared")
 
 
@@ -2291,7 +2297,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file):
+def update_dash(file, ignore_first_row):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2310,9 +2316,13 @@ def update_dash(file):
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
-    populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=False)
-    clear_dash(team_name, dash_id)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
+    if ignore_first_row:
+        clear_dash(team_name, dash_id, ignore_first_row)
+        populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
+    else:
+        populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=False)
+        clear_dash(team_name, dash_id, ignore_first_row)
+        populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
 
     print("Dashboard Updated")
 
