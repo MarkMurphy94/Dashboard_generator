@@ -1024,6 +1024,21 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         create_widget(output_team, overview_id, custom_markdown)
         starting_column += 4
 
+    # region Failed Test by Area Path
+    name = "Failed Test by Area Path"
+    query_id = return_query_id("Failed Test", query_folder)
+    chart_type = "PieChart"
+    group = "System.AreaLevel2"
+    _property = "value"
+    direction = "descending"
+
+    rtt_trend = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                             _property=_property, direction=direction)
+    create_widget(output_team, overview_id, rtt_trend)
+
+    starting_row += 2
+    # endregion
+
     # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
         remainder = min(MAX_COLUMN - starting_column + 2, 10)
