@@ -29,6 +29,7 @@ def write_to_log(request, action, item):
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
 
+
 def write_dashboard_changes_to_log(old_config, new_config):
     """
         Compares two configs in JSON format and writes the changes to the log file set by LOG_PATH.
@@ -46,6 +47,7 @@ def write_dashboard_changes_to_log(old_config, new_config):
                 changes_made = True
         if not changes_made:
             log.write("                    | No changes made\n")
+
 
 @receiver(user_login_failed)
 def attempted_login(sender, credentials, **kwargs):

@@ -14,6 +14,17 @@
                 document.getElementById("test_plan_name").value = Number(document.getElementById("test_plan_name").value) + 1;
             });
 
+
+            function changeText() {
+                var CheckBox = document.getElementById('ignore_first_row');
+                var text = document.getElementById('row_status');
+                if (CheckBox.checked) {
+                    text.value = 'Excluding first 2 widget rows';
+                } else {
+                    text.value = 'Including first 2 widget rows';
+                }
+            }
+
             $(function() {
                 $("#submit_update").submit(function(event) {
                     // Stop form from submitting normally
@@ -164,8 +175,10 @@
                 {% endif %}
             </tr>
             <tr>
-                <td><label>Exclude first 2 widget rows from update</label></td>
-                <td><input type="checkbox" name="ignore_first_row" checked="checked"></td>
+                <td><small>Exclude first 2 widget rows from update. This will save any custom widgets</small></td>
+                <td><input type="checkbox" name="ignore_first_row" id="ignore_first_row" onclick="changeText()" checked="checked"></td>
+                <td></td>
+                <td><input type="text" id="row_status" value="Excluding first 2 widget rows" name="" disabled></td>
             </tr>
         </table>
         <p><label>* Indicates field is required</label> </p>
