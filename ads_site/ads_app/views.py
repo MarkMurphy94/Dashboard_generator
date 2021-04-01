@@ -29,6 +29,7 @@ def write_to_log(request, action, item):
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
 
+
 def write_dashboard_changes_to_log(old_config, new_config):
     """
         Compares two configs in JSON format and writes the changes to the log file set by LOG_PATH.
@@ -46,6 +47,7 @@ def write_dashboard_changes_to_log(old_config, new_config):
                 changes_made = True
         if not changes_made:
             log.write("                    | No changes made\n")
+
 
 @receiver(user_login_failed)
 def attempted_login(sender, credentials, **kwargs):
@@ -234,6 +236,7 @@ def submit_update(request):
 
     team_name = "GTO"
     action = "updated the dashboard"
+    ignore_first_row = checkbox(request, "ignore_first_row")
 
     if request.method == 'POST':  # if the request from the HTML is a post
         form = CreateDash(request.POST)
@@ -267,7 +270,7 @@ def submit_update(request):
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
                                                   target_choice, global_path, target_project_name, old_config["executive"])
                 models.write_config(new_config)
-                models.update_dash(folder_name)
+                models.update_dash(folder_name, ignore_first_row)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
                 write_dashboard_changes_to_log(old_config, new_config)

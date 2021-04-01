@@ -776,20 +776,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                 print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
 
 
-def populate_dash(output_team, url, test_plan, program_name, query_folder,
-                  overview_id, global_reqs_path):
-    """
-        Populates a given dashboard with widgets based on the queries
-        in the query folder provided, and the test suites found in the given
-        test plan.
-    """
-
-    starting_column = 1
-    starting_row = 1
-
-    # adds 1 to plan id to get suite id
-    test_suite_id = str(int(test_plan) + 1)
-
+def first_2_rows(output_team, url, test_plan, program_name, query_folder,
+                 overview_id, global_reqs_path, test_suite_id, starting_column, starting_row):
     # region First Widget Row
     url = url.strip()
     tree_link = "\n"
@@ -1022,9 +1010,27 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
-
-    starting_row += 2
     # endregion
+
+
+def populate_dash(output_team, url, test_plan, program_name, query_folder,
+                  overview_id, global_reqs_path, ignore_first_row=False):
+    """
+        Populates a given dashboard with widgets based on the queries
+        in the query folder provided, and the test suites found in the given
+        test plan.
+    """
+
+    starting_column = 1
+    starting_row = 1
+
+    # adds 1 to plan id to get suite id
+    test_suite_id = str(int(test_plan) + 1)
+
+    if not ignore_first_row:
+        first_2_rows(output_team, url, test_plan, program_name, query_folder,
+                     overview_id, global_reqs_path, test_suite_id, starting_column, starting_row)
+    starting_row += 4
 
     # region Sprint Row
 
@@ -2232,7 +2238,7 @@ def delete_widget(team_name, widget_id, dashboard_id):
     print(json.dumps(js))
 
 
-def clear_dash(team_name, dashboard_id):
+def clear_dash(team_name, dashboard_id, ignore_first_row=False):
     """
         Clears all widgets from a dashboard
     """
@@ -2246,9 +2252,15 @@ def clear_dash(team_name, dashboard_id):
         raise DashDoesNotExists("Dashboard with the selected name does not exist")
 
     dash_response = response.json()
-    for widgets in dash_response["widgets"]:
-        print(widgets["id"])
-        delete_widget(team_name, widgets["id"], dashboard_id)
+    for widget in dash_response["widgets"]:
+        if ignore_first_row:
+            print("Ignoring first 2 widget rows")
+            if widget["position"]["row"] not in [1, 2, 3]:
+                print(widget["id"])
+                delete_widget(team_name, widget["id"], dashboard_id)
+        else:
+            print(widget["id"])
+            delete_widget(team_name, widget["id"], dashboard_id)
     print("Dashboard cleared")
 
 
@@ -2291,7 +2303,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file):
+def update_dash(file, ignore_first_row):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2310,9 +2322,11 @@ def update_dash(file):
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
-    populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=False)
-    clear_dash(team_name, dash_id)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
+    if not ignore_first_row:
+        populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=False)
+
+    clear_dash(team_name, dash_id, ignore_first_row)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path, ignore_first_row)
 
     print("Dashboard Updated")
 
