@@ -664,9 +664,9 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     # region WIQL constants
     # Target clause is dependent on User's GUI choice
     if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
+        target_clause = "[Custom.TargetedProject] contains '{}' ".format(target_project_name)
     else:
-        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
+        target_clause = "[System.Tags] contains '{}' ".format(target_project_name)
 
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
@@ -677,61 +677,68 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     # endregion
 
     # region WIQL statements
-    wiql_dev_bugs = selected_columns + from_bugs \
-                    + "and [System.State] in ('New', 'Active') and " + target_clause \
-                    + " and [Custom.Monitoring] = False"
-    wiql_all_closed_this_week = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
-                                + "and " + target_clause \
-                                + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
-                                  "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
-    wiql_all_created_this_week = selected_columns + from_bugs \
-                                 + "and " + target_clause \
-                                 + " and [System.CreatedDate] > @today - 7 " \
-                                   "order by [System.CreatedDate] desc"
-    wiql_monitored = selected_columns + from_bugs \
-                     + "and not [System.State] contains 'Closed' " \
-                       "and " + target_clause + \
-                     " and [Custom.Monitoring] = True " \
+    wiql_dev_bugs = selected_columns + from_bugs + \
+                    "and [System.State] in ('New', 'Active') " \
+                    "and " + target_clause + \
+                    "and [Custom.Monitoring] = False"
+    wiql_all_closed_this_week = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs + \
+                                "and " + target_clause + \
+                                "and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
+                                "and [System.State] = 'Closed' " \
+                                "order by [System.CreatedDate] desc"
+    wiql_all_created_this_week = selected_columns + from_bugs + \
+                                 "and " + target_clause + \
+                                 "and [System.CreatedDate] > @today - 7 " \
+                                 "order by [System.CreatedDate] desc"
+    wiql_monitored = selected_columns + from_bugs + \
+                     "and not [System.State] contains 'Closed' " \
+                     "and " + target_clause + \
+                     "and [Custom.Monitoring] = True " \
                      "order by [System.CreatedDate] desc"
-    wiql_new_issues_last_24_hours = selected_columns + from_bugs \
-                                    + "and [System.State] <> 'Closed' " \
-                                      "and " + target_clause + \
-                                    " and [System.CreatedDate] >= @today - 1"
-    wiql_cannot_reproduce = selected_columns + from_bugs \
-                            + "and [System.State] <> 'Closed' " \
-                              "and " + target_clause + \
-                            " and [System.reason] = 'Cannot Reproduce' "
-    wiql_all_bugs = selected_columns + from_bugs \
-                    + "and not [System.State] contains 'Closed' " \
-                      "and " + target_clause + \
-                    " order by [System.CreatedDate] desc"
-    wiql_all_resolved_this_week = selected_columns + from_bugs \
-                                  + "and " + target_clause + \
-                                  " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
+    wiql_new_issues_last_24_hours = selected_columns + from_bugs + \
+                                    "and [System.State] <> 'Closed' " \
+                                    "and " + target_clause + \
+                                    "and [System.CreatedDate] >= @today - 1"
+    wiql_cannot_reproduce = selected_columns + from_bugs + \
+                            "and [System.State] <> 'Closed' " \
+                            "and " + target_clause + \
+                            "and [System.reason] = 'Cannot Reproduce' "
+    wiql_all_bugs = selected_columns + from_bugs + \
+                    "and not [System.State] contains 'Closed' " \
+                    "and " + target_clause + \
+                    "order by [System.CreatedDate] desc"
+    wiql_all_resolved_this_week = selected_columns + from_bugs + \
+                                  "and " + target_clause + \
+                                  "and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
                                   "and [System.State] = 'Resolved' " \
                                   "order by [System.CreatedDate] desc"
-    wiql_rtt = selected_columns + from_bugs \
-               + "and [System.State] = 'Resolved' and " + target_clause + \
-               " and [Custom.Monitoring] = False"
+    wiql_rtt = selected_columns + from_bugs + \
+               "and [System.State] = 'Resolved' " \
+               "and " + target_clause + \
+               "and [Custom.Monitoring] = False"
+    wiql_failed_test = selected_columns + ", [System.AreaLevel2]" + from_bugs + \
+                       "and " + target_clause + \
+                       "and (ever [System.Reason] = 'Test Failed' " \
+                       "or ever [System.Reason] = 'Not fixed')"
 
     # SQA Features statements
     wiql_sqa_test_features = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItems " \
-           "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-           "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-           "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                               "order by [System.Id] "
+                             "[System.AssignedTo], [System.State], [System.Tags] " \
+                             "from WorkItems " \
+                             "where [System.WorkItemType] = 'Feature' " \
+                             "and [System.AreaPath] under 'GlobalReqs\\System Test' " \
+                             "and [System.IterationPath] under " + repr(global_reqs_path) + " "\
+                             "and [System.State] <> 'Removed' " \
+                             "order by [System.Id] "
     wiql_sqa_test_features_without_test_cases = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItemLinks " \
-           "where (Source.[System.WorkItemType] = 'Feature' " \
-           "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-           "and Source.[System.IterationPath] under " \
-           + repr(global_reqs_path) + ") " \
-                                      "and (Target.[System.WorkItemType] = 'Test Case') " \
-                                      "and Source.[System.State] <> 'Removed' " \
-                                      "order by [System.Id] mode (DoesNotContain)"
+                                                "[System.AssignedTo], [System.State], [System.Tags] " \
+                                                "from WorkItemLinks " \
+                                                "where (Source.[System.WorkItemType] = 'Feature' " \
+                                                "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+                                                "and Source.[System.IterationPath] under " + repr(global_reqs_path) + ") " \
+                                                "and (Target.[System.WorkItemType] = 'Test Case') " \
+                                                "and Source.[System.State] <> 'Removed' " \
+                                                "order by [System.Id] mode (DoesNotContain)"
     # endregion
 
     # region Populate Standard Query Objects
@@ -743,7 +750,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                      {"name": "Cannot Reproduce", "wiql": wiql_cannot_reproduce},
                      {"name": "All Bugs", "wiql": wiql_all_bugs},
                      {"name": "All resolved this week", "wiql": wiql_all_resolved_this_week},
-                     {"name": "RTT", "wiql": wiql_rtt}]
+                     {"name": "RTT", "wiql": wiql_rtt},
+                     {"name": "Failed Test", "wiql": wiql_failed_test}]
     # endregion
 
     if not first_time:
@@ -1003,6 +1011,21 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
         custom_markdown = return_custom_markdown(starting_column, 4, starting_row, no_global_reqs, 2)
         create_widget(output_team, overview_id, custom_markdown)
         starting_column += 4
+
+    # region Failed Test by Area Path
+    name = "Failed Test by Area Path"
+    query_id = return_query_id("Failed Test", query_folder)
+    chart_type = "PieChart"
+    group = "System.AreaLevel2"
+    _property = "value"
+    direction = "descending"
+
+    failed_test_chart = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                                     _property=_property, direction=direction)
+    create_widget(output_team, overview_id, failed_test_chart)
+
+    starting_column += 2
+    # endregion
 
     # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
