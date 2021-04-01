@@ -30,6 +30,36 @@
             });
         });
 
+        function addRow() {
+            var targetRow2 = document.getElementById("targetRow2")
+            if (targetRow2.hidden) {
+                targetRow2.hidden = false;
+            }
+            else {
+                var targetRow3 = document.getElementById("targetRow3")
+                if (targetRow3.hidden) {
+                    targetRow3.hidden = false;
+                    document.getElementById("addRowBtn").setAttribute("disabled", "true");
+                }
+            }
+            document.getElementById("removeRowBtn").removeAttribute("disabled");
+        }
+
+        function removeRow() {
+            var targetRow3 = document.getElementById("targetRow3")
+            if (!targetRow3.hidden) {
+                targetRow3.hidden = true;
+            }
+            else {
+                var targetRow2 = document.getElementById("targetRow2")
+                if (!targetRow2.hidden) {
+                    targetRow2.hidden = true;
+                    document.getElementById("removeRowBtn").setAttribute("disabled", "true");
+                }
+            }
+            document.getElementById("addRowBtn").removeAttribute("disabled");
+        }
+
     </script>
 
     <div id="myModal" class="modal" style="display: none;">
@@ -126,6 +156,52 @@
                 {% else %}
                     <td><input type="text" name="short_name" required="" id="short_name" maxlength="250"></td>
                 {% endif %}
+            </tr>
+            <tr id="targetRow2" hidden>
+                <td><label for="target_name2">Targeted Project 2:</label></td>
+                {% if target_choice %}
+                    {% if target_choice == '0' %}
+                        <td><input type="radio" name="target_choice2" value="0" checked> Targeted Project</td>
+                        <td><input type="radio" name="target_choice2" value="1"> Tag</td>
+                    {% else %}
+                        <td><input type="radio" name="target_choice2" value="0" > Targeted Project</td>
+                        <td><input type="radio" name="target_choice2" value="1" checked> Tag</td>
+                    {% endif %}
+                {% else %}
+                    <td><input type="radio" name="target_choice2" value="0" checked> Targeted Project</td>
+                    <td><input type="radio" name="target_choice2" value="1"> Tag</td>
+                {% endif %}
+                {% if short_name %}
+                    <td><input type="text" name="target_name2" value="{{ target_name2 }}" required="" id="target_name2" maxlength="250"></td>
+                {% else %}
+                    <td><input type="text" name="target_name2" required="" id="target_name2" maxlength="250"></td>
+                {% endif %}
+            </tr>
+            <tr id="targetRow3" hidden>
+                <td><label for="target_name3">Targeted Project 3:</label></td>
+                {% if target_choice %}
+                    {% if target_choice == '0' %}
+                        <td><input type="radio" name="target_choice3" value="0" checked> Targeted Project</td>
+                        <td><input type="radio" name="target_choice3" value="1"> Tag</td>
+                    {% else %}
+                        <td><input type="radio" name="target_choice3" value="0" > Targeted Project</td>
+                        <td><input type="radio" name="target_choice3" value="1" checked> Tag</td>
+                    {% endif %}
+                {% else %}
+                    <td><input type="radio" name="target_choice3" value="0" checked> Targeted Project</td>
+                    <td><input type="radio" name="target_choice3" value="1"> Tag</td>
+                {% endif %}
+                {% if short_name %}
+                    <td><input type="text" name="target_name3" value="{{ target_name3 }}" required="" id="target_name3" maxlength="250"></td>
+                {% else %}
+                    <td><input type="text" name="target_name3" required="" id="target_name3" maxlength="250"></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>
+                    <button id="removeRowBtn" type="button" onclick="removeRow()" class="button row_button" disabled>➖</button>
+                    <button id="addRowBtn" type="button" onclick="addRow()" class="button row_button">➕</button>
+                </td>
             </tr>
             <tr>
                 <td><label for="test_plan_name">Please enter the Test Suite ID or Name: *</label></td>
