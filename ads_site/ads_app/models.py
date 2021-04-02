@@ -61,6 +61,10 @@ standardRNDWitColorArray = [
         "backgroundColor": "#e60017"
     },
     {
+        "value": "Production",
+        "backgroundColor": "#e60017"
+    },
+    {
         "value": "4 - Low",
         "backgroundColor": "#339947"
     },
@@ -716,6 +720,8 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                "and [System.State] = 'Resolved' " \
                "and " + target_clause + \
                "and [Custom.Monitoring] = False"
+    wiql_lifetime_bugs = selected_columns + from_bugs + \
+                         "and " + target_clause
     wiql_failed_test = selected_columns + ", [System.AreaLevel2]" + from_bugs + \
                        "and " + target_clause + \
                        "and (ever [System.Reason] = 'Test Failed' " \
@@ -751,6 +757,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
                      {"name": "All Bugs", "wiql": wiql_all_bugs},
                      {"name": "All resolved this week", "wiql": wiql_all_resolved_this_week},
                      {"name": "RTT", "wiql": wiql_rtt},
+                     {"name": "Lifetime Bugs", "wiql": wiql_lifetime_bugs},
                      {"name": "Failed Test", "wiql": wiql_failed_test}]
     # endregion
 
@@ -1011,6 +1018,20 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
         custom_markdown = return_custom_markdown(starting_column, 4, starting_row, no_global_reqs, 2)
         create_widget(output_team, overview_id, custom_markdown)
         starting_column += 4
+
+    # region Reported In
+    name = "Reported In"
+    query_id = return_query_id("Lifetime Bugs", query_folder)
+    chart_type = "ColumnChart"
+    group = "Custom.ReportedIn"
+    _property = "value"
+    direction = "descending"
+
+    reported_in = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                               _property=_property, direction=direction)
+    create_widget(output_team, overview_id, reported_in)
+    starting_column += 2
+    # endregion
 
     # region Failed Test by Area Path
     name = "Failed Test by Area Path"
