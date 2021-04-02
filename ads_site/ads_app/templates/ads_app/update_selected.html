@@ -119,24 +119,24 @@
                 {% endfor %}
             </tr>
             <tr>
-                <td><label for="short_name">Edit the Tag or the Targeted Project: *</label></td>
+                <td><label for="target_name1">Edit the Tag or the Targeted Project: *</label></td>
                 {% if target_choice %}
                     {% if item.target_choice == '0' %}
-                        <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
-                        <td><input type="radio" name="target_choice" value="1"> Tag</td>
+                        <td><input type="radio" name="target_choice1" value="0" checked> Targeted Project</td>
+                        <td><input type="radio" name="target_choice1" value="1"> Tag</td>
                     {% else %}
-                        <td><input type="radio" name="target_choice" value="0" > Targeted Project</td>
-                        <td><input type="radio" name="target_choice" value="1" checked> Tag</td>
+                        <td><input type="radio" name="target_choice1" value="0" > Targeted Project</td>
+                        <td><input type="radio" name="target_choice1" value="1" checked> Tag</td>
                     {% endif %}
                 {% else %}
-                    <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
-                    <td><input type="radio" name="target_choice" value="1"> Tag</td>
+                    <td><input type="radio" name="target_choice1" value="0" checked> Targeted Project</td>
+                    <td><input type="radio" name="target_choice1" value="1"> Tag</td>
                 {% endif %}
                 {% for item in json %}
                     {% if item.short_name %}
-                        <td><input type="text" name="short_name" value="{{ item.short_name }}" required="" id="short_name" maxlength="250"></td>
+                        <td><input type="text" name="target_name1" value="{{ item.short_name }}" required="" id="target_name1" maxlength="250"></td>
                     {% else %}
-                        <td><input type="text" name="short_name" value="{{ item.short_name }}" required="" id="short_name" maxlength="250"></td>
+                        <td><input type="text" name="target_name1" value="{{ item.short_name }}" required="" id="target_name1" maxlength="250"></td>
                 {% endif %}
                 {% endfor %}
             </tr>
