@@ -178,8 +178,9 @@ def create_dash(request):
             context[name_key3] = target_project_name3
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name
-
+            # TODO create arrays of target choices and project names
             try:
+                #TODO send arrays to create_full_dash
                 dash_id = models.create_full_dash(folder_name, url, global_path, target_choice1,
                                                   target_project_name1, test_choice, test_plan_name)
                 context['dash_id'] = dash_id
@@ -239,6 +240,7 @@ def submit_update(request):
     folder_key = 'folder_name'
     url_key = 'url'
     global_key = 'global_path'
+    #TODO Refactor these to match create_dash
     target_key = 'target_choice1'
     name_key = 'target_name1'
     choice_key = 'test_choice'
@@ -265,6 +267,7 @@ def submit_update(request):
             context[folder_key] = folder_name
             context[url_key] = url
             context[global_key] = global_path
+            # TODO add new fields to context
             context[target_key] = target_choice1
             context[name_key] = target_project_name1
             context[choice_key] = test_choice

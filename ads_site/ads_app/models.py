@@ -555,6 +555,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
 
         :returns the id of the dashboard created
     """
+    # TODO take arrays of target choices and names as params
     # PROJECT = 'SoftwareProducts'
     team_name = 'GTO'  # 'SQA'
     check_folder_exists(folder)
@@ -660,9 +661,11 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
          - Creates missing standard queries
          - Updates existing standard queries
     """
+    # TODO take arrays of target choices and names as params
 
     # region WIQL constants
     # Target clause is dependent on User's GUI choice
+    # TODO build target clause out of arrays, as long as value != ''
     if str(target_choice) == '0':
         target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
     else:

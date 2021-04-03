@@ -12,6 +12,7 @@
                 $("a#agile_update").addClass('isDisabled');
                 $("a#admin").addClass('isDisabled');
                 document.getElementById("test_plan_name").value = Number(document.getElementById("test_plan_name").value) + 1;
+                // TODO if there exist multiple targeted projects (value != ''), use addRow function to unhide them
             });
 
             $(function() {
@@ -29,8 +30,11 @@
                     // Submit Form
                     help_modal.style.display = "block";
                     document.forms['submit_update'].submit()
+                    // TODO prevent submit_update from sending hidden targeted projects (set value='')
                 });
             });
+            // TODO add extra table rows and +/- buttons for targeted projects
+            // TODO add addRow and removeRow functions
 
         </script>
 
