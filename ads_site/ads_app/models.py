@@ -1029,7 +1029,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
 
     if not ignore_first_row:
         first_2_rows(output_team, url, test_plan, program_name, query_folder,
-                     overview_id, global_reqs_path, test_suite_id, starting_column, starting_row, organize_by,)
+                     overview_id, global_reqs_path, test_suite_id, starting_column, starting_row, organize_by)
     starting_row += 4
 
     # region Sprint Row
@@ -1680,7 +1680,7 @@ def return_query_tile(column, row, name, query_name, query_id, color):
     return query_tile
 
 
-def return_chart(column, row, name, query_id, organize_by, chart_type="StackAreaChart",
+def return_chart(column, row, name, query_id, organize_by="severity", chart_type="StackAreaChart",
                  aggregation="count", group="Microsoft.VSTS.Common.Severity",
                  _property="label", direction="ascending", series="",
                  history="", scope=""):
@@ -2311,7 +2311,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file, ignore_first_row):
+def update_dash(file, ignore_first_row, organize_by):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2334,7 +2334,7 @@ def update_dash(file, ignore_first_row):
         populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=False)
 
     clear_dash(team_name, dash_id, ignore_first_row)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path, ignore_first_row)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path, organize_by, ignore_first_row)
 
     print("Dashboard Updated")
 
