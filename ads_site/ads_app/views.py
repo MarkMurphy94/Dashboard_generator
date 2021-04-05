@@ -134,6 +134,11 @@ def create_test(request):
     return render(request, 'ads_app/done.html', context)
 
 
+def radio(request, name):
+    option = [(request.POST.get(name))]
+    return str(option[0])
+
+
 def create_dash(request):
     context = {}
     # Setting dictionary key values
@@ -144,6 +149,8 @@ def create_dash(request):
     name_key = 'short_name'
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
+
+    organize_by = radio(request, "severity-priority")
 
     action = "created the dashboard"
 
@@ -171,7 +178,7 @@ def create_dash(request):
 
             try:
                 dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
-                                                  target_project_name, test_choice, test_plan_name)
+                                                  target_project_name, test_choice, test_plan_name, organize_by)
                 context['dash_id'] = dash_id
                 write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)

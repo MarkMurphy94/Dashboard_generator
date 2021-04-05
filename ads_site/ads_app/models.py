@@ -544,7 +544,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 
 
 def create_full_dash(folder, url, global_path, target_choice, target_project_name,
-                     test_choice, test_suite):
+                     test_choice, test_suite, organize_by):
     """
         Calls functions to complete the tasks below:
          - Verifies query folder does not exist
@@ -562,7 +562,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
     populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
-    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path)
+    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path, organize_by)
 
     json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder,
                                 target_choice, global_path, target_project_name)
@@ -777,7 +777,7 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
 
 
 def first_2_rows(output_team, url, test_plan, program_name, query_folder,
-                 overview_id, global_reqs_path, test_suite_id, starting_column, starting_row):
+                 overview_id, global_reqs_path, test_suite_id, starting_column, starting_row, organize_by):
     # region First Widget Row
     url = url.strip()
     tree_link = "\n"
@@ -863,7 +863,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id("Dev Bugs", query_folder)
     history = "last12Weeks"
 
-    bug_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
+    bug_trend = return_chart(starting_column, starting_row, name, query_id, organize_by, history=history, direction="descending")
     create_widget(output_team, overview_id, bug_trend)
     # endregion
 
@@ -873,7 +873,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id("Dev Bugs", query_folder)
     chart_type = "ColumnChart"
 
-    bug_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
+    bug_severity = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type)
     create_widget(output_team, overview_id, bug_severity)
     # endregion
 
@@ -883,7 +883,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id("RTT", query_folder)
     history = "last12Weeks"
 
-    rtt_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
+    rtt_trend = return_chart(starting_column, starting_row, name, query_id, organize_by, history=history, direction="descending")
     create_widget(output_team, overview_id, rtt_trend)
     # endregion
 
@@ -894,7 +894,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     chart_type = "ColumnChart"
     # property_ = "value"
 
-    rtt_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
+    rtt_severity = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type)
     create_widget(output_team, overview_id, rtt_severity)
     # endregion
 
@@ -905,7 +905,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     chart_type = "stackBarChart"
     series = "System.CreatedDate"
 
-    arrival_7_days = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
+    arrival_7_days = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, arrival_7_days)
     # endregion
 
@@ -916,7 +916,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     chart_type = "stackBarChart"
     series = "Microsoft.VSTS.Common.ResolvedDate"
 
-    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
+    sys_features = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, sys_features)
     # endregion
 
@@ -927,7 +927,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     chart_type = "stackBarChart"
     series = "Microsoft.VSTS.Common.ClosedDate"
 
-    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
+    sys_features = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, sys_features)
     # endregion
 
@@ -1014,7 +1014,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
 
 
 def populate_dash(output_team, url, test_plan, program_name, query_folder,
-                  overview_id, global_reqs_path, ignore_first_row=False):
+                  overview_id, global_reqs_path, organize_by, ignore_first_row=False):
     """
         Populates a given dashboard with widgets based on the queries
         in the query folder provided, and the test suites found in the given
@@ -1029,7 +1029,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
 
     if not ignore_first_row:
         first_2_rows(output_team, url, test_plan, program_name, query_folder,
-                     overview_id, global_reqs_path, test_suite_id, starting_column, starting_row)
+                     overview_id, global_reqs_path, test_suite_id, starting_column, starting_row, organize_by,)
     starting_row += 4
 
     # region Sprint Row
@@ -1680,7 +1680,7 @@ def return_query_tile(column, row, name, query_name, query_id, color):
     return query_tile
 
 
-def return_chart(column, row, name, query_id, chart_type="StackAreaChart",
+def return_chart(column, row, name, query_id, organize_by, chart_type="StackAreaChart",
                  aggregation="count", group="Microsoft.VSTS.Common.Severity",
                  _property="label", direction="ascending", series="",
                  history="", scope=""):
@@ -1689,6 +1689,14 @@ def return_chart(column, row, name, query_id, chart_type="StackAreaChart",
 
         :returns the json template for the chart
     """
+    if (row < 2) and (organize_by == "severity"):
+        option = "Microsoft.VSTS.Common.Severity"
+    elif (row < 2) and (organize_by == "priority"):
+        option = "Microsoft.VSTS.Common.Priority"
+    else:
+        option = group
+    print("----------------group is: " + organize_by + " -------------------------")
+
     chart = return_widget_obj("Chart")
     chart["name"] = name
     chart["size"]["columnSpan"] = 2
@@ -1702,7 +1710,7 @@ def return_chart(column, row, name, query_id, chart_type="StackAreaChart",
     settings["transformOptions"]["filter"] = query_id
     settings["userColors"] = standardRNDWitColorArray
     settings["transformOptions"]["measure"]["aggregation"] = aggregation
-    settings["transformOptions"]["groupBy"] = group
+    settings["transformOptions"]["groupBy"] = option
     settings["transformOptions"]["orderBy"]["propertyName"] = _property
     settings["transformOptions"]["orderBy"]["direction"] = direction
     settings["transformOptions"]["series"] = series
