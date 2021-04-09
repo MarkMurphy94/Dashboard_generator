@@ -29,6 +29,7 @@ def write_to_log(request, action, item):
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
 
+
 def write_dashboard_changes_to_log(old_config, new_config):
     """
         Compares two configs in JSON format and writes the changes to the log file set by LOG_PATH.
@@ -46,6 +47,7 @@ def write_dashboard_changes_to_log(old_config, new_config):
                 changes_made = True
         if not changes_made:
             log.write("                    | No changes made\n")
+
 
 @receiver(user_login_failed)
 def attempted_login(sender, credentials, **kwargs):
@@ -179,10 +181,14 @@ def create_dash(request):
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name
             # TODO create arrays of target choices and project names
+
+            choices = [{"choice": target_choice1, "project": target_project_name1},
+                       {"choice": target_choice2, "project": target_project_name2},
+                       {"choice": target_choice3, "project": target_project_name3}]
+
             try:
-                #TODO send arrays to create_full_dash
-                dash_id = models.create_full_dash(folder_name, url, global_path, target_choice1,
-                                                  target_project_name1, test_choice, test_plan_name)
+                # TODO send arrays to create_full_dash
+                dash_id = models.create_full_dash(folder_name, url, global_path, test_choice, test_plan_name, choices)
                 context['dash_id'] = dash_id
                 write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)

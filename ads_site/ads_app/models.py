@@ -543,8 +543,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 # region Create Full Dashboard
 
 
-def create_full_dash(folder, url, global_path, target_choice, target_project_name,
-                     test_choice, test_suite):
+def create_full_dash(folder, url, global_path, test_choice, test_suite, choices):
     """
         Calls functions to complete the tasks below:
          - Verifies query folder does not exist
@@ -562,7 +561,7 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     test_plan = return_test_plan_id(test_suite, test_choice)
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
-    populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
+    populate_baseline_query_folder(query_folder, global_path, choices)
     populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path)
 
     json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder,
@@ -652,7 +651,7 @@ def create_query_folder(folder):
     return query_response['id']
 
 
-def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=True):
+def populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=True):
     """
         Populates the given folder with the standard queries.
 
@@ -661,15 +660,22 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
          - Creates missing standard queries
          - Updates existing standard queries
     """
-    # TODO take arrays of target choices and names as params
 
     # region WIQL constants
     # Target clause is dependent on User's GUI choice
-    # TODO build target clause out of arrays, as long as value != ''
-    if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
-    else:
-        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
+    target_clause = ""
+    count = 0
+    for target, next_ in zip(choices, choices[1:] + ["end"]):
+        if target["project"] != "":
+            count += 1
+            if target["choice"] == "0":
+                target_clause += "[Custom.TargetedProject] contains '{}'".format(str(target["project"]))
+                if count < 3 and next_["project"] != "":
+                    target_clause += " or "
+            else:
+                target_clause += "[Custom.Tags] contains '{}'".format(str(target["project"]))
+                if count < 3 and next_["project"] != "":
+                    target_clause += " or "
 
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
@@ -757,12 +763,12 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     for json_obj in query_objects:
         if first_time or (json_obj["name"] not in query_folder_children):
             create_query(json_obj, query_folder)
-            print("Created " + json_obj["name"] + " Query for: " + target_project_name)
+            print("Created " + json_obj["name"])
         else:
             temp_wiql = json_obj["wiql"]
             json_obj["wiql"] = {"wiql": temp_wiql}
             update_query(json_obj["wiql"], query_folder, json_obj["name"])
-            print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
+            print("Updated " + json_obj["name"])
 
     # SQA queries are dependent on global_reqs_path instead of first_time
     if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
@@ -771,12 +777,12 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
         for json_obj in sqa_query_objects:
             if json_obj["name"] not in query_folder_children:
                 create_query(json_obj, query_folder)
-                print("Created " + json_obj["name"] + " Query for: " + target_project_name)
+                print("Created " + json_obj["name"])
             else:
                 temp_wiql = json_obj["wiql"]
                 json_obj["wiql"] = {"wiql": temp_wiql}
                 update_query(json_obj["wiql"], query_folder, json_obj["name"])
-                print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
+                print("Updated " + json_obj["name"])
 
 
 def populate_dash(output_team, url, test_plan, program_name, query_folder,

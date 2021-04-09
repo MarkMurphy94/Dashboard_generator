@@ -50,12 +50,14 @@
             var targetRow3 = document.getElementById("targetRow3")
             if (!targetRow3.hidden) {
                 targetRow3.hidden = true;
+                document.getElementById("target_name3").value = "";
             }
             else {
                 var targetRow2 = document.getElementById("targetRow2")
                 if (!targetRow2.hidden) {
                     targetRow2.hidden = true;
                     document.getElementById("removeRowBtn").setAttribute("disabled", "true");
+                    document.getElementById("target_name2").value = "";
                 }
             }
             document.getElementById("addRowBtn").removeAttribute("disabled");
@@ -140,7 +142,7 @@
             </tr>
             <tr>
                 <td><label for="target_name1">Enter the Tag or the Targeted Project(s): *</label></td>
-                {% if target_choice %}
+                {% if target_choice1 %}
                     {% if target_choice == '0' %}
                         <td><input type="radio" name="target_choice1" value="0" checked> Targeted Project</td>
                         <td><input type="radio" name="target_choice1" value="1"> Tag</td>
@@ -173,7 +175,7 @@
                     <td><input type="radio" name="target_choice2" value="1"> Tag</td>
                 {% endif %}
                 {% if target_name2 %}
-                    <td><input type="text" name="target_name2" value="{{ target_name2 }}" required="" id="target_name2" maxlength="250"></td>
+                    <td><input type="text" name="target_name2" value="{{ target_name2 }}" id="target_name2" maxlength="250"></td>
                 {% else %}
                     <td><input type="text" name="target_name2" id="target_name2" maxlength="250"></td>
                 {% endif %}
@@ -193,7 +195,7 @@
                     <td><input type="radio" name="target_choice3" value="1"> Tag</td>
                 {% endif %}
                 {% if target_name3 %}
-                    <td><input type="text" name="target_name3" value="{{ target_name3 }}" required="" id="target_name3" maxlength="250"></td>
+                    <td><input type="text" name="target_name3" value="{{ target_name3 }}" id="target_name3" maxlength="250"></td>
                 {% else %}
                     <td><input type="text" name="target_name3" id="target_name3" maxlength="250"></td>
                 {% endif %}
