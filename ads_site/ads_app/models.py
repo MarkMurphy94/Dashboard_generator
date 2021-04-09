@@ -554,7 +554,6 @@ def create_full_dash(folder, url, global_path, test_choice, test_suite, choices)
 
         :returns the id of the dashboard created
     """
-    # TODO take arrays of target choices and names as params
     # PROJECT = 'SoftwareProducts'
     team_name = 'GTO'  # 'SQA'
     check_folder_exists(folder)
@@ -564,8 +563,7 @@ def create_full_dash(folder, url, global_path, test_choice, test_suite, choices)
     populate_baseline_query_folder(query_folder, global_path, choices)
     populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path)
 
-    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder,
-                                target_choice, global_path, target_project_name)
+    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder, global_path, choices)
     write_config(json_config)
     return dash_id
 
@@ -661,7 +659,6 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
          - Updates existing standard queries
     """
 
-    # region WIQL constants
     # Target clause is dependent on User's GUI choice
     target_clause = ""
     count = 0
@@ -677,6 +674,7 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
                 if count < 3 and next_["project"] != "":
                     target_clause += " or "
 
+    # region WIQL constants
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
@@ -1476,8 +1474,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
 
-def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
-                  targeted_project, global_path, short_name, executive=False):
+def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, global_path, choices, executive=False):
     """
         Creates JSON object using string arguments unless otherwise specified:
             - team name             - targeted project name or tag flag (bool)
@@ -1489,6 +1486,15 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
     """
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+
+    # choices = list(enumerate(choices))
+    targeted_project = choices[0]["choice"]
+    targeted_project2 = choices[1]["choice"]
+    targeted_project3 = choices[2]["choice"]
+    short_name = choices[0]["project"]
+    short_name2 = choices[1]["project"]
+    short_name3 = choices[2]["project"]
+
     json_config = {
         'teamName': team_name,
         'url': url,
@@ -1497,8 +1503,12 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
         'folderName': folder_name,
         'folderId': folder_id,
         'targetedProject': targeted_project,
+        'targetedProject2': targeted_project2,
+        'targetedProject3': targeted_project3,
         'global_path': global_path,
         'short_name': short_name,
+        'short_name2': short_name2,
+        'short_name3': short_name3,
         'version': VERSION,
         'lastUpdate': date_string,
         'executive': executive

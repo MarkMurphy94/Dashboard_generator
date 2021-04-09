@@ -180,14 +180,12 @@ def create_dash(request):
             context[name_key3] = target_project_name3
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name
-            # TODO create arrays of target choices and project names
 
             choices = [{"choice": target_choice1, "project": target_project_name1},
                        {"choice": target_choice2, "project": target_project_name2},
                        {"choice": target_choice3, "project": target_project_name3}]
 
             try:
-                # TODO send arrays to create_full_dash
                 dash_id = models.create_full_dash(folder_name, url, global_path, test_choice, test_plan_name, choices)
                 context['dash_id'] = dash_id
                 write_to_log(request, action, folder_name)
