@@ -1487,7 +1487,6 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, gl
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
 
-    # choices = list(enumerate(choices))
     targeted_project = choices[0]["choice"]
     targeted_project2 = choices[1]["choice"]
     targeted_project3 = choices[2]["choice"]
@@ -2310,7 +2309,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file):
+def update_dash(file, choices):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2323,13 +2322,13 @@ def update_dash(file):
         url = config_data['url']
         dash_id = config_data['dashId']
         test_plan = config_data['testPlan']
-        target_choice = config_data['targetedProject']
+        # target_choice = config_data['targetedProject']
         global_reqs_path = config_data['global_path']
-        target_project_name = config_data['short_name']
+        # target_project_name = config_data['short_name']
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
-    populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=False)
+    populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=False)
     clear_dash(team_name, dash_id)
     populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
 

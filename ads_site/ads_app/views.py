@@ -38,7 +38,7 @@ def write_dashboard_changes_to_log(old_config, new_config):
     """
     changes_made = False
     config_keys = ['url', 'dashId', 'testPlan', 'folderName', 'folderId', 'targetedProject',
-                   'global_path', 'target_name1', 'target_name2', 'target_name3']
+                   'global_path', 'short_name', 'short_name2', 'short_name3']
 
     with open(models.LOG_PATH, 'a') as log:
         for key in config_keys:
@@ -244,8 +244,12 @@ def submit_update(request):
     folder_key = 'folder_name'
     url_key = 'url'
     global_key = 'global_path'
-    #TODO Refactor these to match create_dash
-    target_key = 'target_choice1'
+    target_key1 = 'target_choice1'
+    target_key2 = 'target_choice2'
+    target_key3 = 'target_choice3'
+    name_key1 = 'target_name1'
+    name_key2 = 'target_name2'
+    name_key3 = 'target_name3'
     name_key = 'target_name1'
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
@@ -262,8 +266,12 @@ def submit_update(request):
             folder_name = form.cleaned_data[folder_key]
             url = form.cleaned_data[url_key]
             global_path = form.cleaned_data[global_key]
-            target_choice1 = form.cleaned_data[target_key]
-            target_project_name1 = form.cleaned_data[name_key]
+            target_choice1 = form.cleaned_data[target_key1]
+            target_choice2 = form.cleaned_data[target_key2]
+            target_choice3 = form.cleaned_data[target_key3]
+            target_project_name1 = form.cleaned_data[name_key1]
+            target_project_name2 = form.cleaned_data[name_key2]
+            target_project_name3 = form.cleaned_data[name_key3]
             test_choice = form.cleaned_data[choice_key]
             test_plan_name_or_id = form.cleaned_data[test_plan_key]
 
@@ -271,11 +279,19 @@ def submit_update(request):
             context[folder_key] = folder_name
             context[url_key] = url
             context[global_key] = global_path
-            # TODO add new fields to context
-            context[target_key] = target_choice1
+            context[target_key1] = target_choice1
+            context[target_key2] = target_choice2
+            context[target_key3] = target_choice3
+            context[name_key1] = target_project_name1
+            context[name_key2] = target_project_name2
+            context[name_key3] = target_project_name3
             context[name_key] = target_project_name1
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name_or_id
+
+            choices = [{"choice": target_choice1, "project": target_project_name1},
+                       {"choice": target_choice2, "project": target_project_name2},
+                       {"choice": target_choice3, "project": target_project_name3}]
 
             try:
                 old_config = models.get_selected_config(folder_name)[0]
@@ -284,9 +300,9 @@ def submit_update(request):
                 test_plan_id = models.return_test_plan_id(test_plan_name_or_id, test_choice)
 
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
-                                                  target_choice1, global_path, target_project_name1, old_config["executive"])
+                                                  global_path, choices)  # old_config["executive"]
                 models.write_config(new_config)
-                models.update_dash(folder_name)
+                models.update_dash(folder_name, choices)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
                 write_dashboard_changes_to_log(old_config, new_config)
