@@ -300,7 +300,7 @@ def submit_update(request):
                 test_plan_id = models.return_test_plan_id(test_plan_name_or_id, test_choice)
 
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
-                                                  global_path, choices)  # old_config["executive"]
+                                                  global_path, choices, old_config["executive"])
                 models.write_config(new_config)
                 models.update_dash(folder_name, choices)
                 context["dash_id"] = dash_id

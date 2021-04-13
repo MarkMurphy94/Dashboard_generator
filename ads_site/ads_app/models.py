@@ -660,7 +660,7 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
     """
 
     # Target clause is dependent on User's GUI choice
-    target_clause = ""
+    target_clause = "("
     count = 0
     for target, next_ in zip(choices, choices[1:] + ["end"]):
         if target["project"] != "":
@@ -669,10 +669,14 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
                 target_clause += "[Custom.TargetedProject] contains '{}'".format(str(target["project"]))
                 if count < 3 and next_["project"] != "":
                     target_clause += " or "
+                else:
+                    target_clause += ") "
             else:
                 target_clause += "[Custom.Tags] contains '{}'".format(str(target["project"]))
                 if count < 3 and next_["project"] != "":
                     target_clause += " or "
+                else:
+                    target_clause += ") "
 
     # region WIQL constants
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
