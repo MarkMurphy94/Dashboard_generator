@@ -44,6 +44,7 @@ def write_dashboard_changes_to_log(old_config, new_config):
         for key in config_keys:
             if key not in old_config:
                 log.write("                    | - " + key + ": --> " + new_config[key] + "\n")
+                changes_made = True
             elif old_config[key] != new_config[key]:
                 log.write("                    | - " + key + ": " + old_config[key] + " --> " + new_config[key] + "\n")
                 changes_made = True
