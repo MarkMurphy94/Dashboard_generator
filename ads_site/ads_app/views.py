@@ -42,7 +42,9 @@ def write_dashboard_changes_to_log(old_config, new_config):
 
     with open(models.LOG_PATH, 'a') as log:
         for key in config_keys:
-            if old_config[key] != new_config[key]:
+            if key not in old_config:
+                log.write("                    | - " + key + ": --> " + new_config[key] + "\n")
+            elif old_config[key] != new_config[key]:
                 log.write("                    | - " + key + ": " + old_config[key] + " --> " + new_config[key] + "\n")
                 changes_made = True
         if not changes_made:
