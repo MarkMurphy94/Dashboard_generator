@@ -13,6 +13,12 @@
             $("a#admin").addClass('isDisabled');
             document.getElementById("test_plan_name").value = Number(document.getElementById("test_plan_name").value) + 1;
             // TODO if there exist multiple targeted projects (value != ''), use addRow function to unhide them
+            if (document.getElementById("target_name2").value != "") {
+                addRow();
+            }
+            if (document.getElementById("target_name3").value != "") {
+                addRow();
+            }
         });
 
         $(function() {
@@ -58,7 +64,7 @@
                 var targetRow2 = document.getElementById("targetRow2")
                 if (!targetRow2.hidden) {
                     targetRow2.hidden = true;
-                    document.getElementById("target_name3").value = "";
+                    document.getElementById("target_name2").value = "";
                     document.getElementById("removeRowBtn").setAttribute("disabled", "true");
                 }
             }
@@ -172,7 +178,7 @@
                 {% endif %}
                 {% endfor %}
             </tr>
-            <tr id="targetRow2">
+            <tr id="targetRow2" hidden>
                 <td><label for="target_name2">Targeted Project 2:</label></td>
                 {% if target_choice2 %}
                     {% if target_choice == '0' %}
@@ -190,11 +196,11 @@
                     {% if item.short_name2 %}
                         <td><input type="text" name="target_name2" value="{{ item.short_name2 }}" id="target_name2" maxlength="250"></td>
                     {% else %}
-                        <td><input type="text" name="target_name2" id="target_name2" maxlength="250"></td>
+                        <td><input type="text" name="target_name2" value="{{ item.short_name2 }}" id="target_name2" maxlength="250"></td>
                 {% endif %}
                 {% endfor %}
             </tr>
-            <tr id="targetRow3">
+            <tr id="targetRow3" hidden>
                 <td><label for="target_name3">Targeted Project 3:</label></td>
                 {% if target_choice3 %}
                     {% if target_choice == '0' %}
@@ -212,7 +218,7 @@
                     {% if item.short_name3 %}
                     <td><input type="text" name="target_name3" value="{{ item.short_name3 }}" id="target_name3" maxlength="250"></td>
                 {% else %}
-                    <td><input type="text" name="target_name3" id="target_name3" maxlength="250"></td>
+                    <td><input type="text" name="target_name3" value="{{ item.short_name3 }}" id="target_name3" maxlength="250"></td>
                 {% endif %}
                 {% endfor %}
             </tr>
