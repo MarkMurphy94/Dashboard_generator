@@ -1695,7 +1695,6 @@ def return_chart(column, row, name, query_id, organize_by="severity", chart_type
         option = "Microsoft.VSTS.Common.Priority"
     else:
         option = group
-    print("----------------group is: " + organize_by + " -------------------------")
 
     chart = return_widget_obj("Chart")
     chart["name"] = name
