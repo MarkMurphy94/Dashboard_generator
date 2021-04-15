@@ -1491,12 +1491,12 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, gl
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
 
-    targeted_project = choices[0]["choice"]
-    targeted_project2 = choices[1]["choice"]
-    targeted_project3 = choices[2]["choice"]
-    short_name = choices[0]["project"]
-    short_name2 = choices[1]["project"]
-    short_name3 = choices[2]["project"]
+    choice1 = choices[0]["choice"]
+    choice2 = choices[1]["choice"]
+    choice3 = choices[2]["choice"]
+    targeted_project1 = choices[0]["project"]
+    targeted_project2 = choices[1]["project"]
+    targeted_project3 = choices[2]["project"]
 
     json_config = {
         'teamName': team_name,
@@ -1505,13 +1505,13 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, gl
         'testPlan': test_plan,
         'folderName': folder_name,
         'folderId': folder_id,
-        'targetedProject': targeted_project,
-        'targetedProject2': targeted_project2,
-        'targetedProject3': targeted_project3,
+        'targetedProject': choice1,
+        'targetedProject2': choice2,
+        'targetedProject3': choice3,
         'global_path': global_path,
-        'short_name': short_name,
-        'short_name2': short_name2,
-        'short_name3': short_name3,
+        'targeted_project1': targeted_project1,
+        'targeted_project2': targeted_project2,
+        'targeted_project3': targeted_project3,
         'version': VERSION,
         'lastUpdate': date_string,
         'executive': executive
