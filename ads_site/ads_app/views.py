@@ -37,8 +37,8 @@ def write_dashboard_changes_to_log(old_config, new_config):
         - teamName, version, lastUpdate, executive
     """
     changes_made = False
-    config_keys = ['url', 'dashId', 'testPlan', 'folderName', 'folderId', 'targetedProject',
-                   'global_path', 'short_name', 'short_name2', 'short_name3']
+    config_keys = ['url', 'dashId', 'testPlan', 'folderName', 'folderId', 'choice1', 'choice2', 'choice3',
+                   'global_path', 'targeted_project1', 'targeted_project2', 'targeted_project3']
 
     with open(models.LOG_PATH, 'a') as log:
         for key in config_keys:
