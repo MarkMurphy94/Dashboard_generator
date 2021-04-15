@@ -659,7 +659,7 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
          - Updates existing standard queries
     """
 
-    # Target clause is dependent on User's GUI choice
+    # Target clause is dependent on User's GUI choice, can include up to 3 targeted projects/tags
     target_clause = "("
     count = 0
     for target, next_ in zip(choices, choices[1:] + ["end"]):
@@ -2326,9 +2326,7 @@ def update_dash(file, choices):
         url = config_data['url']
         dash_id = config_data['dashId']
         test_plan = config_data['testPlan']
-        # target_choice = config_data['targetedProject']
         global_reqs_path = config_data['global_path']
-        # target_project_name = config_data['short_name']
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
