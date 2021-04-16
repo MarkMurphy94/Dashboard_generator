@@ -167,8 +167,9 @@
                 {% endif %}
                 {% endfor %}
             </tr>
+            <tr><td><label>Edit the Tag or the Targeted Project(s):</label></td></tr>
             <tr>
-                <td><label for="target_name1">Edit the Tag or the Targeted Project: *</label></td>
+                <td><label for="target_name1"> Targeted Project 1 (required):</label></td>
                 {% if target_choice %}
                     {% if item.target_choice == '0' %}
                         <td><input type="radio" name="target_choice1" value="0" checked> Targeted Project</td>
@@ -190,7 +191,7 @@
                 {% endfor %}
             </tr>
             <tr id="targetRow2" hidden>
-                <td><label for="target_name2">Targeted Project 2:</label></td>
+                <td><label for="target_name2">Targeted Project 2 (optional):</label></td>
                 {% if target_choice2 %}
                     {% if target_choice == '0' %}
                         <td><input type="radio" name="target_choice2" value="0" checked> Targeted Project</td>
@@ -212,7 +213,7 @@
                 {% endfor %}
             </tr>
             <tr id="targetRow3" hidden>
-                <td><label for="target_name3">Targeted Project 3:</label></td>
+                <td><label for="target_name3">Targeted Project 3 (optional):</label></td>
                 {% if target_choice3 %}
                     {% if target_choice == '0' %}
                         <td><input type="radio" name="target_choice3" value="0" checked> Targeted Project</td>

@@ -253,7 +253,6 @@ def submit_update(request):
     name_key1 = 'target_name1'
     name_key2 = 'target_name2'
     name_key3 = 'target_name3'
-    name_key = 'target_name1'
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
 
@@ -289,7 +288,6 @@ def submit_update(request):
             context[name_key1] = target_project_name1
             context[name_key2] = target_project_name2
             context[name_key3] = target_project_name3
-            context[name_key] = target_project_name1
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name_or_id
 
