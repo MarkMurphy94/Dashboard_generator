@@ -173,12 +173,7 @@
                 {% for item in json %}
                     {% if item.targeted_project1 %}
                         <td><input type="text" name="target_name1" value="{{ item.targeted_project1 }}" required="" id="target_name1" maxlength="250"></td>
-                    {% else %}
-                        <td><input type="text" name="target_name1" value="{{ item.targeted_project1 }}" required="" id="target_name1" maxlength="250"></td>
-                {% endif %}
-                {% if item.short_name %}
-                        <td><input type="text" name="target_name1" value="{{ item.short_name }}" required="" id="target_name1" maxlength="250"></td>
-                    {% else %}
+                    {% elif item.short_name %}
                         <td><input type="text" name="target_name1" value="{{ item.short_name }}" required="" id="target_name1" maxlength="250"></td>
                 {% endif %}
                 {% endfor %}
