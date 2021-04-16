@@ -61,6 +61,10 @@ standardRNDWitColorArray = [
         "backgroundColor": "#e60017"
     },
     {
+        "value": "Production",
+        "backgroundColor": "#e60017"
+    },
+    {
         "value": "4 - Low",
         "backgroundColor": "#339947"
     },
@@ -688,61 +692,70 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
     # endregion
 
     # region WIQL statements
-    wiql_dev_bugs = selected_columns + from_bugs \
-                    + "and [System.State] in ('New', 'Active') and " + target_clause \
-                    + " and [Custom.Monitoring] = False"
-    wiql_all_closed_this_week = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
-                                + "and " + target_clause \
-                                + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
-                                  "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
-    wiql_all_created_this_week = selected_columns + from_bugs \
-                                 + "and " + target_clause \
-                                 + " and [System.CreatedDate] > @today - 7 " \
-                                   "order by [System.CreatedDate] desc"
-    wiql_monitored = selected_columns + from_bugs \
-                     + "and not [System.State] contains 'Closed' " \
-                       "and " + target_clause + \
-                     " and [Custom.Monitoring] = True " \
+    wiql_dev_bugs = selected_columns + from_bugs + \
+                    "and [System.State] in ('New', 'Active') " \
+                    "and " + target_clause + \
+                    "and [Custom.Monitoring] = False"
+    wiql_all_closed_this_week = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs + \
+                                "and " + target_clause + \
+                                "and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
+                                "and [System.State] = 'Closed' " \
+                                "order by [System.CreatedDate] desc"
+    wiql_all_created_this_week = selected_columns + from_bugs + \
+                                 "and " + target_clause + \
+                                 "and [System.CreatedDate] > @today - 7 " \
+                                 "order by [System.CreatedDate] desc"
+    wiql_monitored = selected_columns + from_bugs + \
+                     "and not [System.State] contains 'Closed' " \
+                     "and " + target_clause + \
+                     "and [Custom.Monitoring] = True " \
                      "order by [System.CreatedDate] desc"
-    wiql_new_issues_last_24_hours = selected_columns + from_bugs \
-                                    + "and [System.State] <> 'Closed' " \
-                                      "and " + target_clause + \
-                                    " and [System.CreatedDate] >= @today - 1"
-    wiql_cannot_reproduce = selected_columns + from_bugs \
-                            + "and [System.State] <> 'Closed' " \
-                              "and " + target_clause + \
-                            " and [System.reason] = 'Cannot Reproduce' "
-    wiql_all_bugs = selected_columns + from_bugs \
-                    + "and not [System.State] contains 'Closed' " \
-                      "and " + target_clause + \
-                    " order by [System.CreatedDate] desc"
-    wiql_all_resolved_this_week = selected_columns + from_bugs \
-                                  + "and " + target_clause + \
-                                  " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
+    wiql_new_issues_last_24_hours = selected_columns + from_bugs + \
+                                    "and [System.State] <> 'Closed' " \
+                                    "and " + target_clause + \
+                                    "and [System.CreatedDate] >= @today - 1"
+    wiql_cannot_reproduce = selected_columns + from_bugs + \
+                            "and [System.State] <> 'Closed' " \
+                            "and " + target_clause + \
+                            "and [System.reason] = 'Cannot Reproduce' "
+    wiql_all_bugs = selected_columns + from_bugs + \
+                    "and not [System.State] contains 'Closed' " \
+                    "and " + target_clause + \
+                    "order by [System.CreatedDate] desc"
+    wiql_all_resolved_this_week = selected_columns + from_bugs + \
+                                  "and " + target_clause + \
+                                  "and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
                                   "and [System.State] = 'Resolved' " \
                                   "order by [System.CreatedDate] desc"
-    wiql_rtt = selected_columns + from_bugs \
-               + "and [System.State] = 'Resolved' and " + target_clause + \
-               " and [Custom.Monitoring] = False"
+    wiql_rtt = selected_columns + from_bugs + \
+               "and [System.State] = 'Resolved' " \
+               "and " + target_clause + \
+               "and [Custom.Monitoring] = False"
+    wiql_lifetime_bugs = selected_columns + from_bugs + \
+                         "and " + target_clause
+    wiql_failed_test = selected_columns + ", [System.AreaLevel2]" + from_bugs + \
+                       "and " + target_clause + \
+                       "and (ever [System.Reason] = 'Test Failed' " \
+                       "or ever [System.Reason] = 'Not fixed')"
 
     # SQA Features statements
     wiql_sqa_test_features = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItems " \
-           "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-           "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-           "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                               "order by [System.Id] "
+                             "[System.AssignedTo], [System.State], [System.Tags] " \
+                             "from WorkItems " \
+                             "where [System.WorkItemType] = 'Feature' " \
+                             "and [System.AreaPath] under 'GlobalReqs\\System Test' " \
+                             "and [System.IterationPath] under " + repr(global_reqs_path) + " "\
+                             "and [System.State] <> 'Removed' " \
+                             "order by [System.Id] "
     wiql_sqa_test_features_without_test_cases = "select [System.Id], [System.WorkItemType], [System.Title], " \
-           "[System.AssignedTo], [System.State], [System.Tags] " \
-           "from WorkItemLinks " \
-           "where (Source.[System.WorkItemType] = 'Feature' " \
-           "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-           "and Source.[System.IterationPath] under " \
-           + repr(global_reqs_path) + ") " \
-                                      "and (Target.[System.WorkItemType] = 'Test Case') " \
-                                      "and Source.[System.State] <> 'Removed' " \
-                                      "order by [System.Id] mode (DoesNotContain)"
+                                                "[System.AssignedTo], [System.State], [System.Tags] " \
+                                                "from WorkItemLinks " \
+                                                "where (Source.[System.WorkItemType] = 'Feature' " \
+                                                "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+                                                "and Source.[System.IterationPath] under " + repr(global_reqs_path) + ") " \
+                                                "and (Target.[System.WorkItemType] = 'Test Case') " \
+                                                "and Source.[System.State] <> 'Removed' " \
+                                                "order by [System.Id] mode (DoesNotContain)"
     # endregion
 
     # region Populate Standard Query Objects
@@ -754,7 +767,9 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
                      {"name": "Cannot Reproduce", "wiql": wiql_cannot_reproduce},
                      {"name": "All Bugs", "wiql": wiql_all_bugs},
                      {"name": "All resolved this week", "wiql": wiql_all_resolved_this_week},
-                     {"name": "RTT", "wiql": wiql_rtt}]
+                     {"name": "RTT", "wiql": wiql_rtt},
+                     {"name": "Lifetime Bugs", "wiql": wiql_lifetime_bugs},
+                     {"name": "Failed Test", "wiql": wiql_failed_test}]
     # endregion
 
     if not first_time:
@@ -787,20 +802,8 @@ def populate_baseline_query_folder(query_folder, global_reqs_path, choices, firs
                 print("Updated " + json_obj["name"])
 
 
-def populate_dash(output_team, url, test_plan, program_name, query_folder,
-                  overview_id, global_reqs_path):
-    """
-        Populates a given dashboard with widgets based on the queries
-        in the query folder provided, and the test suites found in the given
-        test plan.
-    """
-
-    starting_column = 1
-    starting_row = 1
-
-    # adds 1 to plan id to get suite id
-    test_suite_id = str(int(test_plan) + 1)
-
+def first_2_rows(output_team, url, test_plan, program_name, query_folder,
+                 overview_id, global_reqs_path, test_suite_id, starting_column, starting_row):
     # region First Widget Row
     url = url.strip()
     tree_link = "\n"
@@ -1027,15 +1030,62 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         create_widget(output_team, overview_id, custom_markdown)
         starting_column += 4
 
+    # region Reported In
+    name = "Reported In"
+    query_id = return_query_id("Lifetime Bugs", query_folder)
+    chart_type = "ColumnChart"
+    group = "Custom.ReportedIn"
+    _property = "value"
+    direction = "descending"
+
+    reported_in = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                               _property=_property, direction=direction)
+    create_widget(output_team, overview_id, reported_in)
+    starting_column += 2
+    # endregion
+
+    # region Failed Test by Area Path
+    name = "Failed Test by Area Path"
+    query_id = return_query_id("Failed Test", query_folder)
+    chart_type = "PieChart"
+    group = "System.AreaLevel2"
+    _property = "value"
+    direction = "descending"
+
+    failed_test_chart = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                                     _property=_property, direction=direction)
+    create_widget(output_team, overview_id, failed_test_chart)
+
+    starting_column += 2
+    # endregion
+
     # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
         remainder = min(MAX_COLUMN - starting_column + 2, 10)
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
-
-    starting_row += 2
     # endregion
+
+
+def populate_dash(output_team, url, test_plan, program_name, query_folder,
+                  overview_id, global_reqs_path, ignore_first_row=False):
+    """
+        Populates a given dashboard with widgets based on the queries
+        in the query folder provided, and the test suites found in the given
+        test plan.
+    """
+
+    starting_column = 1
+    starting_row = 1
+
+    # adds 1 to plan id to get suite id
+    test_suite_id = str(int(test_plan) + 1)
+
+    if not ignore_first_row:
+        first_2_rows(output_team, url, test_plan, program_name, query_folder,
+                     overview_id, global_reqs_path, test_suite_id, starting_column, starting_row)
+    starting_row += 4
 
     # region Sprint Row
 
@@ -2254,7 +2304,7 @@ def delete_widget(team_name, widget_id, dashboard_id):
     print(json.dumps(js))
 
 
-def clear_dash(team_name, dashboard_id):
+def clear_dash(team_name, dashboard_id, ignore_first_row=False):
     """
         Clears all widgets from a dashboard
     """
@@ -2268,9 +2318,15 @@ def clear_dash(team_name, dashboard_id):
         raise DashDoesNotExists("Dashboard with the selected name does not exist")
 
     dash_response = response.json()
-    for widgets in dash_response["widgets"]:
-        print(widgets["id"])
-        delete_widget(team_name, widgets["id"], dashboard_id)
+    for widget in dash_response["widgets"]:
+        if ignore_first_row:
+            print("Ignoring first 2 widget rows")
+            if widget["position"]["row"] not in [1, 2, 3]:
+                print(widget["id"])
+                delete_widget(team_name, widget["id"], dashboard_id)
+        else:
+            print(widget["id"])
+            delete_widget(team_name, widget["id"], dashboard_id)
     print("Dashboard cleared")
 
 
@@ -2313,7 +2369,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file, choices):
+def update_dash(file, choices, ignore_first_row):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2330,9 +2386,11 @@ def update_dash(file, choices):
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
-    populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=False)
-    clear_dash(team_name, dash_id)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
+    if not ignore_first_row:
+        populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=False)
+
+    clear_dash(team_name, dash_id, ignore_first_row)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path, ignore_first_row)
 
     print("Dashboard Updated")
 

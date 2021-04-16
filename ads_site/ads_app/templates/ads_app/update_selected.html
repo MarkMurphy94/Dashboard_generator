@@ -21,23 +21,34 @@
             }
         });
 
-        $(function() {
-            $("#submit_update").submit(function(event) {
-                // Stop form from submitting normally
-                event.preventDefault();
-                //enables the name field for submission
-                $("input").prop('disabled', false);
-                var help_modal = document.getElementById("LoadingModal");
-                var create_dash = $(this);
-                // Un-hide the Loading div
-                document.getElementById("loading").hidden = false;
-                // Disable Submit button
-                document.getElementsByClassName("button")[0].disabled = true;
-                // Submit Form
-                help_modal.style.display = "block";
-                document.forms['submit_update'].submit()
+
+            function changeText() {
+                var CheckBox = document.getElementById('ignore_first_row');
+                var text = document.getElementById('row_status');
+                if (CheckBox.checked) {
+                    text.value = 'Excluding first 2 widget rows';
+                } else {
+                    text.value = 'Updating first 2 widget rows';
+                }
+            }
+
+            $(function() {
+                $("#submit_update").submit(function(event) {
+                    // Stop form from submitting normally
+                    event.preventDefault();
+                    //enables the name field for submission
+                    $("input").prop('disabled', false);
+                    var help_modal = document.getElementById("LoadingModal");
+                    var create_dash = $(this);
+                    // Un-hide the Loading div
+                    document.getElementById("loading").hidden = false;
+                    // Disable Submit button
+                    document.getElementsByClassName("button")[0].disabled = true;
+                    // Submit Form
+                    help_modal.style.display = "block";
+                    document.forms['submit_update'].submit()
+                });
             });
-        });
 
         function addRow() {
             var targetRow2 = document.getElementById("targetRow2")
@@ -250,6 +261,12 @@
                     <td><input type="text" name="test_plan_name" value="{{ item.testPlan }}" required="" id="test_plan_name" maxlength="250"></td>
                 {% endfor %}
                 {% endif %}
+            </tr>
+            <tr>
+                <td><small>Exclude first 2 widget rows from update. This will save any custom widgets</small></td>
+                <td><input type="checkbox" name="ignore_first_row" id="ignore_first_row" onclick="changeText()" checked="checked"></td>
+                <td></td>
+                <td><input type="text" id="row_status" value="Excluding first 2 widget rows" name="" disabled></td>
             </tr>
         </table>
         <p><label>* Indicates field is required</label> </p>
