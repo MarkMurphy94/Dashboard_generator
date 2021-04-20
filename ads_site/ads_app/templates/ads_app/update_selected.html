@@ -11,8 +11,6 @@
                 $("a#update").addClass('isDisabled');
                 $("a#agile_update").addClass('isDisabled');
                 $("a#admin").addClass('isDisabled');
-                var radio = document.getElementById('severity-priority')
-                radio.style.visibility = "hidden";
                 document.getElementById("test_plan_name").value = Number(document.getElementById("test_plan_name").value) + 1;
             });
 
@@ -20,13 +18,10 @@
             function changeText() {
                 var CheckBox = document.getElementById('ignore_first_row');
                 var text = document.getElementById('row_status');
-                var radio = document.getElementById('severity-priority')
                 if (CheckBox.checked) {
                     text.value = 'Excluding first 2 widget rows';
-                    radio.style.visibility = "hidden";
                 } else {
                     text.value = 'Updating first 2 widget rows';
-                    radio.style.visibility = "visible";
                 }
             }
 
@@ -184,16 +179,16 @@
                 {% endfor %}
                 {% endif %}
             </tr>
+            <tr id="severity-priority">
+                <td><label>Organize graph widgets by Severity or Priority</label></td>
+                <td><input type="radio" name="severity-priority" value="severity" checked> Severity</td>
+                <td><input type="radio" name="severity-priority" value="priority"> Priority</td>
+            </tr>
             <tr>
                 <td><small>Exclude first 2 widget rows from update. This will save any custom widgets</small></td>
                 <td><input type="checkbox" name="ignore_first_row" id="ignore_first_row" onclick="changeText()" checked="checked"></td>
                 <td></td>
                 <td><input type="text" id="row_status" value="Excluding first 2 widget rows" name="" disabled></td>
-            </tr>
-            <tr id="severity-priority">
-                <td><label>Organize graph widgets by Severity or Priority</label></td>
-                <td><input type="radio" name="severity-priority" value="severity" checked> Severity</td>
-                <td><input type="radio" name="severity-priority" value="priority"> Priority</td>
             </tr>
         </table>
         <p><label>* Indicates field is required</label> </p>
