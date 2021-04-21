@@ -312,7 +312,7 @@ def submit_update(request):
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
                                                   global_path, choices, old_config["executive"])
                 models.write_config(new_config)
-                models.update_dash(folder_name, choices, ignore_first_row, organize_by)
+                models.update_dash(folder_name, choices, organize_by, ignore_first_row)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
                 write_dashboard_changes_to_log(old_config, new_config)
@@ -334,7 +334,7 @@ def submit_update(request):
                         error_type = "The URL to MRS tree"
                     elif str(item.name) == global_key:
                         error_type = "Global Reqs iteration path"
-                    elif str(item.name) == name_key:
+                    elif str(item.name) == name_key1:
                         error_type = "The Test Project "
                     elif str(item.name) == test_plan_key:
                         error_type = "The Test plan name "
