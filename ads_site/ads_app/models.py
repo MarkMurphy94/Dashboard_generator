@@ -547,8 +547,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 # region Create Full Dashboard
 
 
-def create_full_dash(folder, url, global_path, target_choice, target_project_name,
-                     test_choice, test_suite, organize_by):
+def create_full_dash(folder, url, global_path, test_choice, test_suite, choices, organize_by):
     """
         Calls functions to complete the tasks below:
          - Verifies query folder does not exist
@@ -565,11 +564,10 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     test_plan = return_test_plan_id(test_suite, test_choice)
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
-    populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
+    populate_baseline_query_folder(query_folder, global_path, choices)
     populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path, organize_by)
 
-    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder,
-                                target_choice, global_path, target_project_name)
+    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder, global_path, choices)
     write_config(json_config)
     return dash_id
 
@@ -655,7 +653,7 @@ def create_query_folder(folder):
     return query_response['id']
 
 
-def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=True):
+def populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=True):
     """
         Populates the given folder with the standard queries.
 
@@ -665,13 +663,26 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
          - Updates existing standard queries
     """
 
-    # region WIQL constants
-    # Target clause is dependent on User's GUI choice
-    if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}' ".format(target_project_name)
-    else:
-        target_clause = "[System.Tags] contains '{}' ".format(target_project_name)
+    # Target clause is dependent on User's GUI choice, can include up to 3 targeted projects/tags
+    target_clause = "("
+    count = 0
+    for target, next_ in zip(choices, choices[1:] + ["end"]):
+        if target["project"] != "":
+            count += 1
+            if target["choice"] == "0":
+                target_clause += "[Custom.TargetedProject] contains '{}'".format(str(target["project"]))
+                if count < 3 and next_["project"] != "":
+                    target_clause += " or "
+                else:
+                    target_clause += ") "
+            else:
+                target_clause += "[Custom.Tags] contains '{}'".format(str(target["project"]))
+                if count < 3 and next_["project"] != "":
+                    target_clause += " or "
+                else:
+                    target_clause += ") "
 
+    # region WIQL constants
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
@@ -769,12 +780,12 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
     for json_obj in query_objects:
         if first_time or (json_obj["name"] not in query_folder_children):
             create_query(json_obj, query_folder)
-            print("Created " + json_obj["name"] + " Query for: " + target_project_name)
+            print("Created " + json_obj["name"])
         else:
             temp_wiql = json_obj["wiql"]
             json_obj["wiql"] = {"wiql": temp_wiql}
             update_query(json_obj["wiql"], query_folder, json_obj["name"])
-            print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
+            print("Updated " + json_obj["name"])
 
     # SQA queries are dependent on global_reqs_path instead of first_time
     if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
@@ -783,12 +794,12 @@ def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path
         for json_obj in sqa_query_objects:
             if json_obj["name"] not in query_folder_children:
                 create_query(json_obj, query_folder)
-                print("Created " + json_obj["name"] + " Query for: " + target_project_name)
+                print("Created " + json_obj["name"])
             else:
                 temp_wiql = json_obj["wiql"]
                 json_obj["wiql"] = {"wiql": temp_wiql}
                 update_query(json_obj["wiql"], query_folder, json_obj["name"])
-                print("Updated " + json_obj["name"] + " Query for: " + target_project_name)
+                print("Updated " + json_obj["name"])
 
 
 def first_2_rows(output_team, url, test_plan, program_name, query_folder,
@@ -1517,8 +1528,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     # endregion
 
 
-def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
-                  targeted_project, global_path, short_name, executive=False):
+def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, global_path, choices, executive=False):
     """
         Creates JSON object using string arguments unless otherwise specified:
             - team name             - targeted project name or tag flag (bool)
@@ -1530,6 +1540,14 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
     """
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+
+    choice1 = choices[0]["choice"]
+    choice2 = choices[1]["choice"]
+    choice3 = choices[2]["choice"]
+    targeted_project1 = choices[0]["project"]
+    targeted_project2 = choices[1]["project"]
+    targeted_project3 = choices[2]["project"]
+
     json_config = {
         'teamName': team_name,
         'url': url,
@@ -1537,9 +1555,13 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
         'testPlan': test_plan,
         'folderName': folder_name,
         'folderId': folder_id,
-        'targetedProject': targeted_project,
+        'choice1': choice1,
+        'choice2': choice2,
+        'choice3': choice3,
         'global_path': global_path,
-        'short_name': short_name,
+        'targeted_project1': targeted_project1,
+        'targeted_project2': targeted_project2,
+        'targeted_project3': targeted_project3,
         'version': VERSION,
         'lastUpdate': date_string,
         'executive': executive
@@ -2354,7 +2376,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file, ignore_first_row, organize_by):
+def update_dash(file, choices, organize_by, ignore_first_row):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2367,14 +2389,12 @@ def update_dash(file, ignore_first_row, organize_by):
         url = config_data['url']
         dash_id = config_data['dashId']
         test_plan = config_data['testPlan']
-        target_choice = config_data['targetedProject']
         global_reqs_path = config_data['global_path']
-        target_project_name = config_data['short_name']
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
     if not ignore_first_row:
-        populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name, first_time=False)
+        populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=False)
 
     clear_dash(team_name, dash_id, ignore_first_row)
     populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path, organize_by, ignore_first_row)
