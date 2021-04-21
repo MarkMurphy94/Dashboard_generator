@@ -489,6 +489,16 @@ table {
     vertical-align: top;
 }
 
+/* Special formatting for keyword table */
+.table-keywords td, .table-keywords th {
+    padding: .75rem;
+    vertical-align: top;
+    position: static;
+}
+.table-keywords ul {
+    margin: 0;
+}
+
 /* Colors every second row to light grey */
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(0,0,0,.05);
