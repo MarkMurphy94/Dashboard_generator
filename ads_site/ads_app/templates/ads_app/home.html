@@ -10,6 +10,11 @@
             $("a#home").addClass('active');
         });
 
+        $(document).on("click","input[name=severity-priority]:radio",function(){
+            $("input:radio[name=severity-priority]:checked");
+            $("input:radio[name=severity-priority]:not(:checked)");
+        });
+
         $(function() {
             $("#create_dash").submit(function(event) {
                 // Stop form from submitting normally
@@ -147,6 +152,11 @@
                 {% else %}
                     <td><input type="text" name="test_plan_name" required="" id="test_plan_name" maxlength="250"></td>
                 {% endif %}
+            </tr>
+            <tr>
+                <td><label>Organize graph widgets by Severity or Priority</label></td>
+                <td><input type="radio" name="severity-priority" value="severity" checked> Severity</td>
+                <td><input type="radio" name="severity-priority" value="priority"> Priority</td>
             </tr>
         </table>
         <p><label>* Indicates field is required</label> </p>

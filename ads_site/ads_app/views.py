@@ -134,6 +134,11 @@ def create_test(request):
     return render(request, 'ads_app/done.html', context)
 
 
+def radio(request, name):
+    option = [(request.POST.get(name))]
+    return str(option[0])
+
+
 def create_dash(request):
     context = {}
     # Setting dictionary key values
@@ -144,6 +149,8 @@ def create_dash(request):
     name_key = 'short_name'
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
+
+    organize_by = radio(request, "severity-priority")
 
     action = "created the dashboard"
 
@@ -171,7 +178,7 @@ def create_dash(request):
 
             try:
                 dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
-                                                  target_project_name, test_choice, test_plan_name)
+                                                  target_project_name, test_choice, test_plan_name, organize_by)
                 context['dash_id'] = dash_id
                 write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)
@@ -237,6 +244,7 @@ def submit_update(request):
     team_name = "GTO"
     action = "updated the dashboard"
     ignore_first_row = checkbox(request, "ignore_first_row")
+    organize_by = radio(request, "severity-priority")
 
     if request.method == 'POST':  # if the request from the HTML is a post
         form = CreateDash(request.POST)
@@ -270,7 +278,7 @@ def submit_update(request):
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
                                                   target_choice, global_path, target_project_name, old_config["executive"])
                 models.write_config(new_config)
-                models.update_dash(folder_name, ignore_first_row)
+                models.update_dash(folder_name, ignore_first_row, organize_by)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
                 write_dashboard_changes_to_log(old_config, new_config)
