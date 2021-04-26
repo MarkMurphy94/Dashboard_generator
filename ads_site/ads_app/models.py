@@ -2549,47 +2549,6 @@ def add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan
     create_widget(GTO, EXECUTIVE_ID, main_markdown)
 
     add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
-    add_test_plan_summary(dash_name, test_plan, is_agile_plan, row)
-
-
-def add_test_plan_summary(dash_name, test_plan, is_agile_plan, row):
-    """
-        Adds the test plan summary chart to a dashboard
-    """
-    # region Test Plan Summary
-    name = dash_name + " - Summary"
-    # top level suite ID = test plan ID + 1
-    suite_id = str(int(test_plan) + 1)
-
-    # if this project has an agile test plan, only summarize the Sprints suite children.
-    if is_agile_plan:
-        # API call to retrieve test plan tree
-        api_params = {'api-version': '6.0-preview.1',
-                    'asTreeView': True}
-        response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
-                                + test_plan + '/suites?',
-                                auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
-        if response.status_code != 200:
-            print(json.dumps(response.json()))
-            raise TestPlanNotFound
-
-        # test plan tree contains array "value"
-        # value[0] contains array "children", which contains each child suite in the test plan
-        test_plan_tree = response.json()["value"]
-        for child_suite in test_plan_tree[0]["children"]:
-            if "Sprints" in child_suite["name"]:
-                suite_id = str(child_suite["id"])
-                print("Agile plan detected. Test plan summary will reference 'Sprints' suite")
-                break
-
-    print("Generating test plan summary for suite ID: " + suite_id)
-    group = "Outcome"
-    test_results = True
-    test_readiness = return_test_chart(4, row, name,
-                                       suite_id, test_plan, group=group,
-                                       test_results=test_results)
-    create_widget(GTO, EXECUTIVE_ID, test_readiness)
-    # endregion
 
 
 def add_four_square(query_folder, output_team, overview_id, row):
