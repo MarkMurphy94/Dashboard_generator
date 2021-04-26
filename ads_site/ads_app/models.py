@@ -2505,7 +2505,6 @@ def update_executive(check_list):
     for dash in dash_data:  # creates a row for each valid dashboard
         team_name = dash['teamName']
         dash_id = dash['dashId']
-        test_plan = dash['testPlan']
         dash_name = dash['folderName']
         query_folder = dash['folderId']
         executive = dash['executive']
@@ -2513,8 +2512,7 @@ def update_executive(check_list):
         if executive and dashboard_exists(team_name, dash_id):
             print("Adding executive row for " + dash_name)
             # check if this dashboard's test plan is an agile plan
-            is_agile_plan = test_plan in agile_plan_ids
-            add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row)
+            add_executive_row(dash_name, dash_id, query_folder, row)
 
             row += 2
 
@@ -2537,7 +2535,7 @@ def update_executive_config(check_list):
             json.dump(config_data, outfile)
 
 
-def add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row):
+def add_executive_row(dash_name, dash_id, query_folder, row):
     """
         Adds the row to the executive dashboard
     """
