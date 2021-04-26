@@ -75,7 +75,27 @@ standardRNDWitColorArray = [
     {
         "value": "3 - Medium",
         "backgroundColor": "#3f9bd8"
-    }
+    },
+    {
+        "value": "4",
+        "backgroundColor": "#339947"
+    },
+    {
+        "value": "3",
+        "backgroundColor": "#3f9bd8"
+    },
+    {
+        "value": "2",
+        "backgroundColor": "#f58b1f"
+    },
+    {
+        "value": "1",
+        "backgroundColor": "#e60017"
+    },
+    {
+        "value": "(blank)",
+        "backgroundColor": "#cccccc"
+    },
 ]
 
 standardPieChartColorArray = [
