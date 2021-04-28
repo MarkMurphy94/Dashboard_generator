@@ -125,33 +125,44 @@
                     <li>Run 2</li>
                     <li>Run 3</li>
                 </ul>
-                <li>Customer Solution Test</li>
+                <li>Customer Solution Test **</li>
                 <ul type="circle">
-                    <li>Run 1</li>
-                    <li>Run 2</li>
-                    <li>Run 3</li>
+                    <li>Meter Farm Run 1, 2, 3</li>
+                    <li>Garden Run 1, 2, 3</li>
+                    <li>SVE Run 1, 2, 3</li>
                 </ul>
-                <li>First Article Test</li>
-                <ul type="circle">
-                    <li>Product - Run 1</li>
-                    <li>Product - Run 2</li>
-                    <li>Product - Run 3</li>
+                <li>Final Product Test</li>
+                <ul type="disc">
+                    <li>Device 1 - Run 1</li>
+                    <ul type="disc">
+                        <li>E2E FAT Test Suites</li>
+                        <li>FW FAT Test Suites</li>
+                        <li>HW FAT Test Suites</li>
+                        <li>Product Secure</li>
+                    </ul>
+                    <li>Device 2 - Run 2</li>
+                    <ul type="disc">
+                        <li>E2E FAT Test Suites</li>
+                        <li>FW FAT Test Suites</li>
+                        <li>HW FAT Test Suites</li>
+                        <li>Product Secure</li>
+                    </ul>
                 </ul>
             </ul>
         </ul>
-        <p>Within each Alpha suite under Early System Test and within each Run suite under System Test,
-            the following folders will be generated:</p>
-        <ul type="circle">
+        <p>Within each ○ Suite, the following folders will be generated:</p>
+        <ul type="square">
             <li>New Features</li>
             <li>Manual Regression</li>
             <li>Automatic Regression</li>
         </ul>
-        <p>Within each Run suite in Customer Solution Test, the following folders will be generated:</p>
+        <p>Under the Customer Solution Test suite, the following optional folders will be generated: **</p>
         <ul type="circle">
             <li>Meter Farm Run</li>
             <li>Garden Run</li>
             <li>SVE Run</li>
         </ul>
+        <p>** If none of the CST options are selected, the CST suite will not be created</p>
     </div>
 
     <div id="agile_test_plan" class="box" style="display: none;">
@@ -191,54 +202,123 @@
             <span class="close">x</span>
             <h1>Create Test Plan Help</h1>
             <p>
-                Use this page to create a test plan for a dashboard. A test plan must be created
-                before a dashboard is created.
+                Use this page to create a test plan for a dashboard.<br><br>
+                This tool depends on certain keywords found in the
+                standard GTO test plan structure, so it is highly recommended that you create a project's test plan using the tool
+                before creating a project dashboard.
             </p>
-            <h2>Test Plan Structure</h2>
-            <p>This tool generates a test plan with the structure shown below. Any dashboard created
-                using this tool relies on a test plan with this structure.</p>
+            <h2>Customizing your Test Plan</h2>
+            <p>
+                If you need to customize your test plan for your project, include these keywords in your test suite names.<br>
+                ⓘ Test suites need keywords to appear on the dashboard.<br>
+                ⓘ Test runs within those suites don't need keywords to appear in the test run summary.
+            </p>
+            <table class="table-bordered table-keywords">
+                <thead>
+                    <tr>
+                        <th>Test Suite</th>
+                        <th>Keywords</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Main Test Suite Folders</td>
+                        <td>
+                            <ul>
+                                <li>"Early System Test"</li>
+                                <li>"System Test"</li>
+                                <li>"Customer Solution Test"</li>
+                                <li>"Final Product" <strong>OR</strong> "First Article Test"</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Customer Solution Test suite children</td>
+                        <td>
+                            <ul>
+                                <li>"Meter Farm"</li>
+                                <li>"Garden"</li>
+                                <li>"SVE"</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Child test suites with test runs</td>
+                        <td>
+                            <ul>
+                                <li>"Alpha"</li>
+                                <li>"Beta"</li>
+                                <li>"Sprint"</li>
+                                <li>"Run"</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>Full Waterfall Test Plan Structure</h2>
+            <p>
+                With all options selected, the tool generates a test plan with the structure shown below. Dashboards
+                created with this tool rely on this general test plan structure.
+            </p>
             <ul type="disc">
                 <li>Test Plan Name</li>
                 <ul type="disc">
                     <li>Early System Test</li>
                     <ul type="circle">
-                        <li>Alpha 1</li>
-                        <li>Alpha 2</li>
-                        <li>Alpha 3</li>
+                        <li>Alpha 1, Alpha 2, Alpha 3</li>
+                        <ul>
+                            <li>New Features</li>
+                            <li>Manual Regression</li>
+                            <li>Automatic Regression</li>
+                        </ul>
                         <li>Beta 1/Feature Complete</li>
+                        <ul>
+                            <li>New Features</li>
+                            <li>Manual Regression</li>
+                            <li>Automatic Regression</li>
+                        </ul>
                     </ul>
                     <li>System Test</li>
                     <ul type="circle">
-                        <li>Run 1</li>
-                        <li>Run 2</li>
-                        <li>Run 3</li>
+                        <li>Run 1, Run 2, Run 3</li>
+                        <ul>
+                            <li>New Features</li>
+                            <li>Manual Regression</li>
+                            <li>Automatic Regression</li>
+                        </ul>
                     </ul>
-                    <li>Customer Solution Test</li>
+                    <li>Customer Solution Test **</li>
                     <ul type="circle">
-                        <li>Run 1</li>
-                        <li>Run 2</li>
-                        <li>Run 3</li>
+                        <li>Meter Farm Run 1, Run 2, Run 3</li>
+                        <ul>
+                            <li>New Features</li>
+                            <li>Manual Regression</li>
+                            <li>Automatic Regression</li>
+                        </ul>
+                        <li>Garden Run 1, Run 2, Run 3</li>
+                        <ul>
+                            <li>New Features</li>
+                            <li>Manual Regression</li>
+                            <li>Automatic Regression</li>
+                        </ul>
+                        <li>SVE Run 1, Run 2, Run 3</li>
+                        <ul>
+                            <li>New Features</li>
+                            <li>Manual Regression</li>
+                            <li>Automatic Regression</li>
+                        </ul>
                     </ul>
-                    <li>First Article Test</li>
+                    <li>Final Product Test</li>
                     <ul type="circle">
-                        <li>Product - Run 1</li>
-                        <li>Product - Run 2</li>
-                        <li>Product - Run 3</li>
+                        <li>Device 1, Device 2</li>
+                        <ul>
+                            <li>E2E FAT Test Suites</li>
+                            <li>FW FAT Test Suites</li>
+                            <li>HW FAT Test Suites</li>
+                            <li>Product Secure</li>
+                        </ul>
                     </ul>
                 </ul>
-            </ul>
-            <p>Within each Alpha suite under Early System Test and within each Run suite under System Test,
-                the following folders will be generated:</p>
-            <ul type="circle">
-                <li>New Features</li>
-                <li>Manual Regression</li>
-                <li>Automatic Regression</li>
-            </ul>
-            <p>Within each Run suite in Customer Solution Test, the following folders will be generated:</p>
-            <ul type="circle">
-                <li>Meter Farm Run</li>
-                <li>Garden Run</li>
-                <li>SVE Run</li>
             </ul>
         </div>
     </div>

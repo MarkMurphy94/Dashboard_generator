@@ -61,6 +61,10 @@ standardRNDWitColorArray = [
         "backgroundColor": "#e60017"
     },
     {
+        "value": "Production",
+        "backgroundColor": "#e60017"
+    },
+    {
         "value": "4 - Low",
         "backgroundColor": "#339947"
     },
@@ -71,7 +75,27 @@ standardRNDWitColorArray = [
     {
         "value": "3 - Medium",
         "backgroundColor": "#3f9bd8"
-    }
+    },
+    {
+        "value": "4",
+        "backgroundColor": "#339947"
+    },
+    {
+        "value": "3",
+        "backgroundColor": "#3f9bd8"
+    },
+    {
+        "value": "2",
+        "backgroundColor": "#f58b1f"
+    },
+    {
+        "value": "1",
+        "backgroundColor": "#e60017"
+    },
+    {
+        "value": "(blank)",
+        "backgroundColor": "#cccccc"
+    },
 ]
 
 standardPieChartColorArray = [
@@ -263,9 +287,15 @@ def create_full_test_plan(test_plan, child_suites, user_name):
     # endregion
 
     # region Customer Solution
-    suite_name = "Customer Solution Test"
-    customer_suite = create_suite(suite_name, test_plan_id, suite_id)
-    create_customer_suite_runs(test_plan_id, customer_suite, child_suites)
+    # Don't create Customer Solution Test suite if no child suites are checked
+    any_customer_suites_checked = False
+    for x in range(len(CUSTOMER_SUITES)):
+        if child_suites[CUSTOMER_KEYS[x]]:
+            any_customer_suites_checked = True
+    if any_customer_suites_checked:
+        suite_name = "Customer Solution Test"
+        customer_suite = create_suite(suite_name, test_plan_id, suite_id)
+        create_customer_suite_runs(test_plan_id, customer_suite, child_suites)
     # endregion
 
     # region System Test
@@ -298,6 +328,7 @@ def create_iteration(test_plan):
     dash_response = response.json()
     print(response.status_code)
     if response.status_code == 400:
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("""
                                 Failed to create iteration.
                                 Do not include these characters in your test plan name: 
@@ -327,6 +358,7 @@ def create_test_plan(test_plan):
 
     # indicates that a test plan with test_plan name already exists
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("Test Plan with name " + test_plan
                                 + " already exists")
 
@@ -385,9 +417,11 @@ def create_suite(suite_name, test_plan_id, suite_id):
     suite_response = response.json()
 
     if response.status_code == 404:  # indicates that the test plan was not found
+        print(json.dumps(response.json()))
         raise TestPlanError(
             "Test Plan with Id " + str(test_plan_id) + " not found or no longer exists")
     if response.status_code != 200:  # indicates that a test plan with suite name already exists
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("Test Plan with name " + suite_name
                                 + " already exists")
 
@@ -533,8 +567,7 @@ def create_agile_config(test_plan, test_plan_id, sprints_suite):
 # region Create Full Dashboard
 
 
-def create_full_dash(folder, url, global_path, target_choice, target_project_name,
-                     test_choice, test_suite):
+def create_full_dash(folder, url, global_path, test_choice, test_suite, choices, organize_by):
     """
         Calls functions to complete the tasks below:
          - Verifies query folder does not exist
@@ -551,11 +584,10 @@ def create_full_dash(folder, url, global_path, target_choice, target_project_nam
     test_plan = return_test_plan_id(test_suite, test_choice)
     dash_id = create_dash(team_name, folder)
     query_folder = create_query_folder(folder)
-    populate_baseline_query_folder(query_folder, target_choice, global_path, target_project_name)
-    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path)
+    populate_baseline_query_folder(query_folder, global_path, choices)
+    populate_dash(team_name, url, test_plan, folder, query_folder, dash_id, global_path, organize_by)
 
-    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder,
-                                target_choice, global_path, target_project_name)
+    json_config = create_config(team_name, url, dash_id, test_plan, folder, query_folder, global_path, choices)
     write_config(json_config)
     return dash_id
 
@@ -574,6 +606,7 @@ def check_folder_exists(folder):
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     # indicates that query folder with folderName already exists
     if response.status_code == 200:
+        print(json.dumps(response.json()))
         raise FolderAlreadyExists("Query Folder with name " + folder + " already exists")
 
 
@@ -604,13 +637,14 @@ def create_dash(team_name, dash_name):
                              '/_apis/dashboard/dashboards?',
                              auth=HTTPBasicAuth(USER, TOKEN),
                              json=dash_board, params=version)
-    dash_response = response.json()
 
     # indicates that a dashboard with dashName already exists
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise DashAlreadyExists("Dashboard with name " + dash_name
                                 + " already exists")
 
+    dash_response = response.json()
     print(json.dumps(dash_response))
     print(dash_response["id"])
     return dash_response["id"]
@@ -632,165 +666,164 @@ def create_query_folder(folder):
 
     # indicates that query folder with folderName already exists
     if response.status_code != 201:
+        print(json.dumps(response.json()))
         raise FolderAlreadyExists('Query Folder with name "' + folder + '" already exists')
 
     query_response = response.json()
     return query_response['id']
 
 
-def populate_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
+def populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=True):
     """
-        Populates the given folder with the standard queries
+        Populates the given folder with the standard queries.
+
+        If first_time is set to False:
+         - Checks if standard queries exist
+         - Creates missing standard queries
+         - Updates existing standard queries
     """
-    json_obj = {"name": "Dev Bugs"}
+
+    # Target clause is dependent on User's GUI choice, can include up to 3 targeted projects/tags
+    target_clause = "("
+    count = 0
+    for target, next_ in zip(choices, choices[1:] + ["end"]):
+        if target["project"] != "":
+            count += 1
+            if target["choice"] == "0":
+                target_clause += "[Custom.TargetedProject] contains '{}'".format(str(target["project"]))
+                if count < 3 and next_["project"] != "":
+                    target_clause += " or "
+                else:
+                    target_clause += ") "
+            else:
+                target_clause += "[Custom.Tags] contains '{}'".format(str(target["project"]))
+                if count < 3 and next_["project"] != "":
+                    target_clause += " or "
+                else:
+                    target_clause += ") "
+
+    # region WIQL constants
     selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
                        " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
                        " [System.AssignedTo], [System.State], [System.CreatedDate]," \
                        " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
                        " [System.IterationPath], [Custom.TargetedProject], [System.Tags]"
     from_bugs = " from WorkItems where [System.WorkItemType] = 'Bug' "
+    # endregion
 
-    # Target clause is dependent on User's GUI choice
-    if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
+    # region WIQL statements
+    wiql_dev_bugs = selected_columns + from_bugs + \
+                    "and [System.State] in ('New', 'Active') " \
+                    "and " + target_clause + \
+                    "and [Custom.Monitoring] = False"
+    wiql_all_closed_this_week = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs + \
+                                "and " + target_clause + \
+                                "and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
+                                "and [System.State] = 'Closed' " \
+                                "order by [System.CreatedDate] desc"
+    wiql_all_created_this_week = selected_columns + from_bugs + \
+                                 "and " + target_clause + \
+                                 "and [System.CreatedDate] > @today - 7 " \
+                                 "order by [System.CreatedDate] desc"
+    wiql_monitored = selected_columns + from_bugs + \
+                     "and not [System.State] contains 'Closed' " \
+                     "and " + target_clause + \
+                     "and [Custom.Monitoring] = True " \
+                     "order by [System.CreatedDate] desc"
+    wiql_new_issues_last_24_hours = selected_columns + from_bugs + \
+                                    "and [System.State] <> 'Closed' " \
+                                    "and " + target_clause + \
+                                    "and [System.CreatedDate] >= @today - 1"
+    wiql_cannot_reproduce = selected_columns + from_bugs + \
+                            "and [System.State] <> 'Closed' " \
+                            "and " + target_clause + \
+                            "and [System.reason] = 'Cannot Reproduce' "
+    wiql_all_bugs = selected_columns + from_bugs + \
+                    "and not [System.State] contains 'Closed' " \
+                    "and " + target_clause + \
+                    "order by [System.CreatedDate] desc"
+    wiql_all_resolved_this_week = selected_columns + from_bugs + \
+                                  "and " + target_clause + \
+                                  "and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
+                                  "and [System.State] = 'Resolved' " \
+                                  "order by [System.CreatedDate] desc"
+    wiql_rtt = selected_columns + from_bugs + \
+               "and [System.State] = 'Resolved' " \
+               "and " + target_clause + \
+               "and [Custom.Monitoring] = False"
+    wiql_lifetime_bugs = selected_columns + from_bugs + \
+                         "and " + target_clause
+    wiql_failed_test = selected_columns + ", [System.AreaLevel2]" + from_bugs + \
+                       "and " + target_clause + \
+                       "and (ever [System.Reason] = 'Test Failed' " \
+                       "or ever [System.Reason] = 'Not fixed')"
+
+    # SQA Features statements
+    wiql_sqa_test_features = "select [System.Id], [System.WorkItemType], [System.Title], " \
+                             "[System.AssignedTo], [System.State], [System.Tags] " \
+                             "from WorkItems " \
+                             "where [System.WorkItemType] = 'Feature' " \
+                             "and [System.AreaPath] under 'GlobalReqs\\System Test' " \
+                             "and [System.IterationPath] under " + repr(global_reqs_path) + " "\
+                             "and [System.State] <> 'Removed' " \
+                             "order by [System.Id] "
+    wiql_sqa_test_features_without_test_cases = "select [System.Id], [System.WorkItemType], [System.Title], " \
+                                                "[System.AssignedTo], [System.State], [System.Tags] " \
+                                                "from WorkItemLinks " \
+                                                "where (Source.[System.WorkItemType] = 'Feature' " \
+                                                "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
+                                                "and Source.[System.IterationPath] under " + repr(global_reqs_path) + ") " \
+                                                "and (Target.[System.WorkItemType] = 'Test Case') " \
+                                                "and Source.[System.State] <> 'Removed' " \
+                                                "order by [System.Id] mode (DoesNotContain)"
+    # endregion
+
+    # region Populate Standard Query Objects
+    query_objects = [{"name": "Dev Bugs", "wiql": wiql_dev_bugs},
+                     {"name": "All closed this week", "wiql": wiql_all_closed_this_week},
+                     {"name": "All created this week", "wiql": wiql_all_created_this_week},
+                     {"name": "Monitored", "wiql": wiql_monitored},
+                     {"name": "New Issues last 24 hours", "wiql": wiql_new_issues_last_24_hours},
+                     {"name": "Cannot Reproduce", "wiql": wiql_cannot_reproduce},
+                     {"name": "All Bugs", "wiql": wiql_all_bugs},
+                     {"name": "All resolved this week", "wiql": wiql_all_resolved_this_week},
+                     {"name": "RTT", "wiql": wiql_rtt},
+                     {"name": "Lifetime Bugs", "wiql": wiql_lifetime_bugs},
+                     {"name": "Failed Test", "wiql": wiql_failed_test}]
+    # endregion
+
+    if not first_time:
+        query_folder_children = return_query_folder_children(query_folder)
     else:
-        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
+        query_folder_children = []
 
-    # Dev Bugs Query
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] in ('New', 'Active') and " + target_clause \
-           + " and [Custom.Monitoring] = False"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created Dev Bugs Query for: " + target_project_name)
+    for json_obj in query_objects:
+        if first_time or (json_obj["name"] not in query_folder_children):
+            create_query(json_obj, query_folder)
+            print("Created " + json_obj["name"])
+        else:
+            temp_wiql = json_obj["wiql"]
+            json_obj["wiql"] = {"wiql": temp_wiql}
+            update_query(json_obj["wiql"], query_folder, json_obj["name"])
+            print("Updated " + json_obj["name"])
 
-    # All closed this week Query
-    json_obj["name"] = "All closed this week"
-    wiql = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
-           + "and " + target_clause \
-           + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
-             "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created All closed this week Query for: " + target_project_name)
-
-    # All created this week Query
-    json_obj["name"] = "All created this week"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause \
-           + " and [System.CreatedDate] > @today - 7 " \
-             "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created All created this week Query for: " + target_project_name)
-
-    # Monitored Query
-    json_obj["name"] = "Monitored"
-    wiql = selected_columns + from_bugs \
-           + "and not [System.State] contains 'Closed' " \
-           "and " + target_clause + \
-           " and [Custom.Monitoring] = True " \
-           "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created Monitored Query for: " + target_project_name)
-
-    # New Issues last 24 hours Query
-    json_obj["name"] = "New Issues last 24 hours"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] <> 'Closed' " \
-           "and " + target_clause + \
-           " and [System.CreatedDate] >= @today - 1"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created New Issues last 24 hours Query for: " + target_project_name)
-
-    # Cannot Reproduce Query
-    json_obj["name"] = "Cannot Reproduce"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] <> 'Closed' " \
-           "and " + target_clause + \
-           " and [System.reason] = 'Cannot Reproduce' "
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created Cannot Reproduce Query for: " + target_project_name)
-
-    # All Bugs Query
-    json_obj["name"] = "All Bugs"
-    wiql = selected_columns + from_bugs \
-           + "and not [System.State] contains 'Closed' " \
-           "and " + target_clause + \
-           " order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created All Bugs Query for: " + target_project_name)
-
-    # All Resolved this week Query
-    json_obj["name"] = "All resolved this week"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause + \
-           " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
-           "and [System.State] = 'Resolved' " \
-           "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created All Resolved This Week Query for: " + target_project_name)
-
-    # RTT Query
-    json_obj["name"] = "RTT"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] = 'Resolved' and " + target_clause + \
-           " and [Custom.Monitoring] = False"
-    json_obj["wiql"] = wiql
-    create_query(json_obj, query_folder)
-    print("Created RTT Query for: " + target_project_name)
-
+    # SQA queries are dependent on global_reqs_path instead of first_time
     if global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
-        # SQA Test Features Query
-        json_obj["name"] = "SQA Test Features"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItems " \
-               "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-               "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-               "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                                   "order by [System.Id] "
-        json_obj["wiql"] = wiql
-        create_query(json_obj, query_folder)
-        print("Created SQA Test Features Query for: " + target_project_name)
-
-        # SQA Test Features without test cases
-        json_obj["name"] = "SQA Test Features without test cases"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItemLinks " \
-               "where (Source.[System.WorkItemType] = 'Feature' " \
-               "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-               "and Source.[System.IterationPath] under " \
-               + repr(global_reqs_path) + ") " \
-               "and (Target.[System.WorkItemType] = 'Test Case') " \
-               "and Source.[System.State] <> 'Removed' " \
-               "order by [System.Id] mode (DoesNotContain)"
-        json_obj["wiql"] = wiql
-        create_query(json_obj, query_folder)
-        print("Created SQA Test Features without test cases Query for: "
-              + target_project_name)
+        sqa_query_objects = [{"name": "SQA Test Features", "wiql": wiql_sqa_test_features},
+                             {"name": "SQA Test Features without test cases", "wiql": wiql_sqa_test_features_without_test_cases}]
+        for json_obj in sqa_query_objects:
+            if json_obj["name"] not in query_folder_children:
+                create_query(json_obj, query_folder)
+                print("Created " + json_obj["name"])
+            else:
+                temp_wiql = json_obj["wiql"]
+                json_obj["wiql"] = {"wiql": temp_wiql}
+                update_query(json_obj["wiql"], query_folder, json_obj["name"])
+                print("Updated " + json_obj["name"])
 
 
-def populate_dash(output_team, url, test_plan, program_name, query_folder,
-                  overview_id, global_reqs_path):
-    """
-        Populates a given dashboard with widgets based on the queries
-        in the query folder provided, and the test suites found in the given
-        test plan.
-    """
-
-    starting_column = 1
-    starting_row = 1
-
-    # adds 1 to plan id to get suite id
-    test_suite_id = str(int(test_plan) + 1)
-
+def first_2_rows(output_team, url, test_plan, program_name, query_folder,
+                 overview_id, global_reqs_path, test_suite_id, starting_column, starting_row, organize_by):
     # region First Widget Row
     url = url.strip()
     tree_link = "\n"
@@ -876,7 +909,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id("Dev Bugs", query_folder)
     history = "last12Weeks"
 
-    bug_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
+    bug_trend = return_chart(starting_column, starting_row, name, query_id, organize_by, history=history, direction="descending")
     create_widget(output_team, overview_id, bug_trend)
     # endregion
 
@@ -886,7 +919,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id("Dev Bugs", query_folder)
     chart_type = "ColumnChart"
 
-    bug_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
+    bug_severity = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type)
     create_widget(output_team, overview_id, bug_severity)
     # endregion
 
@@ -896,7 +929,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     query_id = return_query_id("RTT", query_folder)
     history = "last12Weeks"
 
-    rtt_trend = return_chart(starting_column, starting_row, name, query_id, history=history, direction="descending")
+    rtt_trend = return_chart(starting_column, starting_row, name, query_id, organize_by, history=history, direction="descending")
     create_widget(output_team, overview_id, rtt_trend)
     # endregion
 
@@ -907,7 +940,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     chart_type = "ColumnChart"
     # property_ = "value"
 
-    rtt_severity = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type)
+    rtt_severity = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type)
     create_widget(output_team, overview_id, rtt_severity)
     # endregion
 
@@ -918,7 +951,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     chart_type = "stackBarChart"
     series = "System.CreatedDate"
 
-    arrival_7_days = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
+    arrival_7_days = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, arrival_7_days)
     # endregion
 
@@ -929,7 +962,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     chart_type = "stackBarChart"
     series = "Microsoft.VSTS.Common.ResolvedDate"
 
-    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
+    sys_features = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, sys_features)
     # endregion
 
@@ -940,7 +973,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     chart_type = "stackBarChart"
     series = "Microsoft.VSTS.Common.ClosedDate"
 
-    sys_features = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, series=series)
+    sys_features = return_chart(starting_column, starting_row, name, query_id, organize_by, chart_type=chart_type, series=series)
     create_widget(output_team, overview_id, sys_features)
     # endregion
 
@@ -1017,15 +1050,62 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         create_widget(output_team, overview_id, custom_markdown)
         starting_column += 4
 
+    # region Reported In
+    name = "Reported In"
+    query_id = return_query_id("Lifetime Bugs", query_folder)
+    chart_type = "ColumnChart"
+    group = "Custom.ReportedIn"
+    _property = "value"
+    direction = "descending"
+
+    reported_in = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                               _property=_property, direction=direction)
+    create_widget(output_team, overview_id, reported_in)
+    starting_column += 2
+    # endregion
+
+    # region Failed Test by Area Path
+    name = "Failed Test by Area Path"
+    query_id = return_query_id("Failed Test", query_folder)
+    chart_type = "PieChart"
+    group = "System.AreaLevel2"
+    _property = "value"
+    direction = "descending"
+
+    failed_test_chart = return_chart(starting_column, starting_row, name, query_id, chart_type=chart_type, group=group,
+                                     _property=_property, direction=direction)
+    create_widget(output_team, overview_id, failed_test_chart)
+
+    starting_column += 2
+    # endregion
+
     # region Fill In with Blank Widgets
     while starting_column <= MAX_COLUMN:
         remainder = min(MAX_COLUMN - starting_column + 2, 10)
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
         starting_column += 2
     # endregion
-
-    starting_row += 2
     # endregion
+
+
+def populate_dash(output_team, url, test_plan, program_name, query_folder,
+                  overview_id, global_reqs_path, organize_by, ignore_first_row=False):
+    """
+        Populates a given dashboard with widgets based on the queries
+        in the query folder provided, and the test suites found in the given
+        test plan.
+    """
+
+    starting_column = 1
+    starting_row = 1
+
+    # adds 1 to plan id to get suite id
+    test_suite_id = str(int(test_plan) + 1)
+
+    if not ignore_first_row:
+        first_2_rows(output_team, url, test_plan, program_name, query_folder,
+                     overview_id, global_reqs_path, test_suite_id, starting_column, starting_row, organize_by)
+    starting_row += 4
 
     # region Sprint Row
 
@@ -1115,82 +1195,83 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         suite_list = return_suite_child_list(test_plan, early_system)
 
         # Creates a Early System Test row per Alpha found in Test Plan tree
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
-            # region Alpha Markdown
-            row_text = "#Early \n #System Test \n ###" + suite_name + "\n#------->"
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
+                # region Alpha Markdown
+                row_text = "#Early \n #System Test \n ###" + suite_name + "\n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region Test Case Readiness - Alpha
-            name = "Test Case Readiness " + suite_name
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region Test Case Readiness - Alpha
+                name = "Test Case Readiness " + suite_name
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Alpha Overall
-            name = suite_name + " - Overall"
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan, group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            # create widgets for children suites if found
-            child_list = return_suite_child_full(test_plan, suite_id)
-            for child in child_list:
-                if starting_column > MAX_COLUMN:
-                    break
-                else:
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Alpha - New Features
-                        name = suite_name + " - New Features"
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Alpha  - Manual Regression
-                        name = suite_name + "- Manual Regression"
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Alpha - Automated Regression
-                        name = suite_name + "- Automated Regression"
-                    else:
-                        name = child['name']
-
+                # region Alpha Overall
+                name = suite_name + " - Overall"
                 group = "Outcome"
                 test_results = True
-                test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
-                                                   group=group,
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan, group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
                 starting_column += 2
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
-            # endregion
+                # create widgets for children suites if found
+                child_list = return_suite_child_full(test_plan, suite_id)
+                for child in child_list:
+                    if starting_column > MAX_COLUMN:
+                        break
+                    else:
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Alpha - New Features
+                            name = suite_name + " - New Features"
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Alpha  - Manual Regression
+                            name = suite_name + "- Manual Regression"
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Alpha - Automated Regression
+                            name = suite_name + "- Automated Regression"
+                        else:
+                            name = child['name']
+
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
     # region System Test
@@ -1200,71 +1281,37 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
         suite_list = return_suite_child_list(test_plan, system_suite_id)
 
         # Creates row of System Test widgets for each Run found in System Test
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
 
-            # region System Test Markdown
-            row_text = "#System Test \n ###" + suite_name + "\n#------->"
+                # region System Test Markdown
+                row_text = "#System Test \n ###" + suite_name + "\n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region System Test - Test Case Readiness
-            name = "System Test - Test Case Readiness"
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region System Test - Test Case Readiness
+                name = "System Test - Test Case Readiness"
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Overall - System Test
-            name = "Overall - System Test"
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row,
-                                               name, suite_id, test_plan,
-                                               group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
-            for child in child_list:
-                if child_count >= 5:
-                    break
-                else:
-                    # region optional widgets
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Run - New Features
-                        name = "New Feature - System Test"
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Run  - Manual Regression
-                        name = "Manual Regression - System Test"
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Run - Automated Regression
-                        name = "Automated Regression - System Test"
-                    else:
-                        name = child['name']
-                child_count += 1
-
+                # region Overall - System Test
+                name = "Overall - System Test"
                 group = "Outcome"
                 test_results = True
                 test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
+                                                   name, suite_id, test_plan,
                                                    group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
@@ -1272,14 +1319,49 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
-            # endregion
+                child_list = return_suite_child_full(test_plan, suite_id)
+                child_count = 0
+                for child in child_list:
+                    if child_count >= 5:
+                        break
+                    else:
+                        # region optional widgets
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Run - New Features
+                            name = "New Feature - System Test"
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Run  - Manual Regression
+                            name = "Manual Regression - System Test"
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Run - Automated Regression
+                            name = "Automated Regression - System Test"
+                        else:
+                            name = child['name']
+                    child_count += 1
+
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
     # region Customer Solution
@@ -1289,86 +1371,87 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     if customer_solution != NOT_FOUND:
         suite_list = return_suite_child_list(test_plan, customer_solution)
         # Creates a row of Customer widgets per Run found in Customer Solution tree
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
 
-            # region Customer Solution Markdown
-            row_text = "#Customer Solution \n ###" + suite_name + " \n#------->"
+                # region Customer Solution Markdown
+                row_text = "#Customer Solution \n ###" + suite_name + " \n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region Customer Solution - Test Case Readiness
-            name = "Customer Solution - Test Case Readiness"
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region Customer Solution - Test Case Readiness
+                name = "Customer Solution - Test Case Readiness"
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Overall - Customer Solution
-            name = "Overall - Customer Solution"
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan, group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
-            for child in child_list:
-                if child_count >= 5:
-                    break
-                else:
-                    # region optional widgets
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Run - New Features
-                        name = "New Features - Customer Solution"
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Run  - Manual Regression
-                        name = "Manual Regression - Customer Solution"
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Run - Automated Regression
-                        name = "Automated Regression - Customer Solution"
-                    else:
-                        name = child['name']
-                child_count += 1
-
+                # region Overall - Customer Solution
+                name = "Overall - Customer Solution"
                 group = "Outcome"
                 test_results = True
-                test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
-                                                   group=group,
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan, group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
                 starting_column += 2
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
+                child_list = return_suite_child_full(test_plan, suite_id)
+                child_count = 0
+                for child in child_list:
+                    if child_count >= 5:
+                        break
+                    else:
+                        # region optional widgets
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Run - New Features
+                            name = "New Features - Customer Solution"
 
-            # endregion
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Run  - Manual Regression
+                            name = "Manual Regression - Customer Solution"
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Run - Automated Regression
+                            name = "Automated Regression - Customer Solution"
+                        else:
+                            name = child['name']
+                    child_count += 1
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
     # region First Article/Final Product
@@ -1382,90 +1465,90 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
     if product_suite != NOT_FOUND:
         suite_list = return_suite_child_list(test_plan, product_suite)
         # Creates a row of product suite widgets per Run found in product suite tree
-        for suite in suite_list:
-            suite_id = str(suite['id'])
-            suite_name = suite['name']
-            starting_column = 1
-            count = 0
+        if len(suite_list) > 0:
+            for suite in suite_list:
+                suite_id = str(suite['id'])
+                suite_name = suite['name']
+                starting_column = 1
+                count = 0
 
-            # region First Article/Final Product Markdown
-            row_text = "#" + suite_title + " Test\n ###" + suite_name + " \n#------->"
+                # region First Article/Final Product Markdown
+                row_text = "#" + suite_title + " Test\n ###" + suite_name + " \n#------->"
 
-            row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
-            create_widget(output_team, overview_id, row_markdown)
-            starting_column += 1
-            count += 1
-            # endregion
+                row_markdown = return_markdown(starting_column, starting_row, row_text, height=2)
+                create_widget(output_team, overview_id, row_markdown)
+                starting_column += 1
+                count += 1
+                # endregion
 
-            # region First Article/Final Product - Test Case Readiness
-            name = suite_name + " - Test Case Readiness"
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
+                # region First Article/Final Product - Test Case Readiness
+                name = suite_name + " - Test Case Readiness"
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan)
+                create_widget(output_team, overview_id, test_readiness)
+                starting_column += 2
+                count += 1
+                # endregion
 
-            # region Overall - First Article/Final Product
-            name = "Overall " + suite_name
-            group = "Outcome"
-            test_results = True
-            test_readiness = return_test_chart(starting_column, starting_row, name,
-                                               suite_id, test_plan, group=group,
-                                               test_results=test_results)
-            create_widget(output_team, overview_id, test_readiness)
-            starting_column += 2
-            count += 1
-            # endregion
-
-            child_list = return_suite_child_full(test_plan, suite_id)
-            child_count = 0
-            for child in child_list:
-                if child_count >= 5:
-                    break
-                else:
-                    # region optional widgets
-                    child_id = str(child['id'])
-                    if "New Feat" in child['name']:
-                        # region Run - New Features
-                        name = "New Features " + suite_name
-
-                        # endregion
-                    elif "Man" in child['name']:
-                        # region Run  - Manual Regression
-                        name = "Manual Regression - " + suite_name
-                        # endregion
-                    elif "Auto" in child['name']:
-                        # region Run - Automated Regression
-                        name = "Automated Regression - " + suite_name
-                    else:
-                        name = child['name']
-                    child_count += 1
-
+                # region Overall - First Article/Final Product
+                name = "Overall " + suite_name
                 group = "Outcome"
                 test_results = True
-                test_readiness = return_test_chart(starting_column, starting_row,
-                                                   name, child_id, test_plan,
-                                                   group=group,
+                test_readiness = return_test_chart(starting_column, starting_row, name,
+                                                   suite_id, test_plan, group=group,
                                                    test_results=test_results)
                 create_widget(output_team, overview_id, test_readiness)
                 starting_column += 2
                 count += 1
                 # endregion
 
-            # region Fill In with Blank Widgets
-            while starting_column <= MAX_COLUMN:
-                remainder = min(MAX_COLUMN - starting_column + 2, 10)
-                create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
-            # endregion
+                child_list = return_suite_child_full(test_plan, suite_id)
+                child_count = 0
+                for child in child_list:
+                    if child_count >= 5:
+                        break
+                    else:
+                        # region optional widgets
+                        child_id = str(child['id'])
+                        if "New Feat" in child['name']:
+                            # region Run - New Features
+                            name = "New Features " + suite_name
 
-            starting_row += 2  # each widget is of size 2 so we much increment by 2
+                            # endregion
+                        elif "Man" in child['name']:
+                            # region Run  - Manual Regression
+                            name = "Manual Regression - " + suite_name
+                            # endregion
+                        elif "Auto" in child['name']:
+                            # region Run - Automated Regression
+                            name = "Automated Regression - " + suite_name
+                        else:
+                            name = child['name']
+                        child_count += 1
+
+                    group = "Outcome"
+                    test_results = True
+                    test_readiness = return_test_chart(starting_column, starting_row,
+                                                       name, child_id, test_plan,
+                                                       group=group,
+                                                       test_results=test_results)
+                    create_widget(output_team, overview_id, test_readiness)
+                    starting_column += 2
+                    count += 1
+                    # endregion
+
+                # region Fill In with Blank Widgets
+                while starting_column <= MAX_COLUMN:
+                    remainder = min(MAX_COLUMN - starting_column + 2, 10)
+                    create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
+                    starting_column += 2
+                # endregion
+
+                starting_row += 2  # each widget is of size 2 so we much increment by 2
     # endregion
 
 
-def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
-                  targeted_project, global_path, short_name, executive=False):
+def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id, global_path, choices, executive=False):
     """
         Creates JSON object using string arguments unless otherwise specified:
             - team name             - targeted project name or tag flag (bool)
@@ -1477,6 +1560,14 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
     """
     now = datetime.datetime.now()
     date_string = now.strftime("%m/%d/%Y %H:%M:%S")
+
+    choice1 = choices[0]["choice"]
+    choice2 = choices[1]["choice"]
+    choice3 = choices[2]["choice"]
+    targeted_project1 = choices[0]["project"]
+    targeted_project2 = choices[1]["project"]
+    targeted_project3 = choices[2]["project"]
+
     json_config = {
         'teamName': team_name,
         'url': url,
@@ -1484,9 +1575,13 @@ def create_config(team_name, url, dash_id, test_plan, folder_name, folder_id,
         'testPlan': test_plan,
         'folderName': folder_name,
         'folderId': folder_id,
-        'targetedProject': targeted_project,
+        'choice1': choice1,
+        'choice2': choice2,
+        'choice3': choice3,
         'global_path': global_path,
-        'short_name': short_name,
+        'targeted_project1': targeted_project1,
+        'targeted_project2': targeted_project2,
+        'targeted_project3': targeted_project3,
         'version': VERSION,
         'lastUpdate': date_string,
         'executive': executive
@@ -1526,6 +1621,7 @@ def find_test_plan_id_by_name(test_plan, continuation_token=''):
         if test_plan in child["name"]:
             return str(child["id"])
     if continue_key not in response.headers._store:
+        print(json.dumps(response.json()))
         raise TestPlanError("Test Plan: " + test_plan + " not Found in Azure")
     return find_test_plan_id_by_name(test_plan, response.headers._store[continue_key][1])
 
@@ -1542,6 +1638,7 @@ def check_test_plan_id(test_plan):
                             + str(test_plan) + '?',
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise ApiTestIDNotFound("Test Plan ID was not Found in Azure DevOps")
 
 
@@ -1669,7 +1766,7 @@ def return_query_tile(column, row, name, query_name, query_id, color):
     return query_tile
 
 
-def return_chart(column, row, name, query_id, chart_type="StackAreaChart",
+def return_chart(column, row, name, query_id, organize_by="severity", chart_type="StackAreaChart",
                  aggregation="count", group="Microsoft.VSTS.Common.Severity",
                  _property="label", direction="ascending", series="",
                  history="", scope=""):
@@ -1678,6 +1775,13 @@ def return_chart(column, row, name, query_id, chart_type="StackAreaChart",
 
         :returns the json template for the chart
     """
+    if (row < 2) and (organize_by == "severity"):
+        option = "Microsoft.VSTS.Common.Severity"
+    elif (row < 2) and (organize_by == "priority"):
+        option = "Microsoft.VSTS.Common.Priority"
+    else:
+        option = group
+
     chart = return_widget_obj("Chart")
     chart["name"] = name
     chart["size"]["columnSpan"] = 2
@@ -1691,7 +1795,7 @@ def return_chart(column, row, name, query_id, chart_type="StackAreaChart",
     settings["transformOptions"]["filter"] = query_id
     settings["userColors"] = standardRNDWitColorArray
     settings["transformOptions"]["measure"]["aggregation"] = aggregation
-    settings["transformOptions"]["groupBy"] = group
+    settings["transformOptions"]["groupBy"] = option
     settings["transformOptions"]["orderBy"]["propertyName"] = _property
     settings["transformOptions"]["orderBy"]["direction"] = direction
     settings["transformOptions"]["series"] = series
@@ -1809,6 +1913,8 @@ def return_suite_child_list(test_plan, suite_id):
         Returns the given suite's children suites in a list if they contain
         one of the row trigger phrases ('Alpha', 'Beta', 'Run')
 
+        Returns an empty list if there are no children
+
         :return list of child suites
     """
     child_list = []
@@ -1823,11 +1929,13 @@ def return_suite_child_list(test_plan, suite_id):
                             auth=HTTPBasicAuth(USER, TOKEN), params=payload)
     query_response = response.json()
 
-    for child in query_response['children']:
-        if any(trigger in child['name'] for trigger in trigger_list):
-            child_list.append(child)
+    # Check the query_response for the 'children' attribute before iterating
+    if 'children' in query_response:
+        for child in query_response['children']:
+            if any(trigger.upper() in child['name'].upper() for trigger in trigger_list):
+                child_list.append(child)
+        child_list = sorted(child_list, key=lambda name: child['name'])
 
-    child_list = sorted(child_list, key=lambda name: child['name'])
     return child_list
 
 
@@ -2223,7 +2331,7 @@ def delete_widget(team_name, widget_id, dashboard_id):
     print(json.dumps(js))
 
 
-def clear_dash(team_name, dashboard_id):
+def clear_dash(team_name, dashboard_id, ignore_first_row=False):
     """
         Clears all widgets from a dashboard
     """
@@ -2233,12 +2341,19 @@ def clear_dash(team_name, dashboard_id):
                             + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=version)
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise DashDoesNotExists("Dashboard with the selected name does not exist")
 
     dash_response = response.json()
-    for widgets in dash_response["widgets"]:
-        print(widgets["id"])
-        delete_widget(team_name, widgets["id"], dashboard_id)
+    for widget in dash_response["widgets"]:
+        if ignore_first_row:
+            print("Ignoring first 2 widget rows")
+            if widget["position"]["row"] not in [1, 2, 3]:
+                print(widget["id"])
+                delete_widget(team_name, widget["id"], dashboard_id)
+        else:
+            print(widget["id"])
+            delete_widget(team_name, widget["id"], dashboard_id)
     print("Dashboard cleared")
 
 
@@ -2251,6 +2366,7 @@ def return_query_folder_children(folder):
                             + folder + '?', auth=HTTPBasicAuth(USER, TOKEN),
                             params=payload)
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         raise QueryFolderNotFound
     query_response = response.json()
     queries = []
@@ -2260,223 +2376,15 @@ def return_query_folder_children(folder):
     return queries
 
 
-def update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name):
-    """
-        Populates the given folder with the standard queries
-    """
-    json_obj = {"name": "Dev Bugs"}
-    selected_columns = "select [System.Id], [System.WorkItemType], [System.Title]," \
-                       " [Microsoft.VSTS.Common.Severity], [Microsoft.VSTS.Common.Priority]," \
-                       " [System.AssignedTo], [System.State], [System.CreatedDate]," \
-                       " [Microsoft.VSTS.Common.ResolvedDate], [System.AreaPath]," \
-                       " [System.IterationPath], [Custom.TargetedProject], [System.Tags]"
-    from_bugs = " from WorkItems where [System.WorkItemType] = 'Bug' "
-
-    # Target clause is dependent on User's GUI choice
-    if str(target_choice) == '0':
-        target_clause = "[Custom.TargetedProject] contains '{}'".format(target_project_name)
-    else:
-        target_clause = "[System.Tags] contains '{}'".format(target_project_name)
-
-    # Dev Bugs Query
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] in ('New', 'Active') and " + target_clause \
-           + " and [Custom.Monitoring] = False"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated Dev Bugs Query for: " + target_project_name)
-
-    # All closed this week Query
-    json_obj["name"] = "All closed this week"
-    wiql = selected_columns + ", [Microsoft.VSTS.Common.ClosedDate]" + from_bugs \
-           + "and " + target_clause \
-           + " and [Microsoft.VSTS.Common.ClosedDate] >= @today - 7 " \
-             "and [System.State] = 'Closed' order by [System.CreatedDate] desc"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated All closed this week Query for: " + target_project_name)
-
-    # All created this week Query
-    json_obj["name"] = "All created this week"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause \
-           + " and [System.CreatedDate] > @today - 7 " \
-             "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated All created this week Query for: " + target_project_name)
-
-    # Monitored Query
-    json_obj["name"] = "Monitored"
-    wiql = selected_columns + from_bugs \
-           + "and not [System.State] contains 'Closed' " \
-             "and " + target_clause + \
-           " and [Custom.Monitoring] = True " \
-           "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated All Monitored Query for: " + target_project_name)
-
-    # New Issues last 24 hours Query
-    json_obj["name"] = "New Issues last 24 hours"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] <> 'Closed' " \
-           "and " + target_clause + \
-           " and [System.CreatedDate] >= @today - 1"
-    if json_obj["name"] not in return_query_folder_children(query_folder):  # New query, will create if not in folder
-        json_obj["wiql"] = wiql
-        create_query(json_obj, query_folder)
-        print("Created New Issues last 24 hours Query for: " + target_project_name)
-    else:
-        json_obj["wiql"] = {"wiql": wiql}
-        update_query(json_obj["wiql"], query_folder, json_obj["name"])
-        print("Updated New Issues last 24 hours Query for: " + target_project_name)
-
-    # Cannot Reproduce Query
-    json_obj["name"] = "Cannot Reproduce"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] <> 'Closed' " \
-           "and " + target_clause + \
-           " and [System.Reason] = 'Cannot reproduce' "
-    if json_obj["name"] not in return_query_folder_children(query_folder):  # New query, will create if not in folder
-        json_obj["wiql"] = wiql
-        create_query(json_obj, query_folder)
-        print("Created Cannot Reproduce Query for: " + target_project_name)
-    else:
-        json_obj["wiql"] = {"wiql": wiql}
-        update_query(json_obj["wiql"], query_folder, json_obj["name"])
-        print("Updated Cannot Reproduce Query for: " + target_project_name)
-
-    # All Bugs Query
-    json_obj["name"] = "All Bugs"
-    wiql = selected_columns + from_bugs \
-           + "and not [System.State] contains 'Closed' " \
-             "and " + target_clause + \
-             " order by [System.CreatedDate] desc"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated All NOT Closed Query for: " + target_project_name)
-
-    # All Resolved this week Query
-    json_obj["name"] = "All resolved this week"
-    wiql = selected_columns + from_bugs \
-           + "and " + target_clause + \
-           " and [Microsoft.VSTS.Common.ResolvedDate] >= @today - 7 " \
-           "and [System.State] = 'Resolved' " \
-           "order by [System.CreatedDate] desc"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated All Resolved This Week Query for: " + target_project_name)
-
-    # RTT Query
-    json_obj["name"] = "RTT"
-    wiql = selected_columns + from_bugs \
-           + "and [System.State] = 'Resolved' and " + target_clause + \
-           " and [Custom.Monitoring] = False"
-    json_obj["wiql"] = {"wiql": wiql}
-    update_query(json_obj["wiql"], query_folder, json_obj["name"])
-    print("Updated RTT Query for: " + target_project_name)
-
-    if ("SQA Test Features" and "SQA Test Features without test cases" in return_query_folder_children(query_folder)) \
-            and (global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA"):
-        # SQA Test Features Query
-        json_obj["name"] = "SQA Test Features"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItems " \
-               "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-               "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-               "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                                   "order by [System.Id] "
-        json_obj["wiql"] = {"wiql": wiql}
-        update_query(json_obj["wiql"], query_folder, json_obj["name"])
-        print("Updated SQA Test Features Query for: " + target_project_name)
-
-        # SQA Test Features without test cases
-        json_obj["name"] = "SQA Test Features without test cases"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItemLinks " \
-               "where (Source.[System.WorkItemType] = 'Feature' " \
-               "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-               "and Source.[System.IterationPath] under " \
-               + repr(global_reqs_path) + ") " \
-                                          "and (Target.[System.WorkItemType] = 'Test Case') " \
-                                          "and Source.[System.State] <> 'Removed' " \
-                                          "order by [System.Id] mode (DoesNotContain)"
-        json_obj["wiql"] = {"wiql": wiql}
-        update_query(json_obj["wiql"], query_folder, json_obj["name"])
-        print("Updated SQA Test Features without test cases Query for: "
-              + target_project_name)
-    elif global_reqs_path.upper() != "N/A" and global_reqs_path.upper() != "NA":
-        # SQA Test Features Query
-        json_obj["name"] = "SQA Test Features"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItems " \
-               "where [System.WorkItemType] = 'Feature' and [System.AreaPath] " \
-               "under 'GlobalReqs\\System Test' and [System.IterationPath] " \
-               "under " + repr(global_reqs_path) + " and [System.State] <> 'Removed' " \
-                                                   "order by [System.Id] "
-        json_obj["wiql"] = wiql
-        create_query(json_obj, query_folder)
-        print("Created SQA Test Features Query for: " + target_project_name)
-
-        # SQA Test Features without test cases
-        json_obj["name"] = "SQA Test Features without test cases"
-        wiql = "select [System.Id], [System.WorkItemType], [System.Title], " \
-               "[System.AssignedTo], [System.State], [System.Tags] " \
-               "from WorkItemLinks " \
-               "where (Source.[System.WorkItemType] = 'Feature' " \
-               "and Source.[System.AreaPath] under 'GlobalReqs\\System Test' " \
-               "and Source.[System.IterationPath] under " \
-               + repr(global_reqs_path) + ") " \
-               "and (Target.[System.WorkItemType] = 'Test Case') " \
-               "and Source.[System.State] <> 'Removed' " \
-               "order by [System.Id] mode (DoesNotContain)"
-        json_obj["wiql"] = wiql
-        create_query(json_obj, query_folder)
-        print("Created SQA Test Features without test cases Query for: "
-              + target_project_name)
-
-
-def return_legacy_name(query_name):
-    """
-        Return the legacy name corresponding to the current widget
-
-    """
-    legacy = {
-        "All Bugs": "All NOT Closed",
-        "Dev Bugs": "New Bugs",
-        "Monitored": "All Monitored",
-        "All closed this week": "All closed this week",
-        "All created this week": "All created this week",
-        "All resolved this week": "All resolved this week"
-    }
-    return legacy.get(query_name, "LEGACY NAME NOT FOUND")
-
-
 def update_query(json_obj, query_folder, query_name):
     """
         Submits the query json object to ADS
 
-        If the dashboard uses the old query names, translate the query name to find the correct ID,
-        then submit the new query name to ADS.
+        This function should only be called if the query exists.
 
     """
     version = {'api-version': '6.0'}
-    print("-----------------------------")
-    if query_name not in return_query_folder_children(query_folder):  # for compatibility with legacy dashboards
-        query_id = return_query_id(return_legacy_name(query_name), query_folder)    # find the correct query id
-        rename_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
-                                   + query_id + '?',
-                                   auth=HTTPBasicAuth(USER, TOKEN), json={"name": query_name},
-                                   params=version)
-        if rename_response.status_code != 200:
-            print(rename_response.status_code)
-            raise QueryUpdateError("Error renaming query")
-    else:
-        query_id = return_query_id(query_name, query_folder)
+    query_id = return_query_id(query_name, query_folder)
 
     wiql_response = requests.patch(URL_HEADER + PROJECT + '/_apis/wit/queries/'
                               + query_id + '?',
@@ -2488,7 +2396,7 @@ def update_query(json_obj, query_folder, query_name):
     print("-----------------------------")
 
 
-def update_dash(file):
+def update_dash(file, choices, organize_by, ignore_first_row):
     """
         Updates a dashboard based on the given dashboard config file
     """
@@ -2501,15 +2409,15 @@ def update_dash(file):
         url = config_data['url']
         dash_id = config_data['dashId']
         test_plan = config_data['testPlan']
-        target_choice = config_data['targetedProject']
         global_reqs_path = config_data['global_path']
-        target_project_name = config_data['short_name']
         folder_name = config_data['folderName']
         query_folder = config_data['folderId']
 
-    update_baseline_query_folder(query_folder, target_choice, global_reqs_path, target_project_name)
-    clear_dash(team_name, dash_id)
-    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path)
+    if not ignore_first_row:
+        populate_baseline_query_folder(query_folder, global_reqs_path, choices, first_time=False)
+
+    clear_dash(team_name, dash_id, ignore_first_row)
+    populate_dash(team_name, url, test_plan, folder_name, query_folder, dash_id, global_reqs_path, organize_by, ignore_first_row)
 
     print("Dashboard Updated")
 
@@ -2617,7 +2525,6 @@ def update_executive(check_list):
     for dash in dash_data:  # creates a row for each valid dashboard
         team_name = dash['teamName']
         dash_id = dash['dashId']
-        test_plan = dash['testPlan']
         dash_name = dash['folderName']
         query_folder = dash['folderId']
         executive = dash['executive']
@@ -2625,8 +2532,7 @@ def update_executive(check_list):
         if executive and dashboard_exists(team_name, dash_id):
             print("Adding executive row for " + dash_name)
             # check if this dashboard's test plan is an agile plan
-            is_agile_plan = test_plan in agile_plan_ids
-            add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row)
+            add_executive_row(dash_name, dash_id, query_folder, row)
 
             row += 2
 
@@ -2649,7 +2555,7 @@ def update_executive_config(check_list):
             json.dump(config_data, outfile)
 
 
-def add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row):
+def add_executive_row(dash_name, dash_id, query_folder, row):
     """
         Adds the row to the executive dashboard
     """
@@ -2661,46 +2567,6 @@ def add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan
     create_widget(GTO, EXECUTIVE_ID, main_markdown)
 
     add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
-    add_test_plan_summary(dash_name, test_plan, is_agile_plan, row)
-
-
-def add_test_plan_summary(dash_name, test_plan, is_agile_plan, row):
-    """
-        Adds the test plan summary chart to a dashboard
-    """
-    # region Test Plan Summary
-    name = dash_name + " - Summary"
-    # top level suite ID = test plan ID + 1
-    suite_id = str(int(test_plan) + 1)
-
-    # if this project has an agile test plan, only summarize the Sprints suite children.
-    if is_agile_plan:
-        # API call to retrieve test plan tree
-        api_params = {'api-version': '6.0-preview.1',
-                    'asTreeView': True}
-        response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
-                                + test_plan + '/suites?',
-                                auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
-        if response.status_code != 200:
-            raise TestPlanNotFound
-
-        # test plan tree contains array "value"
-        # value[0] contains array "children", which contains each child suite in the test plan
-        test_plan_tree = response.json()["value"]
-        for child_suite in test_plan_tree[0]["children"]:
-            if "Sprints" in child_suite["name"]:
-                suite_id = str(child_suite["id"])
-                print("Agile plan detected. Test plan summary will reference 'Sprints' suite")
-                break
-
-    print("Generating test plan summary for suite ID: " + suite_id)
-    group = "Outcome"
-    test_results = True
-    test_readiness = return_test_chart(4, row, name,
-                                       suite_id, test_plan, group=group,
-                                       test_results=test_results)
-    create_widget(GTO, EXECUTIVE_ID, test_readiness)
-    # endregion
 
 
 def add_four_square(query_folder, output_team, overview_id, row):
@@ -2763,6 +2629,7 @@ def dashboard_exists(output_team, overview_id):
     print("Object Returned:" + str(response.status_code))
 
     if response.status_code != 200:
+        print(json.dumps(response.json()))
         return False
 
     return True

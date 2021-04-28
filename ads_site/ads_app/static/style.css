@@ -38,6 +38,18 @@ body {
   cursor: pointer;
 }
 
+.button.row_button {
+  margin-top: 10px;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  border: 2px solid #333;
+  color: black;
+  padding: 3px 6px;
+  text-align: center;
+  font-size: 8px;
+  cursor: pointer;
+}
+
 .sprint_button {
   margin-top: 10px;
   background-color: #f1f1f1;
@@ -475,6 +487,16 @@ table {
 .table td, .table th {
     padding: .75rem;
     vertical-align: top;
+}
+
+/* Special formatting for keyword table */
+.table-keywords td, .table-keywords th {
+    padding: .75rem;
+    vertical-align: top;
+    position: static;
+}
+.table-keywords ul {
+    margin: 0;
 }
 
 /* Colors every second row to light grey */

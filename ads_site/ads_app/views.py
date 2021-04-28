@@ -29,6 +29,7 @@ def write_to_log(request, action, item):
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
 
+
 def write_dashboard_changes_to_log(old_config, new_config):
     """
         Compares two configs in JSON format and writes the changes to the log file set by LOG_PATH.
@@ -36,16 +37,20 @@ def write_dashboard_changes_to_log(old_config, new_config):
         - teamName, version, lastUpdate, executive
     """
     changes_made = False
-    config_keys = ['url', 'dashId', 'testPlan', 'folderName', 'folderId', 'targetedProject',
-                   'global_path', 'short_name']
+    config_keys = ['url', 'dashId', 'testPlan', 'folderName', 'folderId', 'choice1', 'choice2', 'choice3',
+                   'global_path', 'targeted_project1', 'targeted_project2', 'targeted_project3']
 
     with open(models.LOG_PATH, 'a') as log:
         for key in config_keys:
-            if old_config[key] != new_config[key]:
+            if key not in old_config:
+                log.write("                    | - " + key + ": --> " + new_config[key] + "\n")
+                changes_made = True
+            elif old_config[key] != new_config[key]:
                 log.write("                    | - " + key + ": " + old_config[key] + " --> " + new_config[key] + "\n")
                 changes_made = True
         if not changes_made:
             log.write("                    | No changes made\n")
+
 
 @receiver(user_login_failed)
 def attempted_login(sender, credentials, **kwargs):
@@ -132,16 +137,27 @@ def create_test(request):
     return render(request, 'ads_app/done.html', context)
 
 
+def radio(request, name):
+    option = [(request.POST.get(name))]
+    return str(option[0])
+
+
 def create_dash(request):
     context = {}
     # Setting dictionary key values
     folder_key = 'folder_name'
     url_key = 'url'
     global_key = 'global_path'
-    target_key = 'target_choice'
-    name_key = 'short_name'
+    target_key1 = 'target_choice1'
+    target_key2 = 'target_choice2'
+    target_key3 = 'target_choice3'
+    name_key1 = 'target_name1'
+    name_key2 = 'target_name2'
+    name_key3 = 'target_name3'
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
+
+    organize_by = radio(request, "severity-priority")
 
     action = "created the dashboard"
 
@@ -153,8 +169,12 @@ def create_dash(request):
             folder_name = form.cleaned_data[folder_key]
             url = form.cleaned_data[url_key]
             global_path = form.cleaned_data[global_key]
-            target_choice = form.cleaned_data[target_key]
-            target_project_name = form.cleaned_data[name_key]
+            target_choice1 = form.cleaned_data[target_key1]
+            target_choice2 = form.cleaned_data[target_key2]
+            target_choice3 = form.cleaned_data[target_key3]
+            target_project_name1 = form.cleaned_data[name_key1]
+            target_project_name2 = form.cleaned_data[name_key2]
+            target_project_name3 = form.cleaned_data[name_key3]
             test_choice = form.cleaned_data[choice_key]
             test_plan_name = form.cleaned_data[test_plan_key]
 
@@ -162,14 +182,21 @@ def create_dash(request):
             context[folder_key] = folder_name
             context[url_key] = url
             context[global_key] = global_path
-            context[target_key] = target_choice
-            context[name_key] = target_project_name
+            context[target_key1] = target_choice1
+            context[target_key2] = target_choice2
+            context[target_key3] = target_choice3
+            context[name_key1] = target_project_name1
+            context[name_key2] = target_project_name2
+            context[name_key3] = target_project_name3
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name
 
+            choices = [{"choice": target_choice1, "project": target_project_name1},
+                       {"choice": target_choice2, "project": target_project_name2},
+                       {"choice": target_choice3, "project": target_project_name3}]
+
             try:
-                dash_id = models.create_full_dash(folder_name, url, global_path, target_choice,
-                                                  target_project_name, test_choice, test_plan_name)
+                dash_id = models.create_full_dash(folder_name, url, global_path, test_choice, test_plan_name, choices, organize_by)
                 context['dash_id'] = dash_id
                 write_to_log(request, action, folder_name)
                 raise models.DashboardComplete(dash_id)
@@ -190,7 +217,7 @@ def create_dash(request):
                         error_type = "The URL to MRS tree"
                     elif str(item.name) == global_key:
                         error_type = "Global Reqs iteration path"
-                    elif str(item.name) == name_key:
+                    elif str(item.name) == name_key1:
                         error_type = "The Test Project "
                     elif str(item.name) == test_plan_key:
                         error_type = "The Test plan name "
@@ -227,13 +254,19 @@ def submit_update(request):
     folder_key = 'folder_name'
     url_key = 'url'
     global_key = 'global_path'
-    target_key = 'target_choice'
-    name_key = 'short_name'
+    target_key1 = 'target_choice1'
+    target_key2 = 'target_choice2'
+    target_key3 = 'target_choice3'
+    name_key1 = 'target_name1'
+    name_key2 = 'target_name2'
+    name_key3 = 'target_name3'
     choice_key = 'test_choice'
     test_plan_key = 'test_plan_name'
 
     team_name = "GTO"
     action = "updated the dashboard"
+    ignore_first_row = checkbox(request, "ignore_first_row")
+    organize_by = radio(request, "severity-priority")
 
     if request.method == 'POST':  # if the request from the HTML is a post
         form = CreateDash(request.POST)
@@ -244,8 +277,12 @@ def submit_update(request):
             folder_name = form.cleaned_data[folder_key]
             url = form.cleaned_data[url_key]
             global_path = form.cleaned_data[global_key]
-            target_choice = form.cleaned_data[target_key]
-            target_project_name = form.cleaned_data[name_key]
+            target_choice1 = form.cleaned_data[target_key1]
+            target_choice2 = form.cleaned_data[target_key2]
+            target_choice3 = form.cleaned_data[target_key3]
+            target_project_name1 = form.cleaned_data[name_key1]
+            target_project_name2 = form.cleaned_data[name_key2]
+            target_project_name3 = form.cleaned_data[name_key3]
             test_choice = form.cleaned_data[choice_key]
             test_plan_name_or_id = form.cleaned_data[test_plan_key]
 
@@ -253,10 +290,18 @@ def submit_update(request):
             context[folder_key] = folder_name
             context[url_key] = url
             context[global_key] = global_path
-            context[target_key] = target_choice
-            context[name_key] = target_project_name
+            context[target_key1] = target_choice1
+            context[target_key2] = target_choice2
+            context[target_key3] = target_choice3
+            context[name_key1] = target_project_name1
+            context[name_key2] = target_project_name2
+            context[name_key3] = target_project_name3
             context[choice_key] = test_choice
             context[test_plan_key] = test_plan_name_or_id
+
+            choices = [{"choice": target_choice1, "project": target_project_name1},
+                       {"choice": target_choice2, "project": target_project_name2},
+                       {"choice": target_choice3, "project": target_project_name3}]
 
             try:
                 old_config = models.get_selected_config(folder_name)[0]
@@ -265,9 +310,9 @@ def submit_update(request):
                 test_plan_id = models.return_test_plan_id(test_plan_name_or_id, test_choice)
 
                 new_config = models.create_config(team_name, url, dash_id, test_plan_id, folder_name, folder_id,
-                                                  target_choice, global_path, target_project_name, old_config["executive"])
+                                                  global_path, choices, old_config["executive"])
                 models.write_config(new_config)
-                models.update_dash(folder_name)
+                models.update_dash(folder_name, choices, organize_by, ignore_first_row)
                 context["dash_id"] = dash_id
                 write_to_log(request, action, folder_name)
                 write_dashboard_changes_to_log(old_config, new_config)
@@ -289,7 +334,7 @@ def submit_update(request):
                         error_type = "The URL to MRS tree"
                     elif str(item.name) == global_key:
                         error_type = "Global Reqs iteration path"
-                    elif str(item.name) == name_key:
+                    elif str(item.name) == name_key1:
                         error_type = "The Test Project "
                     elif str(item.name) == test_plan_key:
                         error_type = "The Test plan name "

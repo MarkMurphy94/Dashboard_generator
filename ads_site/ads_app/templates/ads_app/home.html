@@ -10,6 +10,11 @@
             $("a#home").addClass('active');
         });
 
+        $(document).on("click","input[name=severity-priority]:radio",function(){
+            $("input:radio[name=severity-priority]:checked");
+            $("input:radio[name=severity-priority]:not(:checked)");
+        });
+
         $(function() {
             $("#create_dash").submit(function(event) {
                 // Stop form from submitting normally
@@ -29,6 +34,49 @@
                 document.forms['create_dash'].submit()
             });
         });
+
+        function enableButton(text_id) {
+            if(document.getElementById(text_id).value == "") {
+                document.getElementById('addRowBtn').disabled = true;
+            } else {
+                document.getElementById('addRowBtn').disabled = false;
+            }
+        }
+
+        function addRow() {
+            var targetRow2 = document.getElementById("targetRow2")
+            if (targetRow2.hidden) {
+                targetRow2.hidden = false;
+                document.getElementById("addRowBtn").setAttribute("disabled", "true");
+            }
+            else {
+                var targetRow3 = document.getElementById("targetRow3")
+                if (targetRow3.hidden) {
+                    targetRow3.hidden = false;
+                    document.getElementById("target_name2").required = true;
+                    document.getElementById("addRowBtn").setAttribute("disabled", "true");
+                }
+            }
+            document.getElementById("removeRowBtn").removeAttribute("disabled");
+        }
+
+        function removeRow() {
+            var targetRow3 = document.getElementById("targetRow3")
+            if (!targetRow3.hidden) {
+                targetRow3.hidden = true;
+                document.getElementById("target_name3").value = "";
+            }
+            else {
+                var targetRow2 = document.getElementById("targetRow2")
+                if (!targetRow2.hidden) {
+                    targetRow2.hidden = true;
+                    document.getElementById("removeRowBtn").setAttribute("disabled", "true");
+                    document.getElementById("target_name2").value = "";
+                    document.getElementById("target_name2").required = false;
+                }
+            }
+            document.getElementById("addRowBtn").removeAttribute("disabled");
+        }
 
     </script>
 
@@ -107,25 +155,71 @@
                     <td><input type="text" name="global_path" required="" id="global_path" pattern="[^$?:#%|+]{1,255}" maxlength="255" title = "Max 255 characters, cannot contain: $?:#%|+"></td>
                 {% endif %}
             </tr>
-            <tr>
-                <td><label for="short_name">Enter the Tag or the Targeted Project: *</label></td>
-                {% if target_choice %}
+            <tr><td><label>Enter the Tag or the Targeted Project(s):</label></td></tr>
+            <tr><td><label for="target_name1">Targeted Project 1 (required):</label></td>
+                {% if target_choice1 %}
                     {% if target_choice == '0' %}
-                        <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
-                        <td><input type="radio" name="target_choice" value="1"> Tag</td>
+                        <td><input type="radio" name="target_choice1" value="0" checked> Targeted Project</td>
+                        <td><input type="radio" name="target_choice1" value="1"> Tag</td>
                     {% else %}
-                        <td><input type="radio" name="target_choice" value="0" > Targeted Project</td>
-                        <td><input type="radio" name="target_choice" value="1" checked> Tag</td>
+                        <td><input type="radio" name="target_choice1" value="0" > Targeted Project</td>
+                        <td><input type="radio" name="target_choice1" value="1" checked> Tag</td>
                     {% endif %}
                 {% else %}
-                    <td><input type="radio" name="target_choice" value="0" checked> Targeted Project</td>
-                    <td><input type="radio" name="target_choice" value="1"> Tag</td>
+                    <td><input type="radio" name="target_choice1" value="0" checked> Targeted Project</td>
+                    <td><input type="radio" name="target_choice1" value="1"> Tag</td>
                 {% endif %}
-                {% if short_name %}
-                    <td><input type="text" name="short_name" value="{{ short_name }}" required="" id="short_name" maxlength="250"></td>
+                {% if target_name1 %}
+                    <td><input type="text" name="target_name1" onkeyup="enableButton('target_name1')" value="{{ target_name1 }}" required="" id="target_name1" maxlength="250"></td>
                 {% else %}
-                    <td><input type="text" name="short_name" required="" id="short_name" maxlength="250"></td>
+                    <td><input type="text" name="target_name1" onkeyup="enableButton('target_name1')" required="" id="target_name1" maxlength="250"></td>
                 {% endif %}
+            </tr>
+            <tr id="targetRow2" hidden>
+                <td><label for="target_name2">Targeted Project 2 (optional):</label></td>
+                {% if target_choice2 %}
+                    {% if target_choice == '0' %}
+                        <td><input type="radio" name="target_choice2" value="0" checked> Targeted Project</td>
+                        <td><input type="radio" name="target_choice2" value="1"> Tag</td>
+                    {% else %}
+                        <td><input type="radio" name="target_choice2" value="0" > Targeted Project</td>
+                        <td><input type="radio" name="target_choice2" value="1" checked> Tag</td>
+                    {% endif %}
+                {% else %}
+                    <td><input type="radio" name="target_choice2" value="0" checked> Targeted Project</td>
+                    <td><input type="radio" name="target_choice2" value="1"> Tag</td>
+                {% endif %}
+                {% if target_name2 %}
+                    <td><input type="text" name="target_name2" onkeyup="enableButton('target_name2')" value="{{ target_name2 }}" id="target_name2" maxlength="250"></td>
+                {% else %}
+                    <td><input type="text" name="target_name2" onkeyup="enableButton('target_name2')" id="target_name2" maxlength="250"></td>
+                {% endif %}
+            </tr>
+            <tr id="targetRow3" hidden>
+                <td><label for="target_name3">Targeted Project 3 (optional):</label></td>
+                {% if target_choice3 %}
+                    {% if target_choice == '0' %}
+                        <td><input type="radio" name="target_choice3" value="0" checked> Targeted Project</td>
+                        <td><input type="radio" name="target_choice3" value="1"> Tag</td>
+                    {% else %}
+                        <td><input type="radio" name="target_choice3" value="0" > Targeted Project</td>
+                        <td><input type="radio" name="target_choice3" value="1" checked> Tag</td>
+                    {% endif %}
+                {% else %}
+                    <td><input type="radio" name="target_choice3" value="0" checked> Targeted Project</td>
+                    <td><input type="radio" name="target_choice3" value="1"> Tag</td>
+                {% endif %}
+                {% if target_name3 %}
+                    <td><input type="text" name="target_name3" onkeyup="enableButton('target_name3')" value="{{ target_name3 }}" id="target_name3" maxlength="250"></td>
+                {% else %}
+                    <td><input type="text" name="target_name3" onkeyup="enableButton('target_name3')" id="target_name3" maxlength="250"></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>
+                    <button id="removeRowBtn" type="button" onclick="removeRow()" class="button row_button" disabled>➖</button>
+                    <button id="addRowBtn" type="button" onclick="addRow()" class="button row_button" disabled>➕</button>
+                </td>
             </tr>
             <tr>
                 <td><label for="test_plan_name">Please enter the Test Suite ID or Name: *</label></td>
@@ -147,6 +241,11 @@
                 {% else %}
                     <td><input type="text" name="test_plan_name" required="" id="test_plan_name" maxlength="250"></td>
                 {% endif %}
+            </tr>
+            <tr>
+                <td><label>Organize graph widgets by Severity or Priority</label></td>
+                <td><input type="radio" name="severity-priority" value="severity" checked> Severity</td>
+                <td><input type="radio" name="severity-priority" value="priority"> Priority</td>
             </tr>
         </table>
         <p><label>* Indicates field is required</label> </p>
