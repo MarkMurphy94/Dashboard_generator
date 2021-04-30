@@ -75,7 +75,27 @@ standardRNDWitColorArray = [
     {
         "value": "3 - Medium",
         "backgroundColor": "#3f9bd8"
-    }
+    },
+    {
+        "value": "4",
+        "backgroundColor": "#339947"
+    },
+    {
+        "value": "3",
+        "backgroundColor": "#3f9bd8"
+    },
+    {
+        "value": "2",
+        "backgroundColor": "#f58b1f"
+    },
+    {
+        "value": "1",
+        "backgroundColor": "#e60017"
+    },
+    {
+        "value": "(blank)",
+        "backgroundColor": "#cccccc"
+    },
 ]
 
 standardPieChartColorArray = [
@@ -2505,7 +2525,6 @@ def update_executive(check_list):
     for dash in dash_data:  # creates a row for each valid dashboard
         team_name = dash['teamName']
         dash_id = dash['dashId']
-        test_plan = dash['testPlan']
         dash_name = dash['folderName']
         query_folder = dash['folderId']
         executive = dash['executive']
@@ -2513,8 +2532,7 @@ def update_executive(check_list):
         if executive and dashboard_exists(team_name, dash_id):
             print("Adding executive row for " + dash_name)
             # check if this dashboard's test plan is an agile plan
-            is_agile_plan = test_plan in agile_plan_ids
-            add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row)
+            add_executive_row(dash_name, dash_id, query_folder, row)
 
             row += 2
 
@@ -2537,7 +2555,7 @@ def update_executive_config(check_list):
             json.dump(config_data, outfile)
 
 
-def add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan, row):
+def add_executive_row(dash_name, dash_id, query_folder, row):
     """
         Adds the row to the executive dashboard
     """
@@ -2549,47 +2567,6 @@ def add_executive_row(dash_name, dash_id, test_plan, query_folder, is_agile_plan
     create_widget(GTO, EXECUTIVE_ID, main_markdown)
 
     add_four_square(query_folder, GTO, EXECUTIVE_ID, row)
-    add_test_plan_summary(dash_name, test_plan, is_agile_plan, row)
-
-
-def add_test_plan_summary(dash_name, test_plan, is_agile_plan, row):
-    """
-        Adds the test plan summary chart to a dashboard
-    """
-    # region Test Plan Summary
-    name = dash_name + " - Summary"
-    # top level suite ID = test plan ID + 1
-    suite_id = str(int(test_plan) + 1)
-
-    # if this project has an agile test plan, only summarize the Sprints suite children.
-    if is_agile_plan:
-        # API call to retrieve test plan tree
-        api_params = {'api-version': '6.0-preview.1',
-                    'asTreeView': True}
-        response = requests.get(URL_HEADER + PROJECT + '/_apis/testplan/Plans/'
-                                + test_plan + '/suites?',
-                                auth=HTTPBasicAuth(USER, TOKEN), params=api_params)
-        if response.status_code != 200:
-            print(json.dumps(response.json()))
-            raise TestPlanNotFound
-
-        # test plan tree contains array "value"
-        # value[0] contains array "children", which contains each child suite in the test plan
-        test_plan_tree = response.json()["value"]
-        for child_suite in test_plan_tree[0]["children"]:
-            if "Sprints" in child_suite["name"]:
-                suite_id = str(child_suite["id"])
-                print("Agile plan detected. Test plan summary will reference 'Sprints' suite")
-                break
-
-    print("Generating test plan summary for suite ID: " + suite_id)
-    group = "Outcome"
-    test_results = True
-    test_readiness = return_test_chart(4, row, name,
-                                       suite_id, test_plan, group=group,
-                                       test_results=test_results)
-    create_widget(GTO, EXECUTIVE_ID, test_readiness)
-    # endregion
 
 
 def add_four_square(query_folder, output_team, overview_id, row):
