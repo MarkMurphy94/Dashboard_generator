@@ -304,7 +304,7 @@ def submit_update(request):
                        {"choice": target_choice3, "project": target_project_name3}]
 
             try:
-                if ignore_first_row:  # if first row is ignored, update will get values from the config file
+                if ignore_first_row:  # if first rows are ignored, update will get existing values from the config file
                     config_file = models.get_selected_config(folder_name)[0]
                     url = config_file["url"]
                     global_path = config_file["global_path"]
