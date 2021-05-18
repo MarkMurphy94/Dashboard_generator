@@ -1844,7 +1844,6 @@ def return_blank_square(column, row, column_span, name=" "):
     blank_square["position"]["column"] = column
     blank_square["position"]["row"] = row
 
-    print("-----------------------blank square---------------------------")
     return blank_square
 
 
