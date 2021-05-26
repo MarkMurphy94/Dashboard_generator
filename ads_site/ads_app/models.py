@@ -983,7 +983,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     while starting_column <= MAX_COLUMN:
         remainder = min(MAX_COLUMN - starting_column + 2, 10)  # returns the minimum value in the given range
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-        starting_column += 2
+        starting_column += remainder
     # endregion
 
     starting_row += 2
@@ -1083,7 +1083,7 @@ def first_2_rows(output_team, url, test_plan, program_name, query_folder,
     while starting_column <= MAX_COLUMN:
         remainder = min(MAX_COLUMN - starting_column + 2, 10)
         create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-        starting_column += 2
+        starting_column += remainder
     # endregion
     # endregion
 
@@ -1179,7 +1179,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
             while starting_column <= MAX_COLUMN:
                 remainder = min(MAX_COLUMN - starting_column + 2, 10)
                 create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                starting_column += 2
+                starting_column += remainder
             # endregion
 
             starting_row += 2  # each widget is of size 2 so we much increment by 2
@@ -1268,7 +1268,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 while starting_column <= MAX_COLUMN:
                     remainder = min(MAX_COLUMN - starting_column + 2, 10)
                     create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                    starting_column += 2
+                    starting_column += remainder
                 # endregion
 
                 starting_row += 2  # each widget is of size 2 so we much increment by 2
@@ -1358,7 +1358,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 while starting_column <= MAX_COLUMN:
                     remainder = min(MAX_COLUMN - starting_column + 2, 10)
                     create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                    starting_column += 2
+                    starting_column += remainder
                 # endregion
 
                 starting_row += 2  # each widget is of size 2 so we much increment by 2
@@ -1447,7 +1447,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 while starting_column <= MAX_COLUMN:
                     remainder = min(MAX_COLUMN - starting_column + 2, 10)
                     create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                    starting_column += 2
+                    starting_column += remainder
 
                 # endregion
 
@@ -1541,7 +1541,7 @@ def populate_dash(output_team, url, test_plan, program_name, query_folder,
                 while starting_column <= MAX_COLUMN:
                     remainder = min(MAX_COLUMN - starting_column + 2, 10)
                     create_widget(output_team, overview_id, return_blank_square(starting_column, starting_row, remainder))
-                    starting_column += 2
+                    starting_column += remainder
                 # endregion
 
                 starting_row += 2  # each widget is of size 2 so we much increment by 2
@@ -1829,7 +1829,7 @@ def return_suite_child_id(suite_name, test_plan, suite_id):
     return NOT_FOUND
 
 
-def return_blank_square(column, row, remainder, name=" "):
+def return_blank_square(column, row, column_span, name=" "):
     """
         Returns a json template for each widget type
 
@@ -1839,7 +1839,7 @@ def return_blank_square(column, row, remainder, name=" "):
     """
     blank_square = return_widget_obj("Markdown")
     blank_square["settings"] = name
-    blank_square["size"]["columnSpan"] = remainder
+    blank_square["size"]["columnSpan"] = column_span
     blank_square["size"]["rowSpan"] = 2
     blank_square["position"]["column"] = column
     blank_square["position"]["row"] = row
