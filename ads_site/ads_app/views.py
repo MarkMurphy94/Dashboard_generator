@@ -304,6 +304,14 @@ def submit_update(request):
                        {"choice": target_choice3, "project": target_project_name3}]
 
             try:
+                if ignore_first_row:  # if first rows are ignored, update will get existing values from the config file
+                    config_file = models.get_selected_config(folder_name)[0]
+                    url = config_file["url"]
+                    global_path = config_file["global_path"]
+                    choices = [{"choice": config_file["choice1"], "project": config_file["targeted_project1"]},
+                       {"choice": config_file["choice2"], "project": config_file["targeted_project2"]},
+                       {"choice": config_file["choice3"], "project": config_file["targeted_project3"]}]
+
                 old_config = models.get_selected_config(folder_name)[0]
                 dash_id = old_config["dashId"]
                 folder_id = old_config["folderId"]
