@@ -49,8 +49,9 @@ def write_to_log(request, action, item):
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
         user = get_user_name(request)
+        role = get_user_role(request)
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
-        log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
+        log.write(f"{date_string} : ({role}) {user} {action}: {item}\n")
 
 
 def write_dashboard_changes_to_log(old_config, new_config):
@@ -66,10 +67,10 @@ def write_dashboard_changes_to_log(old_config, new_config):
     with open(models.LOG_PATH, 'a') as log:
         for key in config_keys:
             if key not in old_config:
-                log.write("                    | - " + key + ": --> " + new_config[key] + "\n")
+                log.write(f"                    | - {key}: --> {new_config[key]}\n")
                 changes_made = True
             elif old_config[key] != new_config[key]:
-                log.write("                    | - " + key + ": " + old_config[key] + " --> " + new_config[key] + "\n")
+                log.write(f"                    | - {key}: {old_config[key]} --> {new_config[key]}\n")
                 changes_made = True
         if not changes_made:
             log.write("                    | No changes made\n")
