@@ -75,6 +75,25 @@ class DatabaseHelper:
             self.close_connection(conn, c)
         return data[0]
 
+    def get_group_name_by_group_id(self, group_id, connection=None, stay_connected=False):
+        """
+        Return a group's name in the database. (string)
+
+        Keyword arguments:
+            group_ids -- an array
+            connection -- a connection to the Django database
+            stay_connected -- set to False to close connection after execution
+        """
+        conn = self.get_connection(connection)
+        c = conn.cursor()
+
+        c.execute(f'select name from auth_group where id=\'{group_id}\'')
+        data = c.fetchone()
+
+        if not stay_connected:
+            self.close_connection(conn, c)
+        return data[0]
+
     def get_group_ids_by_user_name(self, user_name, connection=None, stay_connected=False):
         """
         Return an array containing all group IDs attached to a user. (int[])
