@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import user_login_failed
 from django.contrib.auth.decorators import login_required
@@ -6,15 +7,37 @@ from django.shortcuts import render
 import datetime
 from .forms import CreateDash
 from . import models
+from .admin import DatabaseHelper
 import json
 
+# User Role constants
+GTO_ROLE = 'gto'
+DELIVERY_ROLE = 'delivery'
 
-def get_user(request):
+
+def get_user_name(request):
     if request.user.is_authenticated:
         username = request.user.username
     else:
         username = "unknown user"
     return username
+
+
+def get_user_role(request):
+    """
+    Return the group associated with current user.
+    If a user does not have a group, return an empty string. (string)
+    """
+    path = settings.DATABASES["default"]["NAME"]
+    username = get_user_name(request)
+    db_helper = DatabaseHelper(path)
+    data = db_helper.get_group_ids_by_user_name(username)
+    # It is possible for users to have multiple roles, so get the first one.
+    role = ''
+    if len(data) > 0:
+        role = db_helper.get_group_name_by_group_id(data[0])
+
+    return role
 
 
 def write_to_log(request, action, item):
@@ -25,7 +48,7 @@ def write_to_log(request, action, item):
     """
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
-        user = get_user(request)
+        user = get_user_name(request)
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
         log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
 
@@ -114,7 +137,7 @@ def create_test(request):
             print(project_type)
             if project_type == 'Waterfall':
                 print("Test Plan is: " + project_type)
-                user = get_user(request)
+                user = get_user_name(request)
                 test_plan_id = models.create_full_test_plan(project, child_suites, user)
                 context['test_plan'] = test_plan_id
                 write_to_log(request, action, project)
