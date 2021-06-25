@@ -54,7 +54,10 @@ class DatabaseHelper:
 
         if not stay_connected:
             self.close_connection(conn, c)
-        return data[0]
+
+        if data:
+            return data[0]
+        return None
 
     def get_group_id_by_group_name(self, group_name, connection=None, stay_connected=False):
         """
@@ -73,7 +76,10 @@ class DatabaseHelper:
 
         if not stay_connected:
             self.close_connection(conn, c)
-        return data[0]
+
+        if data:
+            return data[0]
+        return None
 
     def get_group_name_by_group_id(self, group_id, connection=None, stay_connected=False):
         """
@@ -92,7 +98,10 @@ class DatabaseHelper:
 
         if not stay_connected:
             self.close_connection(conn, c)
-        return data[0]
+
+        if data:
+            return data[0]
+        return None
 
     def get_group_ids_by_user_name(self, user_name, connection=None, stay_connected=False):
         """
@@ -116,6 +125,9 @@ class DatabaseHelper:
 
         if not stay_connected:
             self.close_connection(conn, c)
-        return cleaned_data
+
+        if cleaned_data:
+            return cleaned_data
+        return None
 
     # endregion Database Methods
