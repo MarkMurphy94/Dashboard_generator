@@ -32,10 +32,11 @@ def get_user_group(request):
     username = get_user_name(request)
     db_helper = DatabaseHelper(path)
     data = db_helper.get_group_ids_by_user_name(username)
-    # It is possible for users to have multiple groups, so get the first one.
-    group = ''
-    if len(data) > 0:
+    if data:
+        # It is possible for users to have multiple groups, so get the first one.
         group = db_helper.get_group_name_by_group_id(data[0])
+    else:
+        group = None
 
     return group
 

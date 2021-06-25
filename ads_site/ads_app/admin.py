@@ -24,9 +24,9 @@ class DatabaseHelper:
         Keyword arguments:
             connection -- a connection to the Django database or None.
         """
-        if connection is None:
-            return sqlite3.connect(self.db_name)
-        return connection
+        if connection:
+            return connection
+        return sqlite3.connect(self.db_name)
 
     @staticmethod
     def close_connection(connection, cursor):
