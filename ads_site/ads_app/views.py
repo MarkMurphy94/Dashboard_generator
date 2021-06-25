@@ -10,9 +10,9 @@ from . import models
 from .admin import DatabaseHelper
 import json
 
-# User Role constants
-GTO_ROLE = 'gto'
-DELIVERY_ROLE = 'delivery'
+# User Group constants
+GTO_GROUP = 'gto'
+DELIVERY_GROUP = 'delivery'
 
 
 def get_user_name(request):
@@ -23,7 +23,7 @@ def get_user_name(request):
     return username
 
 
-def get_user_role(request):
+def get_user_group(request):
     """
     Return the group associated with current user.
     If a user does not have a group, return an empty string. (string)
@@ -32,12 +32,12 @@ def get_user_role(request):
     username = get_user_name(request)
     db_helper = DatabaseHelper(path)
     data = db_helper.get_group_ids_by_user_name(username)
-    # It is possible for users to have multiple roles, so get the first one.
-    role = ''
+    # It is possible for users to have multiple groups, so get the first one.
+    group = ''
     if len(data) > 0:
-        role = db_helper.get_group_name_by_group_id(data[0])
+        group = db_helper.get_group_name_by_group_id(data[0])
 
-    return role
+    return group
 
 
 def write_to_log(request, action, item):
@@ -49,9 +49,9 @@ def write_to_log(request, action, item):
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
         user = get_user_name(request)
-        role = get_user_role(request)
+        group = get_user_group(request)
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
-        log.write(f"{date_string} : ({role}) {user} {action}: {item}\n")
+        log.write(f"{date_string} : ({group}) {user} {action}: {item}\n")
 
 
 def write_dashboard_changes_to_log(old_config, new_config):
