@@ -16,11 +16,7 @@ DELIVERY_GROUP = 'delivery'
 
 
 def get_user_name(request):
-    if request.user.is_authenticated:
-        username = request.user.username
-    else:
-        username = "unknown user"
-    return username
+    return request.user.username
 
 
 def get_user_group(request):
@@ -50,9 +46,11 @@ def write_to_log(request, action, item):
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
         user = get_user_name(request)
+        if not user:
+            user = "AnonymousUser"
         group = get_user_group(request)
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
-        log.write(f"{date_string} : ({group}) {user} {action}: {item}\n")
+        log.write(f"{date_string} : [{group}] {user} {action}: {item}\n")
 
 
 def write_dashboard_changes_to_log(old_config, new_config):
@@ -140,6 +138,8 @@ def create_test(request):
             if project_type == 'Waterfall':
                 print("Test Plan is: " + project_type)
                 user = get_user_name(request)
+                if not user:
+                    user = 'AnonymousUser'
                 test_plan_id = models.create_full_test_plan(project, child_suites, user)
                 context['test_plan'] = test_plan_id
                 write_to_log(request, action, project)
