@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import user_login_failed
 from django.contrib.auth.decorators import login_required
@@ -6,15 +7,34 @@ from django.shortcuts import render
 import datetime
 from .forms import CreateDash
 from . import models
+from .admin import DatabaseHelper
 import json
 
+# User Group constants
+GTO_GROUP = 'gto'
+DELIVERY_GROUP = 'delivery'
 
-def get_user(request):
-    if request.user.is_authenticated:
-        username = request.user.username
+
+def get_user_name(request):
+    return request.user.username
+
+
+def get_user_group(request):
+    """
+    Return the group associated with current user.
+    If a user does not have a group, return an empty string. (string)
+    """
+    path = settings.DATABASES["default"]["NAME"]
+    username = get_user_name(request)
+    db_helper = DatabaseHelper(path)
+    data = db_helper.get_group_ids_by_user_name(username)
+    if data:
+        # It is possible for users to have multiple groups, so get the first one.
+        group = db_helper.get_group_name_by_group_id(data[0])
     else:
-        username = "unknown user"
-    return username
+        group = None
+
+    return group
 
 
 def write_to_log(request, action, item):
@@ -25,9 +45,12 @@ def write_to_log(request, action, item):
     """
     with open(models.LOG_PATH, 'a') as log:
         now = datetime.datetime.now()
-        user = get_user(request)
+        user = get_user_name(request)
+        if not user:
+            user = "AnonymousUser"
+        group = get_user_group(request)
         date_string = now.strftime("%m/%d/%Y %H:%M:%S")
-        log.write(date_string + " : " + user + " " + action + ": " + item + "\n")
+        log.write(f"{date_string} : [{group}] {user} {action}: {item}\n")
 
 
 def write_dashboard_changes_to_log(old_config, new_config):
@@ -43,10 +66,10 @@ def write_dashboard_changes_to_log(old_config, new_config):
     with open(models.LOG_PATH, 'a') as log:
         for key in config_keys:
             if key not in old_config:
-                log.write("                    | - " + key + ": --> " + new_config[key] + "\n")
+                log.write(f"                    | - {key}: --> {new_config[key]}\n")
                 changes_made = True
             elif old_config[key] != new_config[key]:
-                log.write("                    | - " + key + ": " + old_config[key] + " --> " + new_config[key] + "\n")
+                log.write(f"                    | - {key}: {old_config[key]} --> {new_config[key]}\n")
                 changes_made = True
         if not changes_made:
             log.write("                    | No changes made\n")
@@ -114,7 +137,9 @@ def create_test(request):
             print(project_type)
             if project_type == 'Waterfall':
                 print("Test Plan is: " + project_type)
-                user = get_user(request)
+                user = get_user_name(request)
+                if not user:
+                    user = 'AnonymousUser'
                 test_plan_id = models.create_full_test_plan(project, child_suites, user)
                 context['test_plan'] = test_plan_id
                 write_to_log(request, action, project)
